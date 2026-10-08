@@ -1,6 +1,6 @@
 import librarySpec from "@/generated/spec.json";
 import { promptOptions } from "@/lib/prompt-options";
-import { sfRecordingContext, SF_RECORDING_PROMPT } from "@/lib/recording-context";
+import { sfRecordingContext, sfFollowupContext, isRecordingConversation, recordingMessageText } from "@/lib/recording-context";
 import { generateSystemPrompt } from "@openuidev/lang-core";
 import OpenAI from "openai";
 import type { Tool } from "openai/resources/responses/responses";
@@ -22,8 +22,8 @@ export async function POST(req: Request) {
     if (capture && process.env.ENABLE_RECORDING_PRESET !== "1") {
       return Response.json({ error: "The optional recording preset is disabled." }, { status: 403 });
     }
-    if (capture && parsed.data.messages.at(-1)?.content.trim() !== SF_RECORDING_PROMPT) {
-      return Response.json({ error: "This recording preset is only for the reference sightseeing prompt. Use normal chat for other requests." }, { status: 400 });
+    if (capture && !isRecordingConversation(parsed.data.messages)) {
+      return Response.json({ error: "This recording preset is only for the reference sightseeing prompt and its follow-ups. Use normal chat for other requests." }, { status: 400 });
     }
     const configuredEffort = process.env.REASONING_EFFORT;
     const reasoning_effort = efforts.find((value) => value === configuredEffort);
@@ -58,8 +58,8 @@ export async function POST(req: Request) {
       } });
     }
     const messages: ChatCompletionMessageParam[] = [
-      { role: "system", content: generateSystemPrompt({ library: librarySpec, promptOptions }) + (capture ? `\n\n${sfRecordingContext}` : "") },
-      ...parsed.data.messages,
+      { role: "system", content: generateSystemPrompt({ library: librarySpec, promptOptions }) + (capture ? `\n\n${sfRecordingContext}${parsed.data.messages.length > 1 ? `\n\n${sfFollowupContext}` : ""}` : "") },
+      ...parsed.data.messages.map((message) => message.role === "user" ? { ...message, content: recordingMessageText(message.content) } : message),
     ];
     // Always a real upstream request. No fixture response, replay, delay or buffering.
     const stream = await new OpenAI({ apiKey: process.env.OPENAI_API_KEY || process.env.THESYS_API_KEY, baseURL: process.env.OPENAI_BASE_URL || "https://api.thesys.dev/v1/embed" }).chat.completions.create({

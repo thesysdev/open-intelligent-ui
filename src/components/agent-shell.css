@@ -145,16 +145,28 @@ body:has(.sf-shell--capture) [data-openui-devtools-root] { display: none !import
 .sf-shell--capture .tv-stop:first-child { padding-top: 0; }
 .sf-shell--capture .tv-stop > .tv-photo { width: 124px; height: 124px; }
 
-/* The film has its own elapsed-time labels and removes submitted prompts entirely. */
-.sf-shell--capture .openui-shell-thread-message-user,
-.sf-shell--capture .openui-agent-thread-message-user,
-.sf-shell--capture .openui-genui-user-message { display: none; }
+/* The film supplies elapsed-time labels and hides only the initial prompt. */
+.sf-shell--capture .openui-agent-thread-messages > .openui-shell-thread-message-user:first-child,
+.sf-shell--capture .openui-agent-thread-messages > .openui-agent-thread-message-user:first-child { display: none; }
+.sf-shell--capture .openui-shell-thread-message-assistant + .openui-shell-thread-message-user { margin-block: 40px 28px; }
 .sf-shell--capture .openui-shell-thread-message-assistant::before { display: none; }
-.sf-shell--capture .openui-agent-thread-scroll-area { padding-top: 186px; scroll-padding-top: 186px; }
+.sf-shell--capture .openui-agent-thread-scroll-area { padding-top: 236px; scroll-padding-top: 186px; overflow-anchor: none; }
 .sf-shell--capture .openui-agent-thread-messages { gap: 0; }
 .sf-shell--capture .openui-agent-thread-scroll-latest { display: none; }
 
 .sf-capture-walkthrough { position: fixed; z-index: 2000; right: 18px; top: 18px; padding: 7px 12px; border: 1px solid #ddd; border-radius: 8px; background: #fff; color: #555; font: 12px/18px system-ui; }
 .sf-capture-walkthrough:disabled { opacity: .35; }
-.sf-capture-cursor { position: fixed; z-index: 2001; top: 0; left: 0; opacity: 0; pointer-events: none; filter: drop-shadow(0 1px 1px #0003); }
-.sf-capture-cursor.is-visible { opacity: 1; }
+
+/* Reserve breathing room beneath streamed blocks instead of letting the loader
+   share the final line's baseline. */
+.sf-shell .openui-agent-thread-message-loading { margin-block: 20px 12px; flex-shrink: 0; }
+.sf-shell--capture .openui-follow-up-block { margin-top: 28px; }
+.sf-shell--capture .openui-follow-up-block__header { font-size: 16px; }
+.sf-shell--capture .openui-follow-up-item { font-size: 17px; }
+
+/* Match the supplied 969×1080 opening shot, while keeping response width 691px. */
+.sf-shell--capture .openui-agent-welcome-screen { position: relative; max-width: 883px; padding-block: 0; }
+.sf-shell--capture .openui-agent-welcome-screen__header { position: absolute; top: calc(50% - 155px); width: calc(100% - 48px); }
+.sf-shell--capture .openui-agent-welcome-screen__title { font-size: 26px; line-height: 32px; font-weight: 400; letter-spacing: -.6px; }
+.sf-shell--capture .openui-agent-welcome-screen__composer-starters-container { position: absolute; top: calc(50% - 85px); width: calc(100% - 48px); }
+.sf-shell--capture .openui-agent-welcome-screen__desktop-starters { display: none; }

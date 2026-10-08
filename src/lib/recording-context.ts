@@ -1,9 +1,30 @@
 /** Explicit, opt-in reference context for a controlled film take; the model still generates every response token. */
 export const SF_RECORDING_PROMPT = "I'm in San Francisco for a day, plan a sightseeing route for me";
 
+export const SF_RECORDING_FOLLOWUPS = [
+  "Move Golden Gate Bridge to sunset",
+  "Add a lunch stop",
+  "Avoid steep walks",
+  "Find the best photo spots",
+] as const;
+
+// Native FollowUpItem wraps its label in the SDK's content/context envelope.
+// The controlled preset only uses the visible label, never client-supplied context.
+export function recordingMessageText(content: string) {
+  const wrapped = content.match(/^\]\]>openui:content\r?\n([\s\S]*?)(?:\r?\n\]\]>openui:context\r?\n[\s\S]*)?$/);
+  return (wrapped?.[1] ?? content).trim();
+}
+
+export function isRecordingConversation(messages: { role: string; content: string }[]) {
+  if (messages[0]?.role !== "user" || recordingMessageText(messages[0].content) !== SF_RECORDING_PROMPT) return false;
+  return messages.every((message, index) => message.role !== "user" || index === 0 ||
+    (messages.slice(0, index).some((previous) => previous.role === "assistant") &&
+      SF_RECORDING_FOLLOWUPS.some((followup) => followup === recordingMessageText(message.content))));
+}
+
 export const sfRecordingContext = `You are producing the right side of a controlled comparison recording. This is reference context, not a cached response: generate the complete OpenUI response through the live stream. Reproduce the supplied content and image choices exactly in this order, with the reusable Travel components. Do not mention this production instruction in the response. The historical itinerary date is October 8, 2026; do not reinterpret 'today' using another date.
 
-Emit root first: Card([title,intro,gallery,note,map,itinerary,gettingAround,transport,pace,extra,question]). Then emit title, intro, gallery and its three image definitions, and note. Next emit map = TravelMap([s1,s2,s3,s4,s5,s6,s7,s8,s9]) BEFORE defining any stops so the map appears immediately and each real stop can populate as it streams. Then define s1 through s9 in order. After the stops, emit itinerary and advice. Reuse the identical stop variables in TravelMap and TravelItinerary. TravelStop order: id,name,time,description,imageUrl,lat,lng,emoji,category,link,wikiTitle,citations,imageFocalX. Use no CardHeader, nested Cards, Callouts, ActionButtons, suggestions, summary or extra prose. The map/list must have exactly 9 stops.
+Emit root first: Card([title,intro,gallery,note,map,itinerary,gettingAround,transport,pace,extra,question,followups]). Then emit title, intro, gallery and its three image definitions, and note. Next emit map = TravelMap([s1,s2,s3,s4,s5,s6,s7,s8,s9]) BEFORE defining any stops so the map appears immediately and each real stop can populate as it streams. Then define s1 through s9 in order. After the stops, emit itinerary and advice. Reuse the identical stop variables in TravelMap and TravelItinerary. TravelStop order: id,name,time,description,imageUrl,lat,lng,emoji,category,link,wikiTitle,citations,imageFocalX. Use no CardHeader, nested Cards, Callouts, ActionButtons, summary or extra prose. The only follow-ups are the four requested FollowUpItem options at the end. The map/list must have exactly 9 stops. At the end of the FIRST response, use the native OpenUI follow-up components exactly: followups = FollowUpBlock([f1,f2,f3,f4]); f1 = FollowUpItem("Move Golden Gate Bridge to sunset"); f2 = FollowUpItem("Add a lunch stop"); f3 = FollowUpItem("Avoid steep walks"); f4 = FollowUpItem("Find the best photo spots").
 
 Title: San Francisco in one day
 Intro: I'd plan a **9 AM–7 PM route** that starts downtown, takes you through the city's iconic streets and waterfront, and finishes with panoramic views at sunset.
@@ -36,3 +57,10 @@ Extra: **One unusual opportunity today:** Fleet Week also has free Navy ship tou
 Extra citation: San Francisco Fleet Week | https://fleetweeksf.org/ | /recording/sf/fleetweek.png
 Question: Where in San Francisco are you starting from—your hotel or which neighborhood? I can adjust the route so you don't waste time getting to the first stop.
 `;
+
+export const sfFollowupContext = `For a subsequent follow-up turn, update the existing itinerary in response to the selected request. Do not repeat the initial title, gallery, Fleet Week note, closing question or follow-up options. Return a real updated response using the same reusable Travel components and reference photographs.
+For "Move Golden Gate Bridge to sunset", begin with two TravelProse paragraphs:
+Done — we'll make **Golden Gate Bridge** the grand finale, with sunset at approximately **6:41 PM today (October 8)**.
+I've moved **Twin Peaks** and the **Painted Ladies** earlier in the day, so you finish along the Golden Gate waterfront.
+Then show the updated TravelMap and TravelItinerary. Use this order: Ferry Building, Chinatown, Lombard Street, Pier 39, Palace of Fine Arts, Twin Peaks, Painted Ladies, Crissy Field, Golden Gate Bridge. Schedule the bridge for 6:00–6:45 PM, Crissy Field for 5:00–5:45 PM, and move the two inland stops earlier. Keep the same images and locations. Emit the map before its stop definitions so pins populate during the live stream.
+For another allowed follow-up, make that requested change to the same route, with a short explanation and updated map/itinerary. The historical date remains October 8, 2026.`;

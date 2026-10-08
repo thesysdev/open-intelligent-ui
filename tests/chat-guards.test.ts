@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 import { POST } from "../src/app/api/chat/route";
-import { SF_RECORDING_PROMPT } from "../src/lib/recording-context";
+import { SF_RECORDING_PROMPT, SF_RECORDING_FOLLOWUPS, isRecordingConversation } from "../src/lib/recording-context";
 
 function request(body: unknown, query = "") {
   return new Request(`http://localhost/api/chat${query}`, {
@@ -56,4 +56,18 @@ test("even an enabled recording preset rejects another destination or prompt", a
       assert.match((await response.json()).error, /only for the reference sightseeing prompt/);
     }
   });
+});
+
+test("recording follow-ups require the reference conversation and a prior assistant response", () => {
+  const initial = { role: "user", content: SF_RECORDING_PROMPT };
+  const reply = { role: "assistant", content: "root = Card([])" };
+  assert.equal(isRecordingConversation([initial]), true);
+  for (const content of SF_RECORDING_FOLLOWUPS) {
+    assert.equal(isRecordingConversation([initial, reply, { role: "user", content }]), true);
+    const wrapped = `]]>openui:content\n${content}\n]]>openui:context\n${JSON.stringify([`User clicked: ${content}`, {}])}`;
+    assert.equal(isRecordingConversation([initial, reply, { role: "user", content: wrapped }]), true);
+    assert.equal(isRecordingConversation([{ role: "user", content }]), false);
+    assert.equal(isRecordingConversation([initial, { role: "user", content }]), false);
+  }
+  assert.equal(isRecordingConversation([initial, reply, { role: "user", content: "Plan London instead" }]), false);
 });

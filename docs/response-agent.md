@@ -40,13 +40,13 @@ For another city, the model supplies new places, coordinates, descriptions, and 
 The server requires both:
 
 1. `ENABLE_RECORDING_PRESET=1` in its environment.
-2. A request to `/api/chat?capture=sf` ending with this exact user prompt:
+2. A conversation sent to `/api/chat?capture=sf` beginning with this exact user prompt:
 
 ```text
 I'm in San Francisco for a day, plan a sightseeing route for me
 ```
 
-The page `/?capture=sf` forwards that query to the API. Without the server flag, the API returns `403`. With the flag, a different prompt returns `400`; use normal chat for another request.
+The page `/?capture=sf` forwards that query to the API. Without the server flag, the API returns `403`. With the flag, an unrelated initial prompt or follow-up returns `400`; use normal chat for other requests. After the first assistant response, the preset allows the four native follow-up choices: **Move Golden Gate Bridge to sunset**, **Add a lunch stop**, **Avoid steep walks**, and **Find the best photo spots**. The API extracts the visible choice from the SDK’s action envelope and sends it to the live model. The sunset choice requests an updated itinerary with the bridge last.
 
 `src/lib/recording-context.ts` provides the historical itinerary, response order, stop data, citations, and local image paths as additional model context. The local photographs match the reference choices, and their original source URLs are listed in `public/recording/sf/sources.json`. The reference's “today” refers to **October 8, 2026**.
 
@@ -63,7 +63,7 @@ pnpm install
 pnpm dev
 ```
 
-For the film take, set `ENABLE_RECORDING_PRESET=1`, restart the server, open `http://localhost:3000/?capture=sf`, and use a **969×1080 CSS viewport**. The centered response column is 691px wide. Submit the exact prompt, record the real stream, and then exercise the map and itinerary. The top-level video composition supplies the two brand labels; the capture route therefore hides app navigation, submitted prompt bubbles, and the inline generation label, while keeping the live composer. The welcome screen has no subtitle.
+For the film take, set `ENABLE_RECORDING_PRESET=1`, restart the server, open `http://localhost:3000/?capture=sf`, and use a **969×1080 CSS viewport**. The centered response column is 691px wide. Submit the exact prompt, record the real stream, and then exercise the map and itinerary. The top-level video composition supplies the two brand labels; the capture route therefore hides app navigation, the initial submitted prompt bubble, and the inline generation label, while keeping the live composer. The welcome screen has no subtitle. Follow-up query bubbles stay visible, and scroll anchoring keeps the new answer in view as its map grows.
 
 For a production-mode local run:
 
@@ -121,4 +121,4 @@ Text reveals new word spans with a short opacity/blur transition; existing words
 
 The map keeps one Leaflet instance and reconciles markers by stable stop ID. During streaming it waits until both coordinate tokens are complete, adds each available marker to a steady city overview, and retains existing marker DOM. Once streaming finishes it frames the route once and draws the line. Selection, category filtering, and resizing do not recreate all markers or repeatedly reset the camera.
 
-The recording view exposes **Walk through response**. This film-only control moves the real scroll container using a cadence measured from the supplied left recording and displays a cursor. It does not replay model output, manufacture tokens, or affect normal chat. The control sits in the header area covered by the film's brand overlay. The revised movie accelerates each recording independently to align visual stages, labels the playback rates, and keeps counters on original elapsed times. It must not be described as a simultaneous real-time benchmark.
+The recording view exposes **Walk through response**. This film-only control moves the real scroll container downward using a cadence measured from the supplied left recording, then stays at the bottom. It draws no cursor. It does not replay model output, manufacture tokens, or affect normal chat. The control sits in the header area covered by the film's brand overlay. The revised movie accelerates each recording independently to align visual stages and keeps number-only counters on original elapsed times. Its edit manifest records the playback remapping. It uses the updated cursor-free source clips, matches downward scroll positions, and selects the native sunset follow-up before fading to the requested endcard. It must not be described as a simultaneous real-time benchmark.
