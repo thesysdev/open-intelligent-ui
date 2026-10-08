@@ -1,45 +1,15 @@
-.rt-root{display:flex;flex-direction:column;gap:14px;width:100%;background:var(--openui-background,#fff);border-radius:20px;}
-.rt-map-wrap{position:relative;border-radius:16px;overflow:hidden;transition:height .2s ease;border:1px solid rgba(0,0,0,.08)}
-.rt-map{position:absolute;inset:0;background:#e9eef2}
-.rt-map .maplibregl-ctrl-attrib{background:rgba(255,255,255,.88);color:#676767;font:10px/1.5 system-ui}
-.rt-marker{width:26px;height:26px;cursor:pointer}
-.rt-map .maplibregl-canvas-container,.rt-map .maplibregl-marker{transition:opacity .25s ease}
-.rt-map-pending .maplibregl-canvas-container,.rt-map-pending .maplibregl-marker,.rt-map-pending .maplibregl-control-container{opacity:0}
-.rt-marker:focus-visible{outline:none}
-.rt-marker:focus-visible .rt-pin{outline:2px solid #2563eb;outline-offset:2px}
-.rt-chip{position:absolute;top:10px;left:10px;z-index:500;background:#fff;border-radius:999px;padding:5px 11px;font-size:12px;font-weight:600;box-shadow:0 1px 4px rgba(0,0,0,.18);border:0}
-.rt-expand{left:auto;right:10px;cursor:pointer}
-.rt-pin{width:26px;height:26px;border-radius:50%;background:#111;color:#fff;font:700 12px/26px system-ui;text-align:center;border:2px solid #fff;box-shadow:0 2px 6px rgba(0,0,0,.35)}
-.rt-pin-off{background:#bbb}
-.rt-list{display:flex;flex-direction:column;gap:12px}
-.rt-card{border:1px solid rgba(0,0,0,.08);border-radius:16px;padding:10px;transition:opacity .2s}
-.rt-removed{opacity:.45}
-.rt-photos{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-bottom:10px}
-.rt-photos img,.rt-photo-skel{width:100%;aspect-ratio:1/1;object-fit:cover;border-radius:10px;background:#eceff1;animation:rtfade .4s ease}
-.rt-photo-skel{animation:rtpulse 1.2s infinite ease-in-out}
-@keyframes rtpulse{50%{opacity:.5}}
-@keyframes rtfade{from{opacity:0}to{opacity:1}}
-.rt-title{display:flex;align-items:center;gap:8px;font-weight:650;font-size:16px}
-.rt-num{width:20px;height:20px;border-radius:50%;background:#111;color:#fff;font-size:11px;display:inline-flex;align-items:center;justify-content:center}
-.rt-time{font-size:12px;color:#666;margin:3px 0 6px 28px}
-.rt-h{font-weight:650;font-size:13px;margin-top:8px}
-.rt-card p{font-size:13px;line-height:1.45;color:#333;margin:2px 0 0}
-.rt-btn{margin-top:10px;width:100%;padding:8px;border-radius:10px;border:1px solid rgba(0,0,0,.12);background:#fff;font-size:13px;cursor:pointer}
-.rt-btn:hover{background:#f4f4f4}
-.rt-pin-new{background:#2563eb;animation:rtpop .6s ease-out 2}
-@keyframes rtpop{0%{transform:scale(.3)}60%{transform:scale(1.35)}100%{transform:scale(1)}}
-.rt-pin-label{position:absolute;left:32px;top:1px;white-space:nowrap;font:600 13px/1 -apple-system,BlinkMacSystemFont,"Inter","Segoe UI",sans-serif;color:#fff;background:#2563eb;padding:6px 10px;border-radius:999px;box-shadow:0 2px 8px rgba(37,99,235,.35);text-shadow:none;-webkit-font-smoothing:antialiased;animation:rtfade .4s ease .2s both}
-.rt-chip-count{animation:rtfade .4s ease}
-.rt-card-new{border:2px solid #2563eb;animation:rtfade .5s ease}
-.rt-badge{margin-left:auto;font-size:11px;font-weight:700;color:#fff;background:#2563eb;padding:2px 8px;border-radius:999px}
-.rt-sugg-wrap{display:flex;flex-direction:column;gap:8px}
-.rt-sugg-title{font-size:15px;margin:0}
-.rt-sugg-row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
-.rt-sugg{border:1px solid rgba(0,0,0,.08);border-radius:14px;padding:8px;display:flex;flex-direction:column}
-.rt-sugg .rt-photos{margin-bottom:6px}
-.rt-sugg .rt-photos img,.rt-sugg .rt-photo-skel{aspect-ratio:4/3}
-.rt-sugg-name{font-weight:650;font-size:14px}
-.rt-sugg-time{font-size:12px;color:#666}
-.rt-add{margin-top:auto;background:#111;color:#fff;border-color:#111;font-weight:600}
-.rt-add:hover{background:#333}
-.rt-added{background:#e8f0fe;color:#2563eb;border-color:#c7d7fb}
+/* Response container rendered by the Card root (src/lib/route/root.tsx). */
+.rt-root {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  width: 100%;
+  min-width: 0;
+  color: var(--iui-ink, #0d0d0d);
+  background: var(--iui-canvas, #fff);
+  font: 400 16px/1.6 var(--iui-font, system-ui);
+}
+
+@media (max-width: 600px) {
+  .rt-root { gap: 20px; }
+}

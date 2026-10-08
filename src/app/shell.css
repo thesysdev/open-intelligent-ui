@@ -1,0 +1,211 @@
+/* Presentation only: keep AgentInterface's layout, state and responsive behavior. */
+/* Colors that have a theme token use it (see src/lib/response-theme.ts); the remaining greys are shell-only. */
+.chat-shell {
+  width: 100%;
+  height: 100dvh;
+  overflow: hidden;
+}
+
+.chat-shell .openui-agent-container {
+  width: 100%;
+  height: 100%;
+}
+
+.chat-shell .openui-agent-sidebar-container {
+  background: #f9f9f9;
+  box-shadow: none;
+  border-right: 1px solid #f0f0f0;
+}
+
+.chat-shell .openui-agent-sidebar-header__agent-name {
+  font-size: 20px;
+  font-weight: 600;
+  letter-spacing: -0.5px;
+}
+
+.chat-shell .openui-agent-new-chat-button,
+.chat-shell .openui-agent-thread-button {
+  border-radius: 10px;
+}
+
+.chat-shell .openui-agent-new-chat-button:not(.openui-agent-new-chat-button--collapsed) {
+  min-height: 40px;
+  gap: 6px;
+}
+
+.chat-shell .openui-agent-thread-button-title {
+  padding: 10px 12px;
+  line-height: 20px;
+}
+
+.chat-shell .openui-agent-thread-button--selected,
+.chat-shell .openui-agent-thread-button--selected:hover {
+  background: #ebebeb;
+}
+
+.chat-shell .openui-agent-new-chat-button:not(.openui-agent-new-chat-button--collapsed):hover,
+.chat-shell .openui-agent-thread-button:hover {
+  background: #eeeeee;
+}
+
+.chat-shell .openui-agent-thread-header {
+  padding: 16px 24px 8px;
+  min-height: 56px;
+}
+
+.chat-shell .openui-agent-thread-header__title {
+  font-size: 16px;
+  font-weight: 500;
+}
+
+.chat-shell .openui-agent-welcome-screen {
+  max-width: 816px;
+  padding: 24px 24px 80px;
+  gap: 32px;
+}
+
+.chat-shell .openui-agent-welcome-screen__content {
+  align-items: center;
+  text-align: center;
+}
+
+.chat-shell .openui-agent-welcome-screen__title {
+  font-size: 30px;
+  line-height: 1.2;
+  font-weight: 500;
+  letter-spacing: -0.8px;
+}
+
+.chat-shell .openui-agent-welcome-screen__composer-starters-container {
+  gap: 20px;
+}
+
+/* The same pill composer in both the welcome screen and an active conversation. */
+.chat-shell .openui-agent-desktop-welcome-composer,
+.chat-shell .openui-agent-thread-composer__input-wrapper {
+  flex-direction: row;
+  align-items: flex-end;
+  min-height: 60px;
+  gap: 12px;
+  padding: 11px 12px 11px 22px;
+  border: 1px solid #e3e3e3;
+  border-radius: 30px;
+  background: var(--openui-foreground);
+  box-shadow: var(--openui-shadow-l);
+  transition: border-color 150ms ease, box-shadow 150ms ease;
+}
+
+.chat-shell .openui-agent-desktop-welcome-composer:focus-within,
+.chat-shell .openui-agent-thread-composer__input-wrapper:focus-within {
+  border-color: #c4c4c4;
+  box-shadow: 0 2px 10px rgb(0 0 0 / 5%);
+}
+
+.chat-shell .openui-agent-desktop-welcome-composer__input,
+.chat-shell .openui-agent-thread-composer__input {
+  flex: 1;
+  min-width: 0;
+  min-height: 36px;
+  padding: 5px 0;
+  font-size: 16px;
+  line-height: 26px;
+}
+
+.chat-shell .openui-agent-desktop-welcome-composer__action-bar,
+.chat-shell .openui-agent-thread-composer__action-bar {
+  flex-shrink: 0;
+  min-height: 36px;
+}
+
+.chat-shell .openui-agent-desktop-welcome-composer__submit-button,
+.chat-shell .openui-agent-thread-composer__submit-button {
+  width: 36px;
+  height: 36px;
+  min-width: 36px;
+  border: 0;
+  border-radius: 50%;
+  color: var(--openui-text-accent-primary);
+  background: var(--openui-interactive-accent-default);
+}
+
+.chat-shell .openui-agent-desktop-welcome-composer__submit-button:not(:disabled):hover,
+.chat-shell .openui-agent-thread-composer__submit-button:not(:disabled):hover {
+  background: var(--openui-interactive-accent-hover);
+}
+
+.chat-shell .openui-agent-desktop-welcome-composer__submit-button:disabled,
+.chat-shell .openui-agent-thread-composer__submit-button:disabled {
+  color: var(--openui-text-accent-primary);
+  background: #d9d9d9;
+}
+
+.chat-shell .openui-agent-conversation-starter__carousel-content {
+  gap: 8px;
+}
+
+.chat-shell .openui-agent-conversation-starter-item-short {
+  min-height: 40px;
+  padding: 9px 16px;
+  border-color: #e5e5e5;
+  border-radius: 999px;
+  color: var(--openui-text-neutral-secondary);
+  font-size: 14px;
+  line-height: 20px;
+}
+
+.chat-shell .openui-agent-conversation-starter-item-short:not(:disabled):hover {
+  border-color: #d5d5d5;
+  color: var(--openui-text-neutral-primary);
+  background: #f7f7f7;
+}
+
+.chat-shell .openui-agent-thread-messages,
+.chat-shell .openui-agent-thread-composer {
+  max-width: 816px;
+  padding-inline: 24px;
+}
+
+/* Colors come from the chatUserResponseBg / chatUserResponseText theme tokens. */
+.chat-shell .openui-agent-thread-message-user__content {
+  max-width: 85%;
+  padding: 12px 20px;
+  border-radius: 24px;
+}
+
+.chat-shell .openui-agent-container--mobile .openui-agent-welcome-screen {
+  padding: 24px;
+}
+
+.chat-shell .openui-agent-container--mobile .openui-agent-welcome-screen__title {
+  font-size: 28px;
+  letter-spacing: -0.6px;
+}
+
+.chat-shell .openui-agent-container--mobile .openui-agent-thread-messages {
+  padding-inline: 16px;
+}
+
+.chat-shell .openui-agent-container--mobile .openui-agent-thread-composer {
+  padding: 12px 12px max(16px, env(safe-area-inset-bottom));
+}
+
+.chat-shell .openui-agent-container--mobile .openui-agent-mobile-header {
+  padding: 12px 16px;
+}
+
+.chat-shell .openui-agent-mobile-header .openui-icon-button {
+  border: 0;
+  border-radius: 50%;
+}
+
+.chat-shell .openui-agent-new-chat-floating-button {
+  border-radius: 999px;
+  padding-inline: 16px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .chat-shell .openui-agent-desktop-welcome-composer,
+  .chat-shell .openui-agent-thread-composer__input-wrapper {
+    transition: none;
+  }
+}
