@@ -5,7 +5,12 @@ import { generateSystemPrompt } from "@openuidev/lang-core";
 import OpenAI from "openai";
 import type { ChatCompletionMessageParam } from "openai/resources/chat/completions";
 
-const client = new OpenAI();
+// OpenUI Gateway speaks the Chat Completions protocol, so the stock OpenAI SDK
+// works against it. The key stays on the server.
+const client = new OpenAI({
+  apiKey: process.env.THESYS_API_KEY,
+  baseURL: "https://api.thesys.dev/v1/embed",
+});
 
 // Each thread's turns as runTools() produced them, tool calls and results
 // included. Kept in memory: a restart or another server instance falls back
@@ -36,11 +41,14 @@ export async function POST(req: Request) {
     // results back, and repeats until the model answers.
     const runner = client.chat.completions.runTools(
       {
-        model: process.env.OPENAI_MODEL ?? "gpt-5.2",
+        model: process.env.THESYS_MODEL ?? "openai/gpt-5.2",
         messages: [
           {
             role: "system",
+            // cloud: true lets Gateway build the prompt from this library spec
+            // and validate/correct the OpenUI Lang it streams back.
             content: generateSystemPrompt({
+              cloud: true,
               library: librarySpec,
               promptOptions,
             }),
