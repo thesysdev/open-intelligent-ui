@@ -350,8 +350,8 @@
       "description": "Optional extra stops the user can add to the route with one tap (adds a pin to RouteMap and a card to RouteStops). Use 2 stops that are NOT already in the route."
     },
     "RouteStop": {
-      "signature": "RouteStop(name: string, wikiTitle: string, lat: number, lng: number, time: string, story: string, beforeYouGo: string)",
-      "description": "One stop on a route. wikiTitle is the exact English Wikipedia article title (used to load real photos). lat/lng are decimal coordinates. time e.g. '9:00 · 1 hr'. story: 1-2 sentences of history. beforeYouGo: one practical tip."
+      "signature": "RouteStop(name: string, wikiTitle: string, lat: number, lng: number, time: string, story: string, beforeYouGo: string, photos?: string[])",
+      "description": "One stop on a route. wikiTitle is the exact English Wikipedia article title (used to load real photos). lat/lng are decimal coordinates. time e.g. '9:00 · 1 hr'. story: 1-2 sentences of history. beforeYouGo: one practical tip. photos: up to 3 image URLs copied exactly from image search results for this place; omit if none were found."
     }
   },
   "componentGroups": [
@@ -559,7 +559,9 @@
         "RouteStop"
       ],
       "notes": [
-        "- For itineraries, day trips or sightseeing routes: CardHeader, then RouteMap([s1, s2, ...]), then RouteStops([s1, s2, ...]) using the same stop refs, then RouteSuggestions('Add to your day', [x1, x2]) with 2 extra stops not in the route, then an optional Callout with tips."
+        "- For itineraries, day trips or sightseeing routes: CardHeader, then RouteMap([s1, s2, ...]), then RouteStops([s1, s2, ...]) using the same stop refs, then RouteSuggestions('Add to your day', [x1, x2]) with 2 extra stops not in the route, then an optional Callout with tips.",
+        "- Before writing a route, run one image search with a query per stop and per suggestion (e.g. 'Ferry Building San Francisco'). Put up to 3 of the returned Image URLs for that place in its RouteStop photos, copied exactly. Never invent or edit image URLs; leave photos out if the search found nothing for a place.",
+        "- End a route with a 'Customize your route' Form (time available, how they'll get around, interests) whose primary Button uses Action([@ToAssistant(...)]) to ask for a rebuilt itinerary. The user's form choices are sent with the message, so on that next turn read them and return a new route that fits. Give each RadioGroup a default value and do not add required rules to the customize form: a pre-selected default does not count as filled in for required validation, so the button would do nothing."
       ]
     }
   ],
@@ -4815,6 +4817,13 @@
           },
           "beforeYouGo": {
             "type": "string"
+          },
+          "photos": {
+            "maxItems": 3,
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
           }
         },
         "required": [
@@ -4828,7 +4837,7 @@
         ],
         "additionalProperties": false,
         "id": "RouteStop",
-        "description": "One stop on a route. wikiTitle is the exact English Wikipedia article title (used to load real photos). lat/lng are decimal coordinates. time e.g. '9:00 · 1 hr'. story: 1-2 sentences of history. beforeYouGo: one practical tip."
+        "description": "One stop on a route. wikiTitle is the exact English Wikipedia article title (used to load real photos). lat/lng are decimal coordinates. time e.g. '9:00 · 1 hr'. story: 1-2 sentences of history. beforeYouGo: one practical tip. photos: up to 3 image URLs copied exactly from image search results for this place; omit if none were found."
       },
       "RouteStops": {
         "type": "object",

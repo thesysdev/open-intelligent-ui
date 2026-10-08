@@ -8,6 +8,7 @@ export type StopData = {
   time?: string;
   story?: string;
   beforeYouGo?: string;
+  photos?: string[];
 };
 
 const removed = new Set<string>();

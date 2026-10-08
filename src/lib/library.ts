@@ -12,6 +12,8 @@ export const library = createLibrary({
       components: ["RouteMap", "RouteStops", "RouteSuggestions", "RouteStop"],
       notes: [
         "- For itineraries, day trips or sightseeing routes: CardHeader, then RouteMap([s1, s2, ...]), then RouteStops([s1, s2, ...]) using the same stop refs, then RouteSuggestions('Add to your day', [x1, x2]) with 2 extra stops not in the route, then an optional Callout with tips.",
+        "- Before writing a route, run one image search with a query per stop and per suggestion (e.g. 'Ferry Building San Francisco'). Put up to 3 of the returned Image URLs for that place in its RouteStop photos, copied exactly. Never invent or edit image URLs; leave photos out if the search found nothing for a place.",
+        "- End a route with a 'Customize your route' Form (time available, how they'll get around, interests) whose primary Button uses Action([@ToAssistant(...)]) to ask for a rebuilt itinerary. The user's form choices are sent with the message, so on that next turn read them and return a new route that fits. Give each RadioGroup a default value and do not add required rules to the customize form: a pre-selected default does not count as filled in for required validation, so the button would do nothing.",
       ],
     },
   ],

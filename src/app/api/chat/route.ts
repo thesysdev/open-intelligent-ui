@@ -1,82 +1,88 @@
 import librarySpec from "@/generated/spec.json";
 import { promptOptions } from "@/lib/prompt-options";
-import { getWeather, WEATHER_TOOL_DESCRIPTION } from "@/lib/tools/get-weather";
 import { generateSystemPrompt } from "@openuidev/lang-core";
 import OpenAI from "openai";
-import type { ChatCompletionMessageParam } from "openai/resources/chat/completions";
+import type { ReasoningEffort } from "openai/resources/shared";
+import type { ResponseInputItem, Tool } from "openai/resources/responses/responses";
 
-const client = new OpenAI();
+// OpenUI Gateway speaks the Responses protocol, so the stock OpenAI SDK works
+// against it. The key stays on the server.
+const client = new OpenAI({
+  apiKey: process.env.THESYS_API_KEY,
+  baseURL: "https://api.thesys.dev/v1/embed",
+});
 
-// Each thread's turns as runTools() produced them, tool calls and results
-// included. Kept in memory: a restart or another server instance falls back
-// to the browser's copy.
-const threads = new Map<string, ChatCompletionMessageParam[]>();
+// cloud: true lets Gateway build the prompt from this library spec and
+// validate/correct the OpenUI Lang it streams back.
+const instructions = generateSystemPrompt({ cloud: true, library: librarySpec, promptOptions });
 
-// The browser keeps each tool call but never receives its result, so its copy
-// of earlier turns is sent to the model as text only.
-function withoutToolCalls(messages: ChatCompletionMessageParam[]): ChatCompletionMessageParam[] {
-  return messages.flatMap((message): ChatCompletionMessageParam[] => {
-    if (message.role === "tool") return [];
-    if (message.role !== "assistant") return [message];
-    if (!message.content) return [];
-    return [{ role: "assistant", content: message.content }];
+// Gateway runs image search itself; the model gets the results and puts the
+// image URLs into the components. It's a Gateway extension to the SDK's tool union.
+const tools = [{ type: "image_search" } as unknown as Tool];
+
+const MAX_ITEMS = 60;
+
+// The browser sends the whole conversation each turn. Keep only user and
+// assistant text: earlier image-search calls already ran inside Gateway, and
+// trusted instructions never come from the browser.
+function toInput(messages: unknown): ResponseInputItem[] | null {
+  if (!Array.isArray(messages)) return null;
+  const items = messages.flatMap((item): ResponseInputItem[] => {
+    if (!item || typeof item !== "object") return [];
+    const { role, content } = item as { role?: unknown; content?: unknown };
+    if (role !== "user" && role !== "assistant") return [];
+    if (typeof content !== "string" && !Array.isArray(content)) return [];
+    return [{ role, content } as ResponseInputItem];
   });
+  return items.length ? items.slice(-MAX_ITEMS) : null;
 }
 
 export async function POST(req: Request) {
+  let input: ResponseInputItem[] | null;
   try {
-    const { threadId, messages } = (await req.json()) as {
-      threadId?: string;
-      messages: ChatCompletionMessageParam[];
-    };
-    const question = messages.slice(-1);
-    const history = (threadId && threads.get(threadId)) || withoutToolCalls(messages.slice(0, -1));
+    input = toInput(((await req.json()) as { messages?: unknown }).messages);
+  } catch {
+    input = null;
+  }
+  if (!input) return Response.json({ error: { message: "messages must be a non-empty array" } }, { status: 400 });
 
-    // runTools() calls the model, runs the tools it asks for, sends the
-    // results back, and repeats until the model answers.
-    const runner = client.chat.completions.runTools(
+  let stream: AsyncIterable<unknown>;
+  try {
+    stream = await client.responses.create(
       {
-        model: process.env.OPENAI_MODEL ?? "gpt-5.2",
-        messages: [
-          {
-            role: "system",
-            content: generateSystemPrompt({
-              library: librarySpec,
-              promptOptions,
-            }),
-          },
-          ...history,
-          ...question,
-        ],
-        tools: [],
-        ...(process.env.REASONING_EFFORT ? { reasoning_effort: process.env.REASONING_EFFORT as any } : {}),
+        model: process.env.THESYS_MODEL ?? "openai/gpt-5.5",
+        instructions,
+        input,
+        tools,
+        store: false,
+        ...(process.env.REASONING_EFFORT ? { reasoning: { effort: process.env.REASONING_EFFORT as ReasoningEffort } } : {}),
         stream: true,
       },
-      { signal: req.signal, maxChatCompletions: 5 }, // propagate browser aborts
+      { signal: req.signal }, // propagate browser aborts
     );
-
-    const turn = [...history, ...question];
-    runner.on("message", (message) => turn.push(message));
-    runner.done().then(
-      () => {
-        if (threadId) threads.set(threadId, turn);
-      },
-      () => {},
-    );
-
-    // NDJSON stream of every completion's chunks — the client parses it with
-    // openAIReadableStreamAdapter().
-    const stream = runner.toReadableStream();
-
-    // Surface upstream failures (bad key, unknown model) as an HTTP error.
-    await Promise.race([runner.emitted("chunk"), runner.done()]);
-
-    return new Response(stream, {
-      headers: { "Content-Type": "application/x-ndjson", "Cache-Control": "no-cache" },
-    });
   } catch (err) {
+    // Surface upstream failures (bad key, unknown model) as an HTTP error.
+    const e = err as { status?: number; message?: string };
     console.error(err);
-    const message = err instanceof Error ? err.message : "Unknown error";
-    return Response.json({ error: message }, { status: 500 });
+    return Response.json({ error: { message: e.message ?? "upstream error" } }, { status: e.status ?? 502 });
   }
+
+  // Relay the Responses events as SSE; the client parses them with openAIResponsesAdapter().
+  const encoder = new TextEncoder();
+  const body = new ReadableStream<Uint8Array>({
+    async start(controller) {
+      try {
+        for await (const event of stream) controller.enqueue(encoder.encode(`data: ${JSON.stringify(event)}\n\n`));
+      } catch (err) {
+        const message = err instanceof Error ? err.message : String(err);
+        controller.enqueue(encoder.encode(`data: ${JSON.stringify({ type: "error", message })}\n\n`));
+      } finally {
+        controller.close();
+      }
+    },
+  });
+
+  return new Response(body, {
+    headers: { "Content-Type": "text/event-stream", "Cache-Control": "no-cache, no-transform", Connection: "keep-alive" },
+  });
 }
