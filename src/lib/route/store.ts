@@ -13,6 +13,7 @@ export type StopData = {
   beforeYouGo?: string;
   category?: string;
   imageUrl?: string;
+  imageFocalX?: number;
   emoji?: string;
   description?: string;
   link?: string;

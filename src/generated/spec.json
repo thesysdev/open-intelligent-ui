@@ -350,15 +350,15 @@
       "description": "An ordinary response paragraph. Supports **bold** and [label](https://url) inline. Optional citations appear as small inline source pills."
     },
     "TravelImage": {
-      "signature": "TravelImage(src: string, alt: string, link?: string, wikiTitle?: string)",
-      "description": "One real destination image. Use a supplied URL; otherwise leave src empty and provide a Wikipedia article title as wikiTitle."
+      "signature": "TravelImage(src: string, alt: string, link?: string, wikiTitle?: string, focalX?: number)",
+      "description": "One real destination image. Use a supplied URL; otherwise leave src empty and provide a Wikipedia article title as wikiTitle. Optional focalX (0–100) chooses the horizontal crop; default 50 centers it."
     },
     "TravelGallery": {
       "signature": "TravelGallery(images: TravelImage[])",
       "description": "A row of destination photographs. Usually three images, with consistent crops and working local save toggles."
     },
     "TravelStop": {
-      "signature": "TravelStop(id: string, name: string, time: string, description: string, imageUrl: string, lat: number, lng: number, emoji: string, category: string, link?: string, wikiTitle?: string, citations?: TravelCitation[])",
+      "signature": "TravelStop(id: string, name: string, time: string, description: string, imageUrl: string, lat: number, lng: number, emoji: string, category: string, link?: string, wikiTitle?: string, citations?: TravelCitation[], imageFocalX?: number)",
       "description": "A reusable destination with a stable id, visiting time, short practical description, real photo URL, coordinates, emoji and category. Reference the SAME stop in TravelMap and TravelItinerary. Omit unknown optional links; never invent images."
     },
     "TravelItinerary": {
@@ -4877,6 +4877,11 @@
           },
           "wikiTitle": {
             "type": "string"
+          },
+          "focalX": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 100
           }
         },
         "required": [
@@ -4885,7 +4890,7 @@
         ],
         "additionalProperties": false,
         "id": "TravelImage",
-        "description": "One real destination image. Use a supplied URL; otherwise leave src empty and provide a Wikipedia article title as wikiTitle."
+        "description": "One real destination image. Use a supplied URL; otherwise leave src empty and provide a Wikipedia article title as wikiTitle. Optional focalX (0–100) chooses the horizontal crop; default 50 centers it."
       },
       "TravelHeading": {
         "type": "object",
@@ -4976,6 +4981,11 @@
             "items": {
               "$ref": "#/$defs/TravelCitation"
             }
+          },
+          "imageFocalX": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 100
           }
         },
         "required": [

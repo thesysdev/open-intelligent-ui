@@ -3,14 +3,14 @@ export const SF_RECORDING_PROMPT = "I'm in San Francisco for a day, plan a sight
 
 export const sfRecordingContext = `You are producing the right side of a controlled comparison recording. This is reference context, not a cached response: generate the complete OpenUI response through the live stream. Reproduce the supplied content and image choices exactly in this order, with the reusable Travel components. Do not mention this production instruction in the response. The historical itinerary date is October 8, 2026; do not reinterpret 'today' using another date.
 
-Emit root first: Card([title,intro,gallery,note,map,itinerary,gettingAround,transport,pace,extra,question]). Then emit title, intro, gallery and note, then stop definitions, map, itinerary and advice. Reuse the identical stop variables in TravelMap and TravelItinerary. TravelStop order: id,name,time,description,imageUrl,lat,lng,emoji,category,link,wikiTitle,citations. Use no CardHeader, nested Cards, Callouts, ActionButtons, suggestions, summary or extra prose. The map/list must have exactly 9 stops.
+Emit root first: Card([title,intro,gallery,note,map,itinerary,gettingAround,transport,pace,extra,question]). Then emit title, intro, gallery and its three image definitions, and note. Next emit map = TravelMap([s1,s2,s3,s4,s5,s6,s7,s8,s9]) BEFORE defining any stops so the map appears immediately and each real stop can populate as it streams. Then define s1 through s9 in order. After the stops, emit itinerary and advice. Reuse the identical stop variables in TravelMap and TravelItinerary. TravelStop order: id,name,time,description,imageUrl,lat,lng,emoji,category,link,wikiTitle,citations,imageFocalX. Use no CardHeader, nested Cards, Callouts, ActionButtons, suggestions, summary or extra prose. The map/list must have exactly 9 stops.
 
 Title: San Francisco in one day
 Intro: I'd plan a **9 AM–7 PM route** that starts downtown, takes you through the city's iconic streets and waterfront, and finishes with panoramic views at sunset.
-Gallery (exactly these 3 TravelImage refs):
-/recording/sf/hero-bridge.jpg | Golden Gate Bridge from the beach
-/recording/sf/hero-lombard.jpg | Lombard Street from above
-/recording/sf/hero-palace.jpg | Palace of Fine Arts and reflecting lagoon
+Gallery (exactly these 3 TravelImage refs; pass empty link/wikiTitle and the specified focalX as the fifth argument):
+/recording/sf/hero-bridge.jpg | Golden Gate Bridge from the beach | focalX 0
+/recording/sf/hero-lombard.jpg | Lombard Street from above | focalX 100
+/recording/sf/hero-palace.jpg | Palace of Fine Arts and reflecting lagoon | focalX 53.5
 Note: **There's a bonus if you're going today, Thursday, October 8:** it's Fleet Week, and the Blue Angels are scheduled to practice between 1 PM and 5 PM. I'd time your waterfront visit to give you a chance to see the jets.
 Note citation: San Francisco Chronicle | https://www.sfchronicle.com/ | /recording/sf/sfchronicle.png
 
@@ -24,6 +24,8 @@ Stops (each has category 'Sightseeing', empty link/wikiTitle, and exact local im
 7. bridge | Golden Gate Bridge | 3:30–4:15 PM | Visit the south-side viewpoint and walk partway across the bridge. Use transport uphill from Crissy Field if needed. | /recording/sf/golden-gate.jpg | 37.8077,-122.4750 | 🌉
 8. painted | Painted Ladies | 5:00–5:30 PM | The famous row of colorful Victorian houses, best viewed from Alamo Square Park. | /recording/sf/painted-ladies.jpg | 37.7762,-122.4328 | 🏠
 9. twin | Twin Peaks | 6:00–6:45 PM | Finish at the panoramic viewpoint for sunset, approximately 6:41 PM today. | /recording/sf/twin-peaks.jpg | 37.7544,-122.4477 | 🌇 | citation Time and Date at https://www.timeanddate.com/sun/usa/san-francisco?month=10&year=2026 with /recording/sf/timeanddate.png
+
+For every TravelStop, include imageFocalX as the thirteenth argument (after citations, which is [] when empty). Values by id: ferry=0, chinatown=100, lombard=0, pier=0, palace=48.8, crissy=0, bridge=100, painted=0, twin=48.4. These exact crop positions are measured from the shared reference.
 
 Itinerary heading: Your itinerary
 Next section heading: Getting around

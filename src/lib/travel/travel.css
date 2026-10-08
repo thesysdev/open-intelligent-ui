@@ -85,3 +85,10 @@
 
 .tv-sources { display: flex; flex-wrap: wrap; gap: 8px; font-size: 12px; line-height: 18px; }
 .tv-sources a { color: #666; border: 1px solid #eee; border-radius: 999px; padding: 4px 10px; }
+
+@keyframes tv-word-in { from { opacity: 0; filter: blur(2px); } to { opacity: 1; filter: blur(0); } }
+.tv-stream-word { animation: tv-word-in 320ms ease-out both; animation-delay: var(--word-delay, 0ms); }
+@keyframes tv-pin-in { from { opacity: 0; transform: scale(.75); } to { opacity: 1; transform: scale(1); } }
+.tv-map-marker-content { animation: tv-pin-in 260ms cubic-bezier(.2,.7,.3,1) both; transform-origin: 50% 17px; }
+.tv-photo img { animation: tv-word-in 300ms ease-out both; }
+@media (prefers-reduced-motion: reduce) { .tv-stream-word, .tv-map-marker-content, .tv-photo img { animation: none; } }

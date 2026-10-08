@@ -1,7 +1,7 @@
 "use client";
 
-import { defineComponent } from "@openuidev/react-lang";
-import { useEffect, useState, type ReactNode } from "react";
+import { defineComponent, useIsStreaming } from "@openuidev/react-lang";
+import { useEffect, useState, type CSSProperties, type ReactNode } from "react";
 import { z } from "zod/v4";
 import { fetchWiki, getStopKey, useRouteStore, type StopData } from "../route/store";
 import { TravelMapView } from "./map";
@@ -26,20 +26,29 @@ export function nodeProps<T extends object>(items: unknown): Partial<T>[] {
 }
 
 /** A small, safe inline grammar. Partial model tokens remain readable as text. */
-export function InlineText({ text }: { text?: string }) {
+export function InlineText({ text, animate = false }: { text?: string; animate?: boolean }) {
   if (typeof text !== "string") return null;
   const pattern = /(\*\*([^*]+)\*\*|\[([^\]]+)\]\((https?:\/\/[^\s)]+)\))/g;
+  const words = (value: string, offset: number) => animate ? value.split(/(\s+)/).map((word, i) => /\S/.test(word)
+    ? <span className="tv-stream-word" key={`${offset}-${i}`} style={{ "--word-delay": `${(i % 12) * 12}ms` } as CSSProperties}>{word}</span> : word) : value;
   const nodes: ReactNode[] = [];
   let cursor = 0;
   for (const match of text.matchAll(pattern)) {
     const index = match.index ?? 0;
-    if (index > cursor) nodes.push(text.slice(cursor, index));
-    if (match[2]) nodes.push(<strong key={index}>{match[2]}</strong>);
-    else nodes.push(<a key={index} href={safeUrl(match[4])} target="_blank" rel="noreferrer">{match[3]}</a>);
+    if (index > cursor) nodes.push(animate ? <span key={`plain-${cursor}`}>{words(text.slice(cursor, index), cursor)}</span> : text.slice(cursor, index));
+    if (match[2]) nodes.push(<strong key={index}>{words(match[2], index)}</strong>);
+    else nodes.push(<a key={index} href={safeUrl(match[4])} target="_blank" rel="noreferrer">{words(match[3], index)}</a>);
     cursor = index + match[0].length;
   }
-  if (cursor < text.length) nodes.push(text.slice(cursor));
+  if (cursor < text.length) nodes.push(animate ? <span key={`plain-${cursor}`}>{words(text.slice(cursor), cursor)}</span> : text.slice(cursor));
   return <>{nodes}</>;
+}
+
+function StreamingText({ text }: { text?: string }) {
+  // Keep token wrappers stable after completion so existing words never flash again.
+  const streaming = useIsStreaming();
+  const [enteredWhileStreaming] = useState(streaming);
+  return <InlineText text={text} animate={enteredWhileStreaming} />;
 }
 
 export type CitationData = { label: string; url: string; icon?: string };
@@ -66,18 +75,18 @@ export const TravelHeading = defineComponent({
   props: z.object({ text: z.string(), level: z.enum(["title", "section"]) }),
   description: "A restrained response heading. Use title once, then section for smaller section headings.",
   component: ({ props }) => props.level === "section"
-    ? <h2 className="tv-heading tv-section-heading">{props.text}</h2>
-    : <h1 className="tv-heading tv-title">{props.text}</h1>,
+    ? <h2 className="tv-heading tv-section-heading"><StreamingText text={props.text} /></h2>
+    : <h1 className="tv-heading tv-title"><StreamingText text={props.text} /></h1>,
 });
 
 export const TravelProse = defineComponent({
   name: "TravelProse",
   props: z.object({ text: z.string(), citations: z.array(TravelCitation.ref).optional() }),
   description: "An ordinary response paragraph. Supports **bold** and [label](https://url) inline. Optional citations appear as small inline source pills.",
-  component: ({ props }) => <p className="tv-prose"><InlineText text={props.text} />{nodeProps<CitationData>(props.citations).map((citation, i) => <Citation key={`${citation.url}-${i}`} citation={citation} />)}</p>,
+  component: ({ props }) => <p className="tv-prose"><StreamingText text={props.text} />{nodeProps<CitationData>(props.citations).map((citation, i) => <Citation key={`${citation.url}-${i}`} citation={citation} />)}</p>,
 });
 
-export type ImageData = { src: string; alt: string; link?: string; wikiTitle?: string };
+export type ImageData = { src: string; alt: string; link?: string; wikiTitle?: string; focalX?: number };
 
 function Photo({ photo, bookmark = false }: { photo: Partial<ImageData>; bookmark?: boolean }) {
   const [saved, setSaved] = useState(false);
@@ -93,7 +102,7 @@ function Photo({ photo, bookmark = false }: { photo: Partial<ImageData>; bookmar
   const src = safeUrl(photo.src || (wikiImage?.title === photo.wikiTitle ? wikiImage?.url : undefined), true);
   const href = safeUrl(photo.link);
   const image = src && failedUrl !== src
-    ? <img src={src} alt={photo.alt ?? "Destination photograph"} onError={() => setFailedUrl(src)} />
+    ? <img src={src} style={{ objectPosition: `${photo.focalX ?? 50}% 50%` }} alt={photo.alt ?? "Destination photograph"} onError={() => setFailedUrl(src)} />
     : <span className="tv-photo-placeholder" role="img" aria-label={photo.alt || "Photograph loading"}><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="3"/><circle cx="8" cy="8" r="1.5"/><path d="m3 17 5-5 4 4 3-3 6 6"/></svg></span>;
   return <figure className="tv-photo">
     {href ? <a href={href} target="_blank" rel="noreferrer" aria-label={photo.alt}>{image}</a> : image}
@@ -105,8 +114,8 @@ function Photo({ photo, bookmark = false }: { photo: Partial<ImageData>; bookmar
 
 export const TravelImage = defineComponent({
   name: "TravelImage",
-  props: z.object({ src: z.string(), alt: z.string(), link: z.string().optional(), wikiTitle: z.string().optional() }),
-  description: "One real destination image. Use a supplied URL; otherwise leave src empty and provide a Wikipedia article title as wikiTitle.",
+  props: z.object({ src: z.string(), alt: z.string(), link: z.string().optional(), wikiTitle: z.string().optional(), focalX: z.number().min(0).max(100).optional() }),
+  description: "One real destination image. Use a supplied URL; otherwise leave src empty and provide a Wikipedia article title as wikiTitle. Optional focalX (0–100) chooses the horizontal crop; default 50 centers it.",
   component: ({ props }) => <Photo photo={props} />,
 });
 
@@ -117,7 +126,7 @@ export const TravelGallery = defineComponent({
   component: ({ props }) => {
     const photos = nodeProps<ImageData>(props.images);
     return <div className="tv-gallery">
-      {photos.map((photo, i) => <Photo key={`${photo.src || "pending"}-${i}`} photo={photo} bookmark />)}
+      {photos.map((photo, i) => <Photo key={i} photo={photo} bookmark />)}
     </div>;
   },
 });
@@ -133,7 +142,7 @@ function StopImage({ stop }: { stop: TravelStopData }) {
     fetchWiki(title).then((info) => { if (active) setFallback({ title, url: info.photos[0] }); });
     return () => { active = false; };
   }, [stop.imageUrl, stop.wikiTitle]);
-  return <Photo photo={{ src: stop.imageUrl || (fallback?.title === stop.wikiTitle ? fallback?.url : undefined), alt: stop.name }} />;
+  return <Photo photo={{ src: stop.imageUrl || (fallback?.title === stop.wikiTitle ? fallback?.url : undefined), alt: stop.name, focalX: stop.imageFocalX }} />;
 }
 
 export function TravelStopRow({ stop }: { stop: TravelStopData }) {
@@ -146,7 +155,7 @@ export function TravelStopRow({ stop }: { stop: TravelStopData }) {
     <div className="tv-stop-content">
       {stop.time && <div className="tv-stop-time">{stop.time}</div>}
       <h3 className="tv-stop-title">{href ? <a href={href} target="_blank" rel="noreferrer">{title}</a> : <button type="button" onClick={() => { route.selectStop(key); document.getElementById(`${route.mapId}-travel`)?.scrollIntoView({ behavior: "smooth", block: "center" }); }}>{title}</button>}</h3>
-      {(stop.description || stop.story) && <p className="tv-stop-description"><InlineText text={stop.description || stop.story} />{nodeProps<CitationData>(stop.citations).map((citation, i) => <Citation key={`${citation.url}-${i}`} citation={citation} />)}</p>}
+      {(stop.description || stop.story) && <p className="tv-stop-description"><StreamingText text={stop.description || stop.story} />{nodeProps<CitationData>(stop.citations).map((citation, i) => <Citation key={`${citation.url}-${i}`} citation={citation} />)}</p>}
     </div>
   </article>;
 }
@@ -156,7 +165,7 @@ export const TravelStop = defineComponent({
   props: z.object({
     id: z.string(), name: z.string(), time: z.string(), description: z.string(), imageUrl: z.string(),
     lat: z.number().min(-90).max(90), lng: z.number().min(-180).max(180), emoji: z.string(), category: z.string(),
-    link: z.string().optional(), wikiTitle: z.string().optional(), citations: z.array(TravelCitation.ref).optional(),
+    link: z.string().optional(), wikiTitle: z.string().optional(), citations: z.array(TravelCitation.ref).optional(), imageFocalX: z.number().min(0).max(100).optional(),
   }),
   description: "A reusable destination with a stable id, visiting time, short practical description, real photo URL, coordinates, emoji and category. Reference the SAME stop in TravelMap and TravelItinerary. Omit unknown optional links; never invent images.",
   component: ({ props }) => <TravelStopRow stop={props} />,
@@ -179,5 +188,8 @@ export const TravelMap = defineComponent({
     route: z.array(z.object({ lat: z.number().min(-90).max(90), lng: z.number().min(-180).max(180) })).max(2000).optional(),
   }),
   description: "A real interactive street map with emoji destination markers, category filtering and expand. Reuse the SAME TravelStop refs in TravelItinerary. Optional route coordinates trace the supplied route; otherwise stops connect in visiting order as a route overview.",
-  component: ({ props }) => <TravelMapView stops={nodeProps<TravelStopData>(props.stops)} path={props.route} />,
+  component: function TravelMapComponent({ props }) {
+    const streaming = useIsStreaming();
+    return <TravelMapView stops={nodeProps<TravelStopData>(props.stops)} path={props.route} streaming={streaming} />;
+  },
 });

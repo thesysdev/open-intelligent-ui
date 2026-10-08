@@ -24,8 +24,8 @@ The registered travel components are small enough to combine in different respon
 | `TravelHeading` | Response and section headings. |
 | `TravelProse` | Paragraphs with limited inline emphasis and optional citations. |
 | `TravelCitation` | Compact links to supplied supporting sources. |
-| `TravelImage`, `TravelGallery` | Destination photos and local save toggles. |
-| `TravelStop` | A destination record: stable ID, name, time, description, image, coordinates, category, and optional link/citations. |
+| `TravelImage`, `TravelGallery` | Destination photos, optional horizontal crop focus, and local save toggles. |
+| `TravelStop` | A destination record: stable ID, name, time, description, image, coordinates, category, and optional link/citations/image crop focus. |
 | `TravelMap` | Interactive map, destination selection, category filtering, and expansion. |
 | `TravelItinerary` | Divided image-and-text rows for the same destination records. |
 
@@ -61,7 +61,7 @@ pnpm install
 pnpm dev
 ```
 
-For the film take, set `ENABLE_RECORDING_PRESET=1`, restart the server, open `http://localhost:3000/?capture=sf`, and use a **969×1080 CSS viewport**. The centered response column is 691px wide. Submit the exact prompt, record the real stream, and then exercise the map and itinerary. The top-level video composition supplies the two brand labels; the capture route therefore hides the app navigation/header but keeps its live composer.
+For the film take, set `ENABLE_RECORDING_PRESET=1`, restart the server, open `http://localhost:3000/?capture=sf`, and use a **969×1080 CSS viewport**. The centered response column is 691px wide. Submit the exact prompt, record the real stream, and then exercise the map and itinerary. The top-level video composition supplies the two brand labels; the capture route therefore hides app navigation, submitted prompt bubbles, and the inline generation label, while keeping the live composer. The welcome screen has no subtitle.
 
 For a production-mode local run:
 
@@ -86,7 +86,7 @@ The shell exposes measurements on `[data-agent-shell]`:
 | `data-stream-done-ms` | `performance.now()` when the stream finishes, errors, or is cancelled. |
 | `data-stream-elapsed-ms` | Request-to-stream-completion duration for a completed run. |
 
-The “Generated in N.N s” label uses the measured completed duration. It includes request/network time and model streaming; it does not claim to measure first meaningful paint, image loading, map tile loading, or general provider performance. All timestamps are relative to the page's performance clock, not wall-clock dates.
+The normal “Rendered in N.N s” label is set after the live stream completes, the map camera/route reveal finishes, and response photo elements have settled. `data-render-done-ms` and `data-render-elapsed-ms` expose this separate measurement. The network-only duration remains in `data-stream-elapsed-ms`. These are measurements of an individual run, not general provider performance; asynchronous basemap tiles can still depend on external services. All timestamps are relative to the page's performance clock, not wall-clock dates.
 
 ## Verification
 
@@ -112,3 +112,11 @@ Manually check normal requests for at least two cities, both narrow and desktop 
 ## Basemap and street geometry
 
 The interactive map uses Leaflet, a MapLibre vector layer, and a restrained local palette over [OpenFreeMap](https://openfreemap.org/quick_start/) / OpenStreetMap geometry. It keeps source attribution visible. If WebGL or vector loading is unavailable, an Esri raster layer provides a fallback. OSRM supplies street geometry in the background; a labelled direct overview remains available if routing fails. This road geometry is not mixed-mode navigation.
+
+## Streaming and film walkthrough
+
+Text reveals new word spans with a short opacity/blur transition; existing words keep their nodes. Reduced-motion preferences disable those transitions. Photos accept an optional horizontal focal point (`TravelImage.focalX` / `TravelStop.imageFocalX`); the recording context supplies the crop positions inspected in the reference chat.
+
+The map keeps one Leaflet instance and reconciles markers by stable stop ID. During streaming it waits until both coordinate tokens are complete, adds each available marker to a steady city overview, and retains existing marker DOM. Once streaming finishes it frames the route once and draws the line. Selection, category filtering, and resizing do not recreate all markers or repeatedly reset the camera.
+
+The recording view exposes **Walk through response**. This film-only control moves the real scroll container using a cadence measured from the supplied left recording and displays a cursor. It does not replay model output, manufacture tokens, or affect normal chat. The control sits in the header area covered by the film's brand overlay. The revised movie accelerates each recording independently to align visual stages, labels the playback rates, and keeps counters on original elapsed times. It must not be described as a simultaneous real-time benchmark.

@@ -144,3 +144,17 @@ body:has(.sf-shell--capture) [data-openui-devtools-root] { display: none !import
 .sf-shell--capture .tv-stop { grid-template-columns: 124px minmax(0,1fr); gap: 14px; padding-block: 22px; }
 .sf-shell--capture .tv-stop:first-child { padding-top: 0; }
 .sf-shell--capture .tv-stop > .tv-photo { width: 124px; height: 124px; }
+
+/* The film has its own elapsed-time labels and removes submitted prompts entirely. */
+.sf-shell--capture .openui-shell-thread-message-user,
+.sf-shell--capture .openui-agent-thread-message-user,
+.sf-shell--capture .openui-genui-user-message { display: none; }
+.sf-shell--capture .openui-shell-thread-message-assistant::before { display: none; }
+.sf-shell--capture .openui-agent-thread-scroll-area { padding-top: 186px; scroll-padding-top: 186px; }
+.sf-shell--capture .openui-agent-thread-messages { gap: 0; }
+.sf-shell--capture .openui-agent-thread-scroll-latest { display: none; }
+
+.sf-capture-walkthrough { position: fixed; z-index: 2000; right: 18px; top: 18px; padding: 7px 12px; border: 1px solid #ddd; border-radius: 8px; background: #fff; color: #555; font: 12px/18px system-ui; }
+.sf-capture-walkthrough:disabled { opacity: .35; }
+.sf-capture-cursor { position: fixed; z-index: 2001; top: 0; left: 0; opacity: 0; pointer-events: none; filter: drop-shadow(0 1px 1px #0003); }
+.sf-capture-cursor.is-visible { opacity: 1; }

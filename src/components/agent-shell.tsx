@@ -14,6 +14,7 @@ import {
   useThreadList,
 } from "@openuidev/react-ui";
 import { useEffect, useMemo, useState, type ReactNode } from "react";
+import { CaptureWalkthrough } from "./capture-walkthrough";
 import { library } from "@/lib/library";
 
 function Icon({ children }: { children: ReactNode }) {
@@ -47,15 +48,32 @@ function GenerationTiming() {
   const messages = useThread((state) => state.messages);
   useEffect(() => {
     if (running) return;
-    const frame = requestAnimationFrame(() => {
-      const shell = document.querySelector<HTMLElement>("[data-agent-shell]");
-      const elapsed = Number(shell?.dataset.streamElapsedMs);
-      if (shell?.dataset.streamState !== "complete" || !Number.isFinite(elapsed) || elapsed <= 0) return;
+    const shell = document.querySelector<HTMLElement>("[data-agent-shell]");
+    if (!shell) return;
+    let frame = 0;
+    const check = () => {
+      if (shell.dataset.streamState !== "complete" || shell.dataset.renderElapsedMs) return;
       const replies = shell.querySelectorAll<HTMLElement>(".openui-shell-thread-message-assistant");
       const latest = replies[replies.length - 1];
-      if (latest && !latest.dataset.generationLabel) latest.dataset.generationLabel = `Generated in ${(elapsed / 1000).toFixed(1)} s`;
-    });
-    return () => cancelAnimationFrame(frame);
+      if (!latest) return;
+      const maps = Array.from(latest.querySelectorAll<HTMLElement>(".tv-map-wrap"));
+      const images = Array.from(latest.querySelectorAll<HTMLImageElement>(".tv-photo img"));
+      if (maps.some((map) => map.dataset.revealState !== "ready") || images.some((image) => !image.complete)) return;
+      cancelAnimationFrame(frame);
+      frame = requestAnimationFrame(() => {
+        const done = performance.now();
+        const elapsed = done - Number(shell.dataset.streamStartedMs);
+        if (!Number.isFinite(elapsed) || elapsed <= 0 || shell.dataset.renderElapsedMs) return;
+        Object.assign(shell.dataset, { renderDoneMs: String(done), renderElapsedMs: String(elapsed) });
+        latest.dataset.generationLabel = `Rendered in ${(elapsed / 1000).toFixed(1)} s`;
+      });
+    };
+    const observer = new MutationObserver(check);
+    observer.observe(shell, { subtree: true, attributes: true, childList: true });
+    shell.addEventListener("load", check, true);
+    shell.addEventListener("error", check, true);
+    check();
+    return () => { observer.disconnect(); shell.removeEventListener("load", check, true); shell.removeEventListener("error", check, true); cancelAnimationFrame(frame); };
   }, [running, messages]);
   return null;
 }
@@ -68,7 +86,7 @@ const measuredFetch: typeof fetch = async (input, init) => {
   const record = (values: Record<string, string>) => {
     if (shell && (shell.dataset.requestId === requestId || !shell.dataset.requestId)) Object.assign(shell.dataset, values);
   };
-  if (shell) Object.assign(shell.dataset, { requestId, streamState: "requesting", streamStartedMs: String(started), streamFirstChunkMs: "", streamDoneMs: "", streamElapsedMs: "" });
+  if (shell) Object.assign(shell.dataset, { requestId, streamState: "requesting", streamStartedMs: String(started), streamFirstChunkMs: "", streamDoneMs: "", streamElapsedMs: "", renderDoneMs: "", renderElapsedMs: "" });
   init?.signal?.addEventListener("abort", () => {
     if (shell?.dataset.streamState !== "complete") record({ streamState: "cancelled", streamDoneMs: String(performance.now()) });
   }, { once: true });
@@ -110,10 +128,11 @@ export function AgentShell({ capture = false }: { capture?: boolean }) {
 
   return <main className={`intelligent-app sf-shell${capture ? " sf-shell--capture" : ""}${expanded ? " sf-shell--expanded" : ""}`} data-agent-shell data-capture={capture ? "sf" : undefined} data-stream-state="idle">
     <AgentInterface llm={llm} componentLibrary={library} agentName="OpenUI" theme={{ mode: "light" }}>
+      {capture && <CaptureWalkthrough />}
       <AgentInterface.Sidebar><ShellNavigation expanded={expanded} onToggle={() => setExpanded((value) => !value)} /></AgentInterface.Sidebar>
       <AgentInterface.ThreadHeader><GenerationTiming /><ShellHeader onOpenHistory={() => setExpanded((value) => !value)} /></AgentInterface.ThreadHeader>
       <AgentInterface.MobileHeader><span>OpenUI</span></AgentInterface.MobileHeader>
-      <AgentInterface.Welcome title="Where would you like to go?" description="Make a little more of your day." starters={[{ displayText: "A day in San Francisco", prompt: "I'm in San Francisco for a day, plan a sightseeing route for me" }, { displayText: "An afternoon in Paris", prompt: "I'm in Paris for an afternoon. Plan a walk with a few memorable stops." }]} starterVariant="short" />
+      <AgentInterface.Welcome title="Where would you like to go?" starters={[{ displayText: "A day in San Francisco", prompt: "I'm in San Francisco for a day, plan a sightseeing route for me" }, { displayText: "An afternoon in Paris", prompt: "I'm in Paris for an afternoon. Plan a walk with a few memorable stops." }]} starterVariant="short" />
       <AgentInterface.Composer placeholder="Ask OpenUI" />
     </AgentInterface>
   </main>;

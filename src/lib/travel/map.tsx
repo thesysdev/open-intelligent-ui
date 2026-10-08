@@ -1,11 +1,11 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import type { LayerGroup, Map as LeafletMap } from "leaflet";
+import type { LayerGroup, Map as LeafletMap, Marker, Polyline } from "leaflet";
 import { getStopKey, useRouteStore, type StopData } from "../route/store";
 
 type Coordinate = { lat?: number; lng?: number };
-const coordinate = (input: unknown): [number, number] | null => {
+export const coordinate = (input: unknown): [number, number] | null => {
   if (!input || typeof input !== "object") return null;
   const value = input as Coordinate;
   return typeof value.lat === "number" && typeof value.lng === "number" && Number.isFinite(value.lat) && Number.isFinite(value.lng) && Math.abs(value.lat) <= 90 && Math.abs(value.lng) <= 180
@@ -13,12 +13,18 @@ const coordinate = (input: unknown): [number, number] | null => {
 };
 const streetRouteCache = new Map<string, [number, number][]>();
 
-export function TravelMapView({ stops, path }: { stops: StopData[]; path?: Coordinate[] }) {
+export function TravelMapView({ stops, path, streaming = false }: { stops: StopData[]; path?: Coordinate[]; streaming?: boolean }) {
   const container = useRef<HTMLDivElement>(null);
   const surface = useRef<HTMLDivElement>(null);
   const map = useRef<LeafletMap | null>(null);
   const layer = useRef<LayerGroup | null>(null);
   const fitSignature = useRef("");
+  const markers = useRef(new Map<string, { marker: Marker; pin: HTMLSpanElement; label: HTMLSpanElement }>());
+  const line = useRef<Polyline | null>(null);
+  const anchored = useRef(false);
+  const userMoved = useRef(false);
+  const expandedNow = useRef(false);
+  const [framedKey, setFramedKey] = useState("");
   const fitPoints = useRef<[number, number][]>([]);
   const [leaflet, setLeaflet] = useState<typeof import("leaflet") | null>(null);
   const [expanded, setExpanded] = useState(false);
@@ -29,10 +35,13 @@ export function TravelMapView({ stops, path }: { stops: StopData[]; path?: Coord
   const route = useRouteStore();
   const selected = route.getSelected();
   const version = route.getSnapshot();
+  // Emoji follows both coordinates in the schema, so its presence marks complete
+  // coordinate tokens. Numeric prefixes such as -1 / -12 must not move the map.
+  const readyStops = stops.filter((stop) => stop.name && coordinate(stop) && (!streaming || !!stop.emoji));
   const categories = Array.from(new Set(stops.map((stop) => stop.category).filter((item): item is string => !!item)));
-  const stopSignature = JSON.stringify(stops.map((stop) => [getStopKey(stop), stop.name, stop.lat, stop.lng, stop.emoji, stop.category]));
+  const stopSignature = JSON.stringify(readyStops.map((stop) => [getStopKey(stop), stop.name, stop.lat, stop.lng, stop.emoji, stop.category]));
   const pathSignature = JSON.stringify(path ?? []);
-  const activePositions = stops.filter((stop) => stop.name && !route.isRemoved(getStopKey(stop)) && (group === "all" || stop.category === group)).map(coordinate).filter((point): point is [number, number] => !!point);
+  const activePositions = readyStops.filter((stop) => stop.name && !route.isRemoved(getStopKey(stop)) && (group === "all" || stop.category === group)).map(coordinate).filter((point): point is [number, number] => !!point);
   const routingKey = activePositions.map(([lat, lng]) => `${lng},${lat}`).join(";");
   const suppliedPath = group === "all" && Array.isArray(path) && path.filter(coordinate).length > 1;
   const streetPoints = streetRoute?.key === routingKey ? streetRoute.points : streetRouteCache.get(routingKey);
@@ -80,6 +89,7 @@ export function TravelMapView({ stops, path }: { stops: StopData[]; path?: Coord
     const instance = leaflet.map(surface.current, { zoomControl: false, attributionControl: true, scrollWheelZoom: false, keyboard: true, zoomSnap: 0.1, minZoom: 1 }).setView([20, 0], 2);
     instance.attributionControl.setPrefix(false);
     let active = true;
+    const markerEntries = markers.current;
     let fallbackAdded = false;
     const fallback = () => {
       if (!active || fallbackAdded) return;
@@ -91,61 +101,127 @@ export function TravelMapView({ stops, path }: { stops: StopData[]; path?: Coord
       try {
         const basemap = addVectorBasemap(instance);
         basemap.getMaplibreMap().on("error", fallback);
-        basemap.getMaplibreMap().on("load", () => setMapError(false));
+        basemap.getMaplibreMap().on("load", () => { setMapError(false); if (container.current) container.current.dataset.basemapReady = "true"; });
         instance.attributionControl.addAttribution('© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> · <a href="https://openfreemap.org">OpenFreeMap</a>');
       } catch { fallback(); }
     }).catch(fallback);
     leaflet.control.zoom({ position: "bottomright" }).addTo(instance);
     layer.current = leaflet.layerGroup().addTo(instance);
     map.current = instance;
+    if (container.current) container.current.dataset.mapInstance = String(leaflet.stamp(instance));
+    instance.on("dragstart", () => { userMoved.current = true; });
     const observer = new ResizeObserver(() => {
+      // A resize must never reframe the camera during streaming or user panning.
       instance.invalidateSize({ animate: false });
-      if (fitPoints.current.length) instance.fitBounds(leaflet.latLngBounds(fitPoints.current), { paddingTopLeft: [34, 55], paddingBottomRight: [40, 35], maxZoom: 15, animate: false });
     });
     observer.observe(surface.current);
-    return () => { active = false; observer.disconnect(); instance.remove(); map.current = null; layer.current = null; fitSignature.current = ""; };
+    return () => { active = false; observer.disconnect(); instance.remove(); map.current = null; layer.current = null; fitSignature.current = ""; markerEntries.clear(); line.current = null; anchored.current = false; };
   }, [leaflet]);
+
+  useEffect(() => { expandedNow.current = expanded; }, [expanded]);
 
   useEffect(() => {
     if (!leaflet || !map.current || !layer.current) return;
     const instance = map.current;
-    const routeLayer = layer.current;
-    routeLayer.clearLayers();
-    const visible = stops.filter((stop) => stop.name && coordinate(stop) && !route.isRemoved(getStopKey(stop)) && (group === "all" || stop.category === group));
-    const positions = visible.map((stop) => coordinate(stop)!);
-    fitPoints.current = positions;
-    const routePositions = suppliedPath && Array.isArray(path)
-      ? path.map(coordinate).filter((point): point is [number, number] => !!point)
-      : streetPoints?.length ? streetPoints : positions;
-    if (routePositions.length > 1) leaflet.polyline(routePositions, { color: "#272727", weight: 3.2, opacity: 1, lineCap: "round", lineJoin: "round", interactive: false }).addTo(routeLayer);
+    const visible = readyStops.filter((stop) => !route.isRemoved(getStopKey(stop)) && (group === "all" || stop.category === group));
+    const keys = new Set(visible.map(getStopKey));
+    for (const [key, entry] of markers.current) {
+      if (!keys.has(key)) { entry.marker.remove(); markers.current.delete(key); }
+    }
     visible.forEach((stop) => {
       const key = getStopKey(stop);
-      const content = document.createElement("div");
-      content.className = "tv-map-marker-content";
-      const pin = document.createElement("span");
-      pin.className = `tv-map-pin${selected === key ? " is-selected" : ""}`;
-      pin.textContent = stop.emoji || "📍";
-      content.append(pin);
-      const label = document.createElement("span");
-      label.className = "tv-map-label";
-      label.textContent = stop.name || "";
-      content.append(label);
-      const icon = leaflet.divIcon({ className: "tv-map-marker", html: content, iconSize: [34, 34], iconAnchor: [17, 17] });
-      leaflet.marker(coordinate(stop)!, { icon, title: stop.name, alt: stop.name, keyboard: true, zIndexOffset: selected === key ? 1000 : 0 })
-        .on("click", () => {
-          route.selectStop(key);
-          if (expanded) setExpanded(false);
-          window.setTimeout(() => document.getElementById(route.stopId(key))?.scrollIntoView({ behavior: "smooth", block: "center" }), expanded ? 80 : 0);
-        }).addTo(routeLayer);
+      let entry = markers.current.get(key);
+      if (!entry) {
+        const content = document.createElement("div");
+        content.className = "tv-map-marker-content";
+        const pin = document.createElement("span");
+        pin.className = "tv-map-pin";
+        const label = document.createElement("span");
+        label.className = "tv-map-label";
+        content.append(pin, label);
+        const icon = leaflet.divIcon({ className: "tv-map-marker", html: content, iconSize: [34, 34], iconAnchor: [17, 17] });
+        const marker = leaflet.marker(coordinate(stop)!, { icon, title: stop.name, alt: stop.name, keyboard: true })
+          .on("click", () => {
+            route.selectStop(key);
+            const wasExpanded = expandedNow.current;
+            if (wasExpanded) setExpanded(false);
+            window.setTimeout(() => document.getElementById(route.stopId(key))?.scrollIntoView({ behavior: "smooth", block: "center" }), wasExpanded ? 80 : 0);
+          }).addTo(layer.current!);
+        entry = { marker, pin, label };
+        markers.current.set(key, entry);
+      }
+      entry.marker.setLatLng(coordinate(stop)!);
+      entry.marker.setZIndexOffset(selected === key ? 1000 : 0);
+      entry.pin.classList.toggle("is-selected", selected === key);
+      entry.pin.textContent = stop.emoji || "📍";
+      entry.label.textContent = stop.name || "";
     });
-    const nextFit = JSON.stringify([group, positions]);
-    if (positions.length && fitSignature.current !== nextFit) {
-      instance.fitBounds(leaflet.latLngBounds(positions), { paddingTopLeft: [34, 55], paddingBottomRight: [40, 35], maxZoom: 15, animate: false });
-      fitSignature.current = nextFit;
+    const positions = visible.map((stop) => coordinate(stop)!);
+    fitPoints.current = positions;
+    if (container.current) {
+      container.current.dataset.markerCount = String(positions.length);
+      if (streaming) container.current.dataset.revealState = "pins";
     }
-    // Rebuild only for completed primitive changes, not each new streamed object identity.
+    if (positions.length && !anchored.current) {
+      // Begin with a steady city overview; subsequent points do not move the camera.
+      instance.setView(positions[0], 11.5, { animate: false });
+      anchored.current = true;
+    }
+    // Object identities change each token. Reconcile completed primitive values only.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [leaflet, stopSignature, pathSignature, group, selected, version, expanded, streetRoute, routeKind]);
+  }, [leaflet, stopSignature, group, selected, version]);
+
+  useEffect(() => {
+    if (!leaflet || !map.current || streaming || !fitPoints.current.length) return;
+    const instance = map.current;
+    const nextFit = JSON.stringify([group, routingKey]);
+    if (fitSignature.current === nextFit) return;
+    fitSignature.current = nextFit;
+    if (container.current) container.current.dataset.revealState = "framing";
+    const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const finish = () => { setFramedKey(routingKey); };
+    if (userMoved.current || reduced) {
+      if (!userMoved.current) instance.fitBounds(leaflet.latLngBounds(fitPoints.current), { paddingTopLeft: [42, 70], paddingBottomRight: [52, 50], maxZoom: 13.2, animate: false });
+      finish();
+      return;
+    }
+    instance.flyToBounds(leaflet.latLngBounds(fitPoints.current), { paddingTopLeft: [42, 70], paddingBottomRight: [52, 50], maxZoom: 13.2, duration: 1.15 });
+    // flyToBounds may not emit moveend when the viewport already matches.
+    const timer = window.setTimeout(finish, 1200);
+    return () => clearTimeout(timer);
+  }, [leaflet, streaming, routingKey, group]);
+
+  useEffect(() => {
+    if (!leaflet || !map.current || !layer.current || streaming || framedKey !== routingKey) return;
+    const positions = suppliedPath && Array.isArray(path)
+      ? path.map(coordinate).filter((point): point is [number, number] => !!point)
+      : streetPoints?.length ? streetPoints : fitPoints.current;
+    if (positions.length < 2) {
+      line.current?.remove(); line.current = null;
+      if (container.current) container.current.dataset.revealState = "ready";
+      return;
+    }
+    const firstDraw = !line.current;
+    if (!line.current) line.current = leaflet.polyline(positions, { color: "#272727", weight: 3.2, opacity: 1, lineCap: "round", lineJoin: "round", interactive: false }).addTo(layer.current);
+    else line.current.setLatLngs(positions);
+    const element = line.current.getElement() as SVGPathElement | undefined;
+    if (!element || !firstDraw || window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+      if (container.current) container.current.dataset.revealState = "ready";
+      return;
+    }
+    const length = element.getTotalLength();
+    element.style.strokeDasharray = `${length}`;
+    if (container.current) container.current.dataset.revealState = "drawing";
+    const animation = element.animate([{ strokeDashoffset: length }, { strokeDashoffset: 0 }], { duration: 950, easing: "ease-in-out", fill: "forwards" });
+    animation.onfinish = () => {
+      element.style.strokeDasharray = "";
+      animation.cancel();
+      if (container.current) container.current.dataset.revealState = "ready";
+    };
+    return () => { animation.cancel(); element.style.strokeDasharray = ""; };
+    // Geometry changes update the existing SVG path instead of clearing the layer.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [leaflet, framedKey, routingKey, pathSignature, streetRoute, suppliedPath, streaming]);
 
   useEffect(() => {
     const frame = requestAnimationFrame(() => map.current?.invalidateSize({ animate: false }));
@@ -172,7 +248,7 @@ export function TravelMapView({ stops, path }: { stops: StopData[]; path?: Coord
   }, [expanded]);
 
   return <div className="tv-map-slot" id={`${route.mapId}-travel`}>
-    <div ref={container} className={`tv-map-wrap${expanded ? " is-expanded" : ""}`} role={expanded ? "dialog" : "region"} aria-modal={expanded || undefined} aria-label="Sightseeing route map" data-route-kind={routeKind} tabIndex={expanded ? -1 : undefined}>
+    <div ref={container} className={`tv-map-wrap${expanded ? " is-expanded" : ""}`} role={expanded ? "dialog" : "region"} aria-modal={expanded || undefined} aria-label="Sightseeing route map" data-route-kind={routeKind} data-streaming={streaming} tabIndex={expanded ? -1 : undefined}>
       <div className="tv-map-surface" ref={surface} />
       <div className="tv-map-top-left">
         <label className="tv-map-pill tv-map-filter">

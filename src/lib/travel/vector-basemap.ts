@@ -8,6 +8,7 @@ setWorkerUrl(new URL("maplibre-gl/dist/maplibre-gl-worker.mjs", import.meta.url)
 /** Restrained, destination-independent cartography using public OpenMapTiles geometry. */
 const style: StyleSpecification = {
   version: 8,
+  glyphs: "https://tiles.openfreemap.org/fonts/{fontstack}/{range}.pbf",
   sources: { places: { type: "vector", url: "https://tiles.openfreemap.org/planet", attribution: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> · <a href="https://openfreemap.org">OpenFreeMap</a>' } },
   layers: [
     { id: "background", type: "background", paint: { "background-color": "#f4f2f0" } },
@@ -20,6 +21,8 @@ const style: StyleSpecification = {
     { id: "streets", type: "line", source: "places", "source-layer": "transportation", filter: ["!in", "class", "rail", "transit", "ferry", "motorway", "trunk", "primary"], layout: { "line-cap": "round", "line-join": "round" }, paint: { "line-color": "#cdd1d9", "line-width": ["interpolate", ["linear"], ["zoom"], 9, 0.3, 12, 1.5, 14, 2.8, 17, 8] } },
     { id: "main-roads", type: "line", source: "places", "source-layer": "transportation", filter: ["in", "class", "motorway", "trunk", "primary"], layout: { "line-cap": "round", "line-join": "round" }, paint: { "line-color": "#b1b9c8", "line-width": ["interpolate", ["linear"], ["zoom"], 9, 0.7, 12, 3, 14, 5, 17, 12] } },
     { id: "ferries", type: "line", source: "places", "source-layer": "transportation", filter: ["==", "class", "ferry"], paint: { "line-color": "#89cfe9", "line-width": 0.8 } },
+    { id: "neighborhood-labels", type: "symbol", source: "places", "source-layer": "place", minzoom: 10, maxzoom: 15, filter: ["in", "class", "suburb", "quarter", "neighbourhood"], layout: { "text-field": ["coalesce", ["get", "name_en"], ["get", "name"]], "text-font": ["Noto Sans Regular"], "text-size": 10, "text-letter-spacing": 0.08, "text-transform": "uppercase", "text-max-width": 8 }, paint: { "text-color": "#687078", "text-halo-color": "#fff", "text-halo-width": 1.2 } },
+    { id: "city-labels", type: "symbol", source: "places", "source-layer": "place", minzoom: 7, maxzoom: 13, filter: ["in", "class", "city", "town"], layout: { "text-field": ["coalesce", ["get", "name_en"], ["get", "name"]], "text-font": ["Noto Sans Regular"], "text-size": 14, "text-max-width": 8 }, paint: { "text-color": "#50545a", "text-halo-color": "#fff", "text-halo-width": 1.5 } },
   ],
 };
 
