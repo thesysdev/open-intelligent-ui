@@ -1,6 +1,16 @@
-# intelligent-ui
+# Open Intelligent UI
 
-An [OpenUI](https://openui.com) demo that recreates the "plan a sightseeing route in San Francisco" experience. The model streams OpenUI Lang through OpenUI Gateway, and the app renders it as an OpenAI-inspired answer built from its own travel components:
+Fun fact: [openui.com](https://openui.com) isn't owned by OpenAI. It's owned by us :)
+
+[OpenUI](https://github.com/thesysdev/openui) is the open standard for Generative UI, and yes, it's actually open source and MIT licensed. It recently passed 10K GitHub stars, right as the big players started validating what we've been shouting about for almost two years.
+
+We vibe-coded this demo after watching the launch video for what ChatGPT calls "Intelligent UI": ask it to plan a day in a city and you get an interactive answer (a map, photos, an itinerary you can edit) instead of a wall of text. Everything here is built on OpenUI, so you can build the same kind of experience without the paywall and actually ship it inside your own app. **Try it at [openui.com](https://openui.com).**
+
+> An independent recreation, not affiliated with OpenAI. "Intelligent UI" is the name of ChatGPT's feature.
+
+## What's in the demo
+
+The model streams OpenUI Lang through OpenUI Gateway, and the app renders it as an answer built from its own travel components:
 
 - `TravelHeading` and `TravelProse`: editorial headings and paragraphs with streaming word fades.
 - `TravelImage` and `TravelGallery`: a three-photo strip using Gateway image-search results, with Wikipedia fallbacks.
