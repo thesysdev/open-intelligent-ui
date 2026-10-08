@@ -21,6 +21,7 @@ const instructions = generateSystemPrompt({ cloud: true, library: librarySpec, p
 const tools = [{ type: "image_search" } as unknown as Tool];
 
 const MAX_ITEMS = 60;
+const MAX_BODY_BYTES = 1_000_000;
 
 // The browser sends the whole conversation each turn. Keep only user and
 // assistant text: earlier image-search calls already ran inside Gateway, and
@@ -38,9 +39,16 @@ function toInput(messages: unknown): ResponseInputItem[] | null {
 }
 
 export async function POST(req: Request) {
+  if (!req.headers.get("content-type")?.includes("application/json")) {
+    return Response.json({ error: { message: "expected application/json" } }, { status: 415 });
+  }
+  const raw = await req.text();
+  if (new TextEncoder().encode(raw).length > MAX_BODY_BYTES) {
+    return Response.json({ error: { message: "request body too large" } }, { status: 413 });
+  }
   let input: ResponseInputItem[] | null;
   try {
-    input = toInput(((await req.json()) as { messages?: unknown }).messages);
+    input = toInput((JSON.parse(raw) as { messages?: unknown }).messages);
   } catch {
     input = null;
   }

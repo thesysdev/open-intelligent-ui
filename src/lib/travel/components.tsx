@@ -4,7 +4,8 @@ import { defineComponent, useIsStreaming } from "@openuidev/react-lang";
 import { useEffect, useState, type CSSProperties, type ReactNode } from "react";
 import { z } from "zod/v4";
 import { fetchWiki, getStopKey, useRouteStore, type StopData } from "../route/store";
-import { coordinate, TravelMapView } from "./map";
+import { TravelMapView } from "./map";
+import { coordinate } from "./map-utils";
 import "./travel.css";
 
 export function safeUrl(value: unknown, local = false): string | undefined {
@@ -215,7 +216,7 @@ function SuggestionCard({ stop }: { stop: TravelStopData }) {
 export const TravelSuggestions = defineComponent({
   name: "TravelSuggestions",
   props: z.object({ title: z.string(), stops: z.array(TravelStop.ref).max(4) }),
-  description: "Optional extra places the user can add to the route. Use 2–3 TravelStops that are NOT in the itinerary, each with its own unique id. Adding one puts a pin on TravelMap and appends it to TravelItinerary.",
+  description: "Optional extra places the user can add to the route. Use 2–3 TravelStops that are NOT in the itinerary, each with its own unique id and a short duration such as \"+1 hr\" as its time. Adding one puts a pin on TravelMap and appends it to TravelItinerary.",
   component: ({ props }) => <section className="tv-suggestions">
     {props.title && <h2 className="tv-heading tv-section-heading">{props.title}</h2>}
     <div className="tv-suggestion-list">{nodeProps<TravelStopData>(props.stops).map((stop, i) => <SuggestionCard key={getStopKey(stop) || `pending-${i}`} stop={stop} />)}</div>

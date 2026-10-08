@@ -2,7 +2,7 @@
   "root": "Card",
   "components": {
     "Card": {
-      "signature": "Card(children: (TextContent | MarkDownRenderer | CardHeader | Callout | TextCallout | CodeBlock | Image | ImageBlock | ImageGallery | Separator | HorizontalBarChart | RadarChart | PieChart | RadialChart | SingleStackedBarChart | ScatterChart | AreaChart | BarChart | LineChart | Table | TagBlock | Form | Buttons | IconButton | Steps | InlineHeader | EntityList | EditableTable | SnippetCardBlock | OverviewCardBlock | ContextCardBlock | CompositeCardBlock | VisualCardBlock | ListBlock | FollowUpBlock | SectionBlock | Tabs | Carousel | RouteMap | RouteStops | RouteSuggestions | RouteStop | TravelGallery | TravelHeading | TravelItinerary | TravelSuggestions | TravelMap | TravelProse | TravelImage | TravelStop)[], sources?: {url?: string, title: string, sourceName: string}[])",
+      "signature": "Card(children: (TextContent | MarkDownRenderer | CardHeader | Callout | TextCallout | CodeBlock | Image | ImageBlock | ImageGallery | Separator | HorizontalBarChart | RadarChart | PieChart | RadialChart | SingleStackedBarChart | ScatterChart | AreaChart | BarChart | LineChart | Table | TagBlock | Form | Buttons | IconButton | Steps | InlineHeader | EntityList | EditableTable | SnippetCardBlock | OverviewCardBlock | ContextCardBlock | CompositeCardBlock | VisualCardBlock | ListBlock | FollowUpBlock | SectionBlock | Tabs | Carousel | TravelGallery | TravelHeading | TravelItinerary | TravelSuggestions | TravelMap | TravelProse | TravelImage | TravelStop)[], sources?: {url?: string, title: string, sourceName: string}[])",
       "description": "Vertical response container. Pass one array of content children. Travel citations belong inline in TravelProse/TravelStop, not in root sources."
     },
     "CardHeader": {
@@ -337,22 +337,6 @@
       "signature": "VisualCardBlock(items: VisualCardItem[], layout?: \"grid\" | \"carousel\", responsive?: boolean, action?: ActionExpression, gap?: number | string)",
       "description": "A grid or carousel of photo-first cards: a full-bleed background image with a tag on top and a bold text panel at the bottom; an optional action makes every card clickable."
     },
-    "RouteMap": {
-      "signature": "RouteMap(stops: RouteStop[])",
-      "description": "Interactive map that plots RouteStop items in visiting order with a street-route overview. Always reuse the SAME RouteStop references in RouteStops below it."
-    },
-    "RouteStop": {
-      "signature": "RouteStop(name: string, wikiTitle: string, lat: number, lng: number, time: string, story: string, beforeYouGo: string, photos?: string[], category?: string, id?: string)",
-      "description": "One stop on a route. wikiTitle is the exact English Wikipedia article title (used to load real photos). lat/lng are decimal coordinates. time e.g. '9:00 · 1 hr'. story: 1-2 sentences of history. beforeYouGo: one practical tip. Optional category groups the map, e.g. 'Landmarks', 'Museums' or 'Neighborhoods'. Optional id distinguishes repeated visits or stops with identical names in a route."
-    },
-    "RouteStops": {
-      "signature": "RouteStops(stops: RouteStop[])",
-      "description": "Photo cards for each RouteStop (real photos, story, tips, remove-from-route toggle)."
-    },
-    "RouteSuggestions": {
-      "signature": "RouteSuggestions(title: string, stops: RouteStop[])",
-      "description": "Optional extra stops the user can add to the route with one tap (adds a pin to RouteMap and a card to RouteStops). Use 2 stops that are NOT already in the route."
-    },
     "TravelHeading": {
       "signature": "TravelHeading(text: string, level: \"title\" | \"section\")",
       "description": "A restrained response heading. Use title once, then section for smaller section headings."
@@ -387,7 +371,7 @@
     },
     "TravelSuggestions": {
       "signature": "TravelSuggestions(title: string, stops: TravelStop[])",
-      "description": "Optional extra places the user can add to the route. Use 2–3 TravelStops that are NOT in the itinerary, each with its own unique id. Adding one puts a pin on TravelMap and appends it to TravelItinerary."
+      "description": "Optional extra places the user can add to the route. Use 2–3 TravelStops that are NOT in the itinerary, each with its own unique id and a short duration such as \"+1 hr\" as its time. Adding one puts a pin on TravelMap and appends it to TravelItinerary."
     }
   },
   "componentGroups": [
@@ -600,7 +584,7 @@
         "TravelSuggestions"
       ],
       "notes": [
-        "- For travel: TravelHeading, TravelProse, a three-photo TravelGallery, TravelMap and TravelItinerary sharing identical TravelStop refs, then TravelSuggestions with 2–3 extra places not in the itinerary (each its own TravelStop with a unique id), followed by transport advice. Card accepts all display components. Use image_search once with queries for the destination photos and stops, and copy returned Image URLs exactly into TravelImage.src and TravelStop.imageUrl. If no image is returned, leave src empty and use wikiTitle. Finish with a Customize your route Form using the standard form components and an @ToAssistant primary action. Read the submitted form values when rebuilding the route."
+        "- For sightseeing and travel: TravelHeading (title), TravelProse, a three-photo TravelGallery, TravelMap and TravelItinerary sharing the same TravelStop refs, TravelSuggestions with 2–3 extra places not in the itinerary, transport advice in TravelProse, then the customize Form. Prefer a natural editorial response without nested cards, duplicate titles or decorative badges."
       ]
     }
   ],
@@ -860,18 +844,6 @@
       "VisualCardBlock": {
         "$ref": "#/$defs/VisualCardBlock"
       },
-      "RouteMap": {
-        "$ref": "#/$defs/RouteMap"
-      },
-      "RouteStop": {
-        "$ref": "#/$defs/RouteStop"
-      },
-      "RouteStops": {
-        "$ref": "#/$defs/RouteStops"
-      },
-      "RouteSuggestions": {
-        "$ref": "#/$defs/RouteSuggestions"
-      },
       "TravelHeading": {
         "$ref": "#/$defs/TravelHeading"
       },
@@ -985,10 +957,6 @@
       "CompositeCardBlock",
       "VisualCardItem",
       "VisualCardBlock",
-      "RouteMap",
-      "RouteStop",
-      "RouteStops",
-      "RouteSuggestions",
       "TravelHeading",
       "TravelCitation",
       "TravelProse",
@@ -1121,18 +1089,6 @@
                 },
                 {
                   "$ref": "#/$defs/Carousel"
-                },
-                {
-                  "$ref": "#/$defs/RouteMap"
-                },
-                {
-                  "$ref": "#/$defs/RouteStops"
-                },
-                {
-                  "$ref": "#/$defs/RouteSuggestions"
-                },
-                {
-                  "$ref": "#/$defs/RouteStop"
                 },
                 {
                   "$ref": "#/$defs/TravelGallery"
@@ -4901,128 +4857,6 @@
         "id": "Carousel",
         "description": "Horizontal scrollable carousel"
       },
-      "RouteMap": {
-        "type": "object",
-        "properties": {
-          "stops": {
-            "maxItems": 50,
-            "type": "array",
-            "items": {
-              "$ref": "#/$defs/RouteStop"
-            }
-          }
-        },
-        "required": [
-          "stops"
-        ],
-        "additionalProperties": false,
-        "id": "RouteMap",
-        "description": "Interactive map that plots RouteStop items in visiting order with a street-route overview. Always reuse the SAME RouteStop references in RouteStops below it."
-      },
-      "RouteStop": {
-        "type": "object",
-        "properties": {
-          "name": {
-            "type": "string",
-            "minLength": 1,
-            "maxLength": 160
-          },
-          "wikiTitle": {
-            "type": "string",
-            "maxLength": 200
-          },
-          "lat": {
-            "type": "number",
-            "minimum": -90,
-            "maximum": 90
-          },
-          "lng": {
-            "type": "number",
-            "minimum": -180,
-            "maximum": 180
-          },
-          "time": {
-            "type": "string",
-            "maxLength": 120
-          },
-          "story": {
-            "type": "string",
-            "maxLength": 1200
-          },
-          "beforeYouGo": {
-            "type": "string",
-            "maxLength": 600
-          },
-          "photos": {
-            "maxItems": 3,
-            "type": "array",
-            "items": {
-              "type": "string"
-            }
-          },
-          "category": {
-            "type": "string",
-            "maxLength": 60
-          },
-          "id": {
-            "type": "string",
-            "maxLength": 120
-          }
-        },
-        "required": [
-          "name",
-          "wikiTitle",
-          "lat",
-          "lng",
-          "time",
-          "story",
-          "beforeYouGo"
-        ],
-        "additionalProperties": false,
-        "id": "RouteStop",
-        "description": "One stop on a route. wikiTitle is the exact English Wikipedia article title (used to load real photos). lat/lng are decimal coordinates. time e.g. '9:00 · 1 hr'. story: 1-2 sentences of history. beforeYouGo: one practical tip. Optional category groups the map, e.g. 'Landmarks', 'Museums' or 'Neighborhoods'. Optional id distinguishes repeated visits or stops with identical names in a route."
-      },
-      "RouteStops": {
-        "type": "object",
-        "properties": {
-          "stops": {
-            "maxItems": 50,
-            "type": "array",
-            "items": {
-              "$ref": "#/$defs/RouteStop"
-            }
-          }
-        },
-        "required": [
-          "stops"
-        ],
-        "additionalProperties": false,
-        "id": "RouteStops",
-        "description": "Photo cards for each RouteStop (real photos, story, tips, remove-from-route toggle)."
-      },
-      "RouteSuggestions": {
-        "type": "object",
-        "properties": {
-          "title": {
-            "type": "string",
-            "maxLength": 160
-          },
-          "stops": {
-            "maxItems": 12,
-            "type": "array",
-            "items": {
-              "$ref": "#/$defs/RouteStop"
-            }
-          }
-        },
-        "required": [
-          "title",
-          "stops"
-        ],
-        "additionalProperties": false,
-        "id": "RouteSuggestions",
-        "description": "Optional extra stops the user can add to the route with one tap (adds a pin to RouteMap and a card to RouteStops). Use 2 stops that are NOT already in the route."
-      },
       "TravelGallery": {
         "type": "object",
         "properties": {
@@ -5222,7 +5056,7 @@
         ],
         "additionalProperties": false,
         "id": "TravelSuggestions",
-        "description": "Optional extra places the user can add to the route. Use 2–3 TravelStops that are NOT in the itinerary, each with its own unique id. Adding one puts a pin on TravelMap and appends it to TravelItinerary."
+        "description": "Optional extra places the user can add to the route. Use 2–3 TravelStops that are NOT in the itinerary, each with its own unique id and a short duration such as \"+1 hr\" as its time. Adding one puts a pin on TravelMap and appends it to TravelItinerary."
       },
       "TravelMap": {
         "type": "object",

@@ -1,7 +1,7 @@
-import type { Theme } from "@openuidev/react-ui";
+import { createTheme } from "@openuidev/react-ui";
 
 // Shared palette and typography for the built-in shell and generated responses.
-export const responseTheme = {
+export const responseTheme = createTheme({
   "background": "#ffffff",
   "foreground": "#ffffff",
   "popoverBackground": "#ffffff",
@@ -112,4 +112,4 @@ export const responseTheme = {
   "shadow3xl": "0 16px 48px rgb(0 0 0 / 12%)",
   "chatUserResponseBg": "#f4f4f4",
   "chatUserResponseText": "#0d0d0d"
-} satisfies Theme;
+});

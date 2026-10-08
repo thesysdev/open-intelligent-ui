@@ -1,15 +1,17 @@
-/* OpenAI-inspired response styling. Shell/navigation/composer are deliberately outside this scope. */
+/* OpenAI-inspired response styling. Shell/navigation/composer are deliberately outside this scope.
+   Colors, fonts, radii and shadows come from the theme tokens in response-theme.ts;
+   the --iui-* names below alias them, and only values with no token are defined here. */
 .openui-response {
-  --iui-font: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-  --iui-canvas: #ffffff;
-  --iui-surface: #f7f7f8;
-  --iui-surface-hover: #eeeeef;
-  --iui-ink: #0d0d0d;
-  --iui-muted: #676767;
-  --iui-faint: #8f8f8f;
-  --iui-border: #e7e7e7;
-  --iui-border-strong: #cecece;
-  --iui-radius: 16px;
+  --iui-font: var(--openui-font-body);
+  --iui-canvas: var(--openui-background);
+  --iui-surface: var(--openui-sunk);
+  --iui-surface-hover: var(--openui-highlight-strong);
+  --iui-ink: var(--openui-text-neutral-primary);
+  --iui-muted: var(--openui-text-neutral-secondary);
+  --iui-faint: var(--openui-text-neutral-tertiary);
+  --iui-border: var(--openui-border-default);
+  --iui-border-strong: var(--openui-border-interactive);
+  --iui-radius: var(--openui-radius-3xl);
   --iui-control-gap: 8px;
   --iui-label-gap: 12px;
   --iui-field-gap: 24px;
@@ -20,7 +22,7 @@
   --iui-focus: #0285ff;
   --iui-blue: #0285ff;
   --iui-green: #008764;
-  --iui-shadow: 0 4px 20px rgb(0 0 0 / 6%);
+  --iui-shadow: var(--openui-shadow-xl);
   color-scheme: light;
 }
 .openui-response { font: 400 16px/1.6 var(--iui-font); -webkit-font-smoothing: antialiased; }
@@ -50,8 +52,9 @@
 .openui-response .openui-textarea { min-height: 96px; resize: vertical; }
 .openui-response .openui-input:focus, .openui-response .openui-textarea:focus, .openui-response .openui-select-trigger:focus-visible { box-shadow: 0 0 0 2px rgb(2 133 255 / 15%); outline: none; }
 .openui-response .openui-input:not(.openui-input-error):focus, .openui-response .openui-textarea:not(.openui-textarea-error):focus { border-color: var(--iui-focus); }
-.openui-response .openui-select-content, .openui-response .openui-date-picker-renderer-floating-content { border-radius: 14px; box-shadow: var(--iui-shadow); }
-.openui-response .openui-select-item { border-radius: 8px; padding-top: 9px; padding-bottom: 9px; }
+/* Menus are portalled to <body>, outside .openui-response, so these rules are not scoped to it. */
+.openui-select-content, .openui-date-picker-renderer-floating-content { border-radius: var(--openui-radius-2xl); box-shadow: var(--openui-shadow-xl); }
+.openui-select-item { border-radius: 8px; padding-top: 9px; padding-bottom: 9px; }
 .openui-response .openui-checkbox-item-root { border-radius: 5px; }
 /* Shared range geometry: 24px pill track, 18px thumb, 40px interaction area.
    Native experience controls and the original OpenUI/Radix slider use the same tokens. */

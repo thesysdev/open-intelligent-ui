@@ -1,3 +1,4 @@
+/* Response container rendered by the Card root (src/lib/route/root.tsx). */
 .rt-root {
   display: flex;
   flex-direction: column;
@@ -9,108 +10,6 @@
   font: 400 16px/1.6 var(--iui-font, system-ui);
 }
 
-.rt-map-wrap {
-  position: relative;
-  border: 1px solid var(--iui-border, #e7e7e7);
-  border-radius: 18px;
-  overflow: hidden;
-  isolation: isolate;
-  transition: height .2s ease;
-}
-.rt-map { position: absolute; inset: 0; background: #e9eef0; }
-.rt-chip {
-  position: absolute;
-  top: 12px;
-  left: 12px;
-  z-index: 500;
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  min-height: 32px;
-  padding: 6px 12px;
-  border: 1px solid rgb(0 0 0 / 6%);
-  border-radius: 999px;
-  background: #fff;
-  color: #0d0d0d;
-  box-shadow: 0 2px 8px rgb(0 0 0 / 8%);
-  font: 500 12px/1.4 var(--iui-font, system-ui);
-}
-.rt-expand { left: auto; right: 12px; }
-.rt-expand:hover { background: #f7f7f8; }
-.rt-expand svg { width: 14px; height: 14px; }
-.rt-group-filter { padding: 0; }
-.rt-group-filter select { appearance: none; background: transparent; border: 0; border-radius: 999px; max-width: 200px; padding: 7px 29px 7px 12px; font: inherit; cursor: pointer; }
-.rt-group-filter > svg { position: absolute; right: 10px; width: 12px; height: 12px; pointer-events: none; }
-.rt-pin {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 28px;
-  height: 28px;
-  border: 2px solid #fff;
-  border-radius: 50%;
-  background: #0d0d0d;
-  color: #fff;
-  box-shadow: 0 2px 5px rgb(0 0 0 / 18%);
-  font: 600 12px/1 var(--iui-font, system-ui);
-}
-.rt-pin-off { background: #a3a3a3; }
-.rt-pin-new { background: #0285ff; animation: rt-pop .35s ease-out; }
-.rt-pin-label { position: absolute; left: 34px; top: 1px; white-space: nowrap; color: #fff; background: #0285ff; border-radius: 999px; padding: 6px 10px; font: 500 12px/1.4 var(--iui-font, system-ui); box-shadow: 0 2px 6px rgb(0 0 0 / 12%); }
-.rt-chip-count { animation: rt-fade .2s ease; }
-
-.rt-list { display: flex; flex-direction: column; gap: 22px; }
-.rt-card {
-  padding: 16px;
-  border: 1px solid var(--iui-border, #e7e7e7);
-  border-radius: 18px;
-  background: var(--iui-canvas, #fff);
-  transition: border-color .18s ease, background .18s ease;
-  scroll-margin-block: 80px;
-}
-.rt-card-new { border-color: #c8e4ff; animation: rt-fade .35s ease; }
-.rt-removed { background: var(--iui-surface, #f7f7f8); }
-.rt-removed .rt-photos, .rt-removed .rt-title, .rt-removed .rt-time, .rt-removed .rt-h, .rt-removed p { opacity: .5; }
-.rt-photos { display: grid; gap: 8px; margin-bottom: 14px; overflow: hidden; border-radius: 0; }
-.rt-photos img, .rt-photo-skel { width: 100%; height: 100%; min-width: 0; aspect-ratio: 1; max-height: 240px; object-fit: cover; border-radius: 14px; background: #f1f1f1; }
-.rt-photos img { animation: rt-fade .25s ease; }
-.rt-photo-skel { animation: rt-pulse 1.2s infinite ease-in-out; }
-.rt-photo-empty { height: 130px; display: flex; flex-direction: column; justify-content: center; align-items: center; gap: 8px; background: var(--iui-surface, #f7f7f8); color: var(--iui-muted, #676767); font-size: 12px; }
-.rt-photo-empty svg { width: 26px; height: 26px; stroke-width: 1.3; }
-.rt-title { display: flex; align-items: center; gap: 8px; font-weight: 500; font-size: 17px; line-height: 1.4; letter-spacing: -.15px; }
-.rt-num { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); }
-.rt-time { display: flex; align-items: center; gap: 4px; color: var(--iui-muted, #676767); font-size: 12px; margin: 5px 0 14px; }
-.rt-time svg { width: 14px; height: 14px; }
-.rt-h { margin-top: 14px; font-size: 14px; font-weight: 500; }
-.rt-card p { margin: 4px 0 0; color: #404040; font-size: 14px; line-height: 1.65; }
-.rt-btn { display: flex; align-items: center; justify-content: center; width: 100%; min-height: 38px; margin-top: 18px; padding: 8px 16px; border: 1px solid var(--iui-border, #e7e7e7); border-radius: 999px; background: var(--iui-canvas, #fff); font-size: 13px; font-weight: 500; line-height: 1.4; transition: background .15s ease; }
-.rt-btn:hover { background: var(--iui-surface, #f7f7f8); }
-.rt-badge { margin-left: auto; padding: 3px 8px; border-radius: 999px; background: #edf5ff; color: #0068bc; font-size: 11px; font-weight: 500; letter-spacing: 0; }
-.rt-sugg-wrap { display: flex; flex-direction: column; gap: 12px; }
-.rt-sugg-title { margin: 0; font-size: 17px; font-weight: 600; letter-spacing: -.2px; }
-.rt-sugg-row { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; }
-.rt-sugg { display: flex; flex-direction: column; min-width: 0; padding: 12px; border: 1px solid var(--iui-border, #e7e7e7); border-radius: 16px; background: var(--iui-canvas, #fff); }
-.rt-sugg .rt-photos { margin-bottom: 12px; border-radius: 0; }
-.rt-sugg .rt-photos img { border-radius: 9px; }
-.rt-sugg .rt-photos img, .rt-sugg .rt-photo-skel { aspect-ratio: 3/2; }
-.rt-sugg-name { font-size: 15px; font-weight: 500; line-height: 1.4; }
-.rt-sugg-time { margin: 4px 0 12px; color: var(--iui-muted, #676767); font-size: 12px; }
-.rt-add { margin-top: auto; background: var(--iui-ink, #0d0d0d); border-color: transparent; color: var(--iui-canvas, #fff); }
-.rt-add:hover:not(:disabled) { background: #2f2f2f; }
-.rt-added, .rt-added:hover { background: #edf9f2; color: #00805d; border-color: transparent; cursor: default; }
-
-@keyframes rt-pulse { 50% { opacity: .5; } }
-@keyframes rt-fade { from { opacity: 0; } to { opacity: 1; } }
-@keyframes rt-pop { 0% { transform: scale(.7); } 70% { transform: scale(1.08); } 100% { transform: scale(1); } }
-
 @media (max-width: 600px) {
   .rt-root { gap: 20px; }
-  .rt-card { padding: 12px; border-radius: 16px; }
-  .rt-title { font-size: 16px; }
-  .rt-photos { gap: 4px; margin-bottom: 13px; }
-  .rt-photos img, .rt-photo-skel { aspect-ratio: 1; }
-  .rt-sugg-row { gap: 10px; }
-  .rt-sugg { padding: 10px; border-radius: 14px; }
-  .rt-sugg .rt-btn { padding-inline: 8px; font-size: 12px; }
 }
-@media (max-width: 360px) { .rt-sugg-row { grid-template-columns: 1fr; } }

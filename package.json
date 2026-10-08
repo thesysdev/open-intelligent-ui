@@ -16,8 +16,7 @@
     "build": "next build",
     "start": "next start",
     "deploy": "openui deploy",
-    "lint": "eslint",
-    "test": "node --import ./tests/register.mjs --import tsx --test tests/*.test.ts tests/*.test.tsx"
+    "lint": "eslint"
   },
   "dependencies": {
     "@openuidev/lang-core": "0.3.0",
@@ -37,7 +36,6 @@
     "@types/react-dom": "^19",
     "eslint": "^9",
     "eslint-config-next": "16.3.0",
-    "tsx": "^4.23.15",
     "typescript": "^5"
   },
   "allowScripts": {

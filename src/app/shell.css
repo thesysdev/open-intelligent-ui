@@ -1,4 +1,5 @@
 /* Presentation only: keep AgentInterface's layout, state and responsive behavior. */
+/* Colors that have a theme token use it (see src/lib/response-theme.ts); the remaining greys are shell-only. */
 .chat-shell {
   width: 100%;
   height: 100dvh;
@@ -89,8 +90,8 @@
   padding: 11px 12px 11px 22px;
   border: 1px solid #e3e3e3;
   border-radius: 30px;
-  background: #fff;
-  box-shadow: 0 2px 8px rgb(0 0 0 / 4%);
+  background: var(--openui-foreground);
+  box-shadow: var(--openui-shadow-l);
   transition: border-color 150ms ease, box-shadow 150ms ease;
 }
 
@@ -123,18 +124,18 @@
   min-width: 36px;
   border: 0;
   border-radius: 50%;
-  color: #fff;
-  background: #0d0d0d;
+  color: var(--openui-text-accent-primary);
+  background: var(--openui-interactive-accent-default);
 }
 
 .chat-shell .openui-agent-desktop-welcome-composer__submit-button:not(:disabled):hover,
 .chat-shell .openui-agent-thread-composer__submit-button:not(:disabled):hover {
-  background: #2f2f2f;
+  background: var(--openui-interactive-accent-hover);
 }
 
 .chat-shell .openui-agent-desktop-welcome-composer__submit-button:disabled,
 .chat-shell .openui-agent-thread-composer__submit-button:disabled {
-  color: #fff;
+  color: var(--openui-text-accent-primary);
   background: #d9d9d9;
 }
 
@@ -147,14 +148,14 @@
   padding: 9px 16px;
   border-color: #e5e5e5;
   border-radius: 999px;
-  color: #676767;
+  color: var(--openui-text-neutral-secondary);
   font-size: 14px;
   line-height: 20px;
 }
 
 .chat-shell .openui-agent-conversation-starter-item-short:not(:disabled):hover {
   border-color: #d5d5d5;
-  color: #0d0d0d;
+  color: var(--openui-text-neutral-primary);
   background: #f7f7f7;
 }
 
