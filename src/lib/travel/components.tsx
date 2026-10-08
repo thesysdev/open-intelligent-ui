@@ -88,7 +88,7 @@ export const TravelProse = defineComponent({
 
 export type ImageData = { src: string; alt: string; link?: string; wikiTitle?: string; focalX?: number };
 
-function Photo({ photo, bookmark = false }: { photo: Partial<ImageData>; bookmark?: boolean }) {
+function Photo({ photo, bookmark = false, hideIfMissing = false }: { photo: Partial<ImageData>; bookmark?: boolean; hideIfMissing?: boolean }) {
   const [saved, setSaved] = useState(false);
   const [failedUrls, setFailedUrls] = useState<string[]>([]);
   const [wikiImages, setWikiImages] = useState<{ title: string; urls: string[] } | null>(null);
@@ -106,6 +106,9 @@ function Photo({ photo, bookmark = false }: { photo: Partial<ImageData>; bookmar
   // Try the supplied image, then each Wikipedia photo in turn.
   const src = [primary, ...(wikiImages && wikiImages.title === photo.wikiTitle ? wikiImages.urls : [])]
     .map((url) => safeUrl(url, true)).find((url) => url && !failedUrls.includes(url));
+  // Nothing left to try: no working URL and Wikipedia already answered (or there is no title).
+  const exhausted = !src && !primaryOk && (!photo.wikiTitle || wikiImages?.title === photo.wikiTitle);
+  if (exhausted && hideIfMissing) return null;
   const href = safeUrl(photo.link);
   const image = src
     ? <img src={src} referrerPolicy="no-referrer" style={{ objectPosition: `${photo.focalX ?? 50}% 50%` }} alt={photo.alt ?? "Destination photograph"} onError={() => setFailedUrls((previous) => previous.includes(src) ? previous : [...previous, src])} />
@@ -129,10 +132,12 @@ export const TravelGallery = defineComponent({
   name: "TravelGallery",
   props: z.object({ images: z.array(TravelImage.ref).max(6) }),
   description: "A row of destination photographs. Usually three images, with consistent crops and working local save toggles.",
-  component: ({ props }) => {
+  component: function TravelGalleryComponent({ props }) {
+    // Keep placeholders while URLs are still streaming in.
+    const streaming = useIsStreaming();
     const photos = nodeProps<ImageData>(props.images);
     return <div className="tv-gallery">
-      {photos.map((photo, i) => <Photo key={i} photo={photo} bookmark />)}
+      {photos.map((photo, i) => <Photo key={i} photo={photo} bookmark hideIfMissing={!streaming} />)}
     </div>;
   },
 });

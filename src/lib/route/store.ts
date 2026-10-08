@@ -85,9 +85,15 @@ const wikiCache = new Map<string, Promise<WikiInfo>>();
 export function fetchWiki(title: string): Promise<WikiInfo> {
   if (!wikiCache.has(title)) {
     const t = encodeURIComponent(title.replace(/ /g, "_"));
+    // A missing article is a real answer; any other failure is retried next time.
+    const get = (url: string) => fetch(url).then((r) => {
+      if (r.status === 404) return {};
+      if (!r.ok) throw new Error(`Wikipedia ${r.status}`);
+      return r.json();
+    });
     const p = Promise.all([
-      fetch(`https://en.wikipedia.org/api/rest_v1/page/summary/${t}`).then((r) => (r.ok ? r.json() : {})),
-      fetch(`https://en.wikipedia.org/api/rest_v1/page/media-list/${t}`).then((r) => (r.ok ? r.json() : {})),
+      get(`https://en.wikipedia.org/api/rest_v1/page/summary/${t}`),
+      get(`https://en.wikipedia.org/api/rest_v1/page/media-list/${t}`),
     ])
       .then(([s, m]: [WikiSummary, WikiMedia]) => {
         const photos: string[] = [];
@@ -103,7 +109,10 @@ export function fetchWiki(title: string): Promise<WikiInfo> {
         }
         return { lat: s?.coordinates?.lat, lng: s?.coordinates?.lon, photos };
       })
-      .catch(() => ({ photos: [] }));
+      .catch(() => {
+        wikiCache.delete(title);
+        return { photos: [] };
+      });
     wikiCache.set(title, p);
   }
   return wikiCache.get(title)!;

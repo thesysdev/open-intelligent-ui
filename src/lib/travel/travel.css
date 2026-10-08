@@ -18,7 +18,9 @@
 .tv-citation > span:last-child { overflow: hidden; text-overflow: ellipsis; }
 .tv-citation > img { width: 12px; height: 12px; border-radius: 50%; object-fit: contain; }
 .tv-citation:hover { background: #e9e9e9; color: #444; }
-.tv-gallery { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; min-width: 0; }
+/* Flex rather than a fixed 3-column grid, so a photo with no usable image can drop out without leaving a gap. */
+.tv-gallery { display: flex; gap: 8px; min-width: 0; }
+.tv-gallery > .tv-photo { flex: 1 1 0; }
 .tv-photo { position: relative; min-width: 0; overflow: hidden; border-radius: 12px; background: #edf5f8; }
 .tv-photo > a { display: block; width: 100%; height: 100%; }
 .tv-photo img { display: block; width: 100%; height: 100%; object-fit: cover; }
