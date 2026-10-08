@@ -6,11 +6,13 @@ import type { ReasoningEffort } from "openai/resources/shared";
 import type { ResponseInputItem, Tool } from "openai/resources/responses/responses";
 
 // OpenUI Gateway speaks the Responses protocol, so the stock OpenAI SDK works
-// against it. The key stays on the server.
-const client = new OpenAI({
-  apiKey: process.env.THESYS_API_KEY,
-  baseURL: "https://api.thesys.dev/v1/embed",
-});
+// against it. The key stays on the server. Created on first request so the app
+// builds without THESYS_API_KEY set.
+let client: OpenAI | undefined;
+function gateway() {
+  client ??= new OpenAI({ apiKey: process.env.THESYS_API_KEY, baseURL: "https://api.thesys.dev/v1/embed" });
+  return client;
+}
 
 // cloud: true lets Gateway build the prompt from this library spec and
 // validate/correct the OpenUI Lang it streams back.
@@ -68,9 +70,13 @@ export async function POST(req: Request) {
   }
   if (!input) return Response.json({ error: { message: "messages must be a non-empty array" } }, { status: 400 });
 
+  if (!process.env.THESYS_API_KEY) {
+    return Response.json({ error: { message: "THESYS_API_KEY is not set. Add it to .env.local." } }, { status: 500 });
+  }
+
   let stream: AsyncIterable<unknown>;
   try {
-    stream = await client.responses.create(
+    stream = await gateway().responses.create(
       {
         model: process.env.THESYS_MODEL ?? "openai/gpt-5.5",
         instructions,

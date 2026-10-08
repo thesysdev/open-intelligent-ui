@@ -141,7 +141,6 @@ export function TravelMapView({ stops, path, streaming = false }: { stops: StopD
       anchored.current = true;
     }
     // Object identities change each token. Reconcile completed primitive values only.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [lib, ready, stopSignature, group, selected, version]);
 
   // Once streaming ends (or the filter changes), fly to fit the stops.
@@ -182,7 +181,6 @@ export function TravelMapView({ stops, path, streaming = false }: { stops: StopD
       else lineDrawn.current = true;
     });
     return () => { cancelAnimationFrame(frame); setLine(instance, linePoints.current); };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [ready, framedKey, routingKey, pathSignature, streetPoints, suppliedPath, streaming]);
 
   useEffect(() => {
