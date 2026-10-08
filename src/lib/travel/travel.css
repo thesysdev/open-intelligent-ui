@@ -1,0 +1,112 @@
+.rt-root:has(.tv-heading, .tv-prose, .tv-gallery, .tv-itinerary, .tv-map-slot) {
+  gap: 16px;
+  background: transparent;
+  color: #111;
+  font-family: var(--iui-font, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif);
+  font-size: 16px;
+  line-height: 26px;
+}
+.tv-heading, .tv-prose, .tv-photo, .tv-stop-title, .tv-stop-description { margin: 0; }
+.tv-heading { color: inherit; letter-spacing: -.25px; font-weight: 600; }
+.tv-title { font-size: 20px; line-height: 28px; }
+.tv-section-heading { font-size: 18px; line-height: 28px; }
+.tv-title + .tv-prose { margin-top: -8px; }
+.tv-prose { font-size: 16px; line-height: 26px; overflow-wrap: anywhere; }
+.tv-prose strong, .tv-stop-description strong { font-weight: 600; }
+.tv-prose > a:not(.tv-citation), .tv-stop-description > a:not(.tv-citation) { color: inherit; text-decoration: none; border-bottom: 1px dotted #a6a6a6; }
+.tv-citation { display: inline-flex; align-items: center; gap: 5px; max-width: 168px; padding: 2px 7px; margin-left: 5px; border-radius: 999px; vertical-align: baseline; background: #f2f2f2; color: #777; text-decoration: none; font-size: 10px; font-weight: 400; line-height: 16px; white-space: nowrap; }
+.tv-citation > span:last-child { overflow: hidden; text-overflow: ellipsis; }
+.tv-citation > img { width: 12px; height: 12px; border-radius: 50%; object-fit: contain; }
+.tv-citation:hover { background: #e9e9e9; color: #444; }
+.tv-gallery { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; min-width: 0; }
+.tv-photo { position: relative; min-width: 0; overflow: hidden; border-radius: 12px; background: #edf5f8; }
+.tv-photo > a { display: block; width: 100%; height: 100%; }
+.tv-photo img { display: block; width: 100%; height: 100%; object-fit: cover; }
+.tv-gallery .tv-photo { aspect-ratio: 1.25; }
+.tv-photo-placeholder { display: flex; width: 100%; height: 100%; min-height: 48px; align-items: center; justify-content: center; color: #c4d5de; background: #edf5f8; }
+.tv-photo-placeholder svg { width: 26px; height: 26px; }
+.tv-bookmark { position: absolute; top: 9px; right: 9px; display: grid; place-items: center; width: 34px; height: 34px; padding: 7px; border: 0; border-radius: 50%; background: rgb(0 0 0 / 9%); color: rgb(255 255 255 / 80%); cursor: pointer; backdrop-filter: blur(12px); }
+.tv-bookmark svg { width: 20px; height: 20px; }
+.tv-bookmark:hover, .tv-bookmark.is-saved { color: #fff; background: rgb(0 0 0 / 28%); }
+.tv-itinerary { display: flex; flex-direction: column; gap: 16px; }
+.tv-stop-list { display: flex; flex-direction: column; }
+.tv-stop { display: grid; grid-template-columns: 114px minmax(0, 1fr); align-items: start; gap: 12px; padding: 20px 0; border-bottom: 1px solid #ededed; scroll-margin-block: 104px; transition: background .18s ease; }
+.tv-stop:first-child { padding-top: 0; }
+.tv-stop:last-child { padding-bottom: 0; border-bottom: 0; }
+.tv-stop > .tv-photo { width: 114px; height: 114px; }
+.tv-stop-content { min-width: 0; }
+.tv-stop-time { margin-bottom: 4px; color: #777; font-size: 12px; font-weight: 500; line-height: 16px; }
+.tv-stop-title { margin-bottom: 5px; font-size: 16px; font-weight: 600; line-height: 22px; letter-spacing: -.12px; }
+.tv-stop-title a, .tv-stop-title button { display: inline; padding: 0; color: inherit; background: none; border: 0; border-bottom: 1px dotted #aaa; text-decoration: none; font: inherit; text-align: left; cursor: pointer; }
+.tv-stop-title a:hover, .tv-stop-title button:hover { border-bottom-style: solid; }
+.tv-stop-description { font-size: 16px; line-height: 26px; }
+.tv-stop.is-selected { background: #f1f6fa; outline: 8px solid #f1f6fa; border-radius: 6px; }
+.tv-map-slot { margin-top: 24px; min-height: 400px; scroll-margin-top: 96px; }
+.tv-map-wrap { position: relative; height: 400px; overflow: hidden; border-radius: 20px; background: #a9dff0; isolation: isolate; }
+.tv-map-surface { position: absolute; inset: 0; z-index: 0; background: #a9dff0; }
+.tv-map-wrap.is-expanded { position: fixed; inset: 24px; height: auto; z-index: 1500; outline: 24px solid rgb(255 255 255 / 90%); box-shadow: 0 12px 64px rgb(0 0 0 / 18%); }
+.tv-map-top-left { position: absolute; z-index: 500; top: 12px; left: 12px; display: flex; align-items: center; gap: 8px; }
+.tv-map-pill { display: inline-flex; align-items: center; gap: 6px; min-height: 34px; padding: 6px 12px; color: #222; background: #fff; border: 1px solid rgb(0 0 0 / 8%); border-radius: 999px; box-shadow: 0 1px 3px rgb(0 0 0 / 14%); font-family: inherit; font-size: 12px; line-height: 18px; font-weight: 500; cursor: pointer; }
+.tv-map-filter { position: relative; padding: 0; }
+.tv-map-filter select { appearance: none; border: 0; border-radius: 999px; padding: 8px 30px 8px 12px; max-width: 180px; background: transparent; color: inherit; font: inherit; cursor: pointer; }
+.tv-map-filter > svg { position: absolute; right: 10px; width: 14px; height: 14px; pointer-events: none; }
+.tv-map-recenter { width: 34px; height: 34px; padding: 6px; justify-content: center; }
+.tv-map-recenter svg { width: 22px; height: 22px; }
+.tv-map-info { display: grid; place-items: center; width: 22px; height: 22px; padding: 3px; border-radius: 7px; color: #666; background: #fff; border: 1px solid #ddd; box-shadow: 0 1px 3px rgb(0 0 0 / 10%); cursor: pointer; }
+.tv-map-info svg { width: 16px; height: 16px; }
+.tv-map-expand { position: absolute; top: 12px; right: 12px; z-index: 500; min-height: 28px; padding: 4px 10px; }
+.tv-map-expand svg { width: 14px; height: 14px; }
+.tv-map-pill:hover, .tv-map-info:hover { background: #f9f9f9; }
+.tv-map-marker { background: transparent; border: 0; }
+.tv-map-marker-content { position: relative; display: flex; width: 34px; flex-direction: column; align-items: center; }
+.tv-map-pin { display: flex; align-items: center; justify-content: center; width: 34px; height: 34px; flex-shrink: 0; background: #fff; border: 1px solid #e2e2e2; border-radius: 50%; box-shadow: 0 1px 4px rgb(0 0 0 / 20%); font-size: 18px; line-height: 1; }
+.tv-map-pin.is-selected { outline: 3px solid #3985f5; }
+.tv-map-label { display: block; max-width: 160px; margin-top: 3px; color: #2c2c2c; font-family: Arial, Helvetica, sans-serif; font-size: 12px; font-weight: 600; line-height: 15px; text-align: center; white-space: nowrap; text-shadow: 0 1px 2px white, 0 -1px 2px white, 1px 0 2px white, -1px 0 2px white; }
+.tv-map-note, .tv-map-error { position: absolute; top: 56px; left: 12px; z-index: 500; max-width: 275px; padding: 12px; border: 1px solid #e7e7e7; border-radius: 12px; color: #555; background: #fff; box-shadow: 0 3px 16px rgb(0 0 0 / 12%); font-size: 12px; line-height: 18px; }
+.tv-map-error { top: auto; bottom: 28px; }
+.tv-map-overview { position: absolute; bottom: 22px; left: 12px; z-index: 500; padding: 2px 7px; border-radius: 6px; background: rgb(255 255 255 / 92%); color: #666; font-size: 10px; line-height: 16px; }
+.tv-map-status { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0; }
+.tv-map-surface .leaflet-control-attribution { max-width: calc(100% - 50px); padding: 1px 4px; background: rgb(255 255 255 / 90%); color: #666; font-size: 8px; line-height: 10px; }
+.tv-map-surface .leaflet-control-attribution a { color: #555; }
+.tv-map-surface .leaflet-control-zoom { border: 1px solid rgb(0 0 0 / 10%); border-radius: 10px; overflow: hidden; box-shadow: 0 1px 4px rgb(0 0 0 / 12%); opacity: 0; transition: opacity .15s ease; }
+.tv-map-wrap:hover .leaflet-control-zoom, .tv-map-wrap:focus-within .leaflet-control-zoom { opacity: 1; }
+.tv-map-surface .leaflet-control-zoom a { width: 28px; height: 28px; color: #555; font-size: 20px; line-height: 28px; }
+.tv-map-wrap :focus-visible, .tv-bookmark:focus-visible, .tv-stop-title button:focus-visible, .tv-stop-title a:focus-visible, .tv-citation:focus-visible { outline: 2px solid #3985f5; outline-offset: 3px; }
+@media (max-width: 520px) {
+  .tv-stop { grid-template-columns: 84px minmax(0, 1fr); gap: 12px; padding-block: 18px; }
+  .tv-stop > .tv-photo { width: 84px; height: 84px; }
+  .tv-stop-description { font-size: 14px; line-height: 22px; }
+  .tv-map-wrap, .tv-map-slot { min-height: 320px; height: 320px; }
+  .tv-map-wrap.is-expanded { height: auto; inset: 12px; outline-width: 12px; }
+  .tv-map-label { max-width: 120px; overflow: hidden; text-overflow: ellipsis; font-size: 10px; }
+  .tv-bookmark { width: 28px; height: 28px; padding: 5px; top: 6px; right: 6px; }
+}
+@media (prefers-reduced-motion: reduce) { .tv-stop { transition: none; } }
+
+.tv-sources { display: flex; flex-wrap: wrap; gap: 8px; font-size: 12px; line-height: 18px; }
+.tv-sources a { color: #666; border: 1px solid #eee; border-radius: 999px; padding: 4px 10px; }
+
+@keyframes tv-word-in { from { opacity: 0; filter: blur(2px); } to { opacity: 1; filter: blur(0); } }
+.tv-stream-word { animation: tv-word-in 320ms ease-out both; animation-delay: var(--word-delay, 0ms); }
+@keyframes tv-pin-in { from { opacity: 0; transform: scale(.75); } to { opacity: 1; transform: scale(1); } }
+.tv-map-marker-content { animation: tv-pin-in 260ms cubic-bezier(.2,.7,.3,1) both; transform-origin: 50% 17px; }
+.tv-photo img { animation: tv-word-in 300ms ease-out both; }
+@media (prefers-reduced-motion: reduce) { .tv-stream-word, .tv-map-marker-content, .tv-photo img { animation: none; } }
+
+/* Response typography is independent of the surrounding chat shell. */
+.openui-response:has(.tv-heading) { font-size: 18px; line-height: 28px; }
+.openui-response .tv-prose, .openui-response .tv-stop-description { font-size: 18px; line-height: 28px; }
+.openui-response .tv-title { font-size: 21px; line-height: 30px; }
+.openui-response .tv-section-heading { font-size: 20px; line-height: 28px; }
+.openui-response .tv-stop-title { font-size: 18px; line-height: 26px; }
+.openui-response .tv-stop-time { font-size: 14px; line-height: 20px; }
+.openui-response .tv-stop { grid-template-columns: 124px minmax(0, 1fr); gap: 14px; padding-block: 22px; }
+.openui-response .tv-stop:first-child { padding-top: 0; }
+.openui-response .tv-stop > .tv-photo { width: 124px; height: 124px; }
+@media (max-width: 520px) {
+  .openui-response .tv-prose, .openui-response .tv-stop-description { font-size: 16px; line-height: 25px; }
+  .openui-response .tv-stop { grid-template-columns: 84px minmax(0, 1fr); gap: 12px; }
+  .openui-response .tv-stop > .tv-photo { width: 84px; height: 84px; }
+  .openui-response .tv-stop-title { font-size: 16px; line-height: 23px; }
+  .openui-response .tv-stop-time { font-size: 12px; line-height: 18px; }
+}
