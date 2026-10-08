@@ -1,14 +1,9 @@
 import type { Metadata } from "next";
-import { Inter } from "next/font/google";
 import "./globals.css";
 
-const inter = Inter({
-  weight: ["400", "500", "600"],
-});
-
 export const metadata: Metadata = {
-  title: "OpenUI Self Hosted",
-  description: "Generative UI Chat with OpenAI SDK",
+  title: "OpenUI · Intelligent UI",
+  description: "Open-source interactive answers. Explore, plan, learn, and create with OpenUI.",
 };
 
 export default function RootLayout({
@@ -18,7 +13,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <body className={inter.className}>{children}</body>
+      <body>{children}</body>
     </html>
   );
 }

@@ -1,27 +1,49 @@
-# intelligent-ui
+# OpenUI sightseeing agent
 
-An [OpenUI](https://openui.com) demo that recreates the "plan a sightseeing route in San Francisco" experience. The model streams OpenUI Lang, and the app renders it with its own travel components:
+A real streaming [OpenUI](https://openui.com) agent with a ChatGPT-inspired response layout: destination photographs, an interactive map, itinerary rows, source links, and transport advice. The agent can plan for different cities; the model supplies the content and composes reusable components.
 
-- `RouteMap`: a Leaflet map with numbered pins and a walking path. It expands, and tapping a pin jumps to that stop's card.
-- `RouteStops` / `RouteStop`: photo cards with a story and a "Before you go" section, plus remove/add-back. Photos and coordinates come from the Wikipedia/Wikimedia APIs.
-- `RouteSuggestions`: suggested extra stops with "+ Add to my route". Adding one puts a new pin on the map, extends the path, updates the stop count and appends a card marked "Added".
+This focused branch keeps the restyled base component library and response-scoped route state from the Intelligent UI work. Its shell adapts the collapsed rail, shared reading column, and pill composer from [OpenUI PR #1327](https://github.com/thesysdev/openui/pull/1327) using the published `AgentInterface` API.
 
-The components live in `src/lib/route/`. They're registered in `src/lib/library.ts`, and the prompt example is in `src/lib/prompt-options.ts`.
+## Run locally
 
-## Setup
+Use Node 24 and pnpm. Create `.env.local` with your server-side provider settings:
 
-Requires Node 24 and pnpm.
+```dotenv
+OPENAI_API_KEY=your_thesys_api_key
+OPENAI_BASE_URL=https://api.thesys.dev/v1/embed
+OPENAI_MODEL=openai/gpt-5.2
+ENABLE_RECORDING_PRESET=0
+```
+
+`REASONING_EFFORT` is optional and must be supported by the selected model. Never put the API key in a `NEXT_PUBLIC_` variable.
 
 ```bash
-cp .env.example .env.local   # add your OPENAI_API_KEY
 pnpm install
 pnpm dev
 ```
 
-Open http://localhost:3000 and try: `I'm in San Francisco for a day, plan a sightseeing route for me`
+Open [localhost:3000](http://localhost:3000) and try:
 
-`REASONING_EFFORT` is optional. `low` makes the first UI appear much sooner on reasoning models. Function tools are turned off in `src/app/api/chat/route.ts`, because Chat Completions rejects them when reasoning effort is set on gpt-6-sol.
+> I'm in San Francisco for a day, plan a sightseeing route for me
 
-## Recording
+Then try another city to check that the content changes. Select a map pin, open a stop from the itinerary, filter the map, expand it, and save a gallery image. The save toggle lasts for the current rendered response.
 
-`scripts/record.mjs` is the Playwright script used for the demo video. It connects to a Chrome instance over CDP (`localhost:29229`) and runs the prompt → map → cards → add-a-stop flow at phone size.
+## Controlled comparison recording
+
+For the matching San Francisco film take, explicitly set `ENABLE_RECORDING_PRESET=1` on the server, restart it, and open [localhost:3000/?capture=sf](http://localhost:3000/?capture=sf). Submit the exact prompt above. This mode supplies the reference itinerary and image choices to the **live model**; it does not return a stored answer or replay a stream. The capture query alone cannot enable it.
+
+The capture view hides navigation and development inspection controls, keeps the real input and renderer, and uses a 691px reading column. A 969×1080 CSS viewport matches the source recording's panel proportions. The completed response shows its measured request-to-stream-completion time. A reference-conditioned film take is a controlled product demonstration, **not a model-speed benchmark**.
+
+See [the response-agent notes](docs/response-agent.md) for components, provenance, capture details, and verification steps. Reference asset URLs are recorded in [sources.json](public/recording/sf/sources.json).
+
+## Validate
+
+```bash
+pnpm generate
+pnpm test
+pnpm exec tsc --noEmit
+pnpm lint
+pnpm build
+```
+
+Tests cover response isolation, stable place IDs, duplicate suggestions, malformed requests, the server recording gate, safe links, and partial streamed content. They do not call a model provider.

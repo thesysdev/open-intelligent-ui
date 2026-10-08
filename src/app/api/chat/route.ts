@@ -1,82 +1,54 @@
 import librarySpec from "@/generated/spec.json";
 import { promptOptions } from "@/lib/prompt-options";
-import { getWeather, WEATHER_TOOL_DESCRIPTION } from "@/lib/tools/get-weather";
+import { sfRecordingContext, SF_RECORDING_PROMPT } from "@/lib/recording-context";
 import { generateSystemPrompt } from "@openuidev/lang-core";
 import OpenAI from "openai";
 import type { ChatCompletionMessageParam } from "openai/resources/chat/completions";
+import { z } from "zod/v4";
 
-const client = new OpenAI();
-
-// Each thread's turns as runTools() produced them, tool calls and results
-// included. Kept in memory: a restart or another server instance falls back
-// to the browser's copy.
-const threads = new Map<string, ChatCompletionMessageParam[]>();
-
-// The browser keeps each tool call but never receives its result, so its copy
-// of earlier turns is sent to the model as text only.
-function withoutToolCalls(messages: ChatCompletionMessageParam[]): ChatCompletionMessageParam[] {
-  return messages.flatMap((message): ChatCompletionMessageParam[] => {
-    if (message.role === "tool") return [];
-    if (message.role !== "assistant") return [message];
-    if (!message.content) return [];
-    return [{ role: "assistant", content: message.content }];
-  });
-}
+export const maxDuration = 120;
+const messageSchema = z.object({ role: z.enum(["user", "assistant"]), content: z.string().max(80_000) });
+const requestSchema = z.object({ messages: z.array(messageSchema).min(1).max(40) });
+const efforts = ["none", "minimal", "low", "medium", "high"] as const;
 
 export async function POST(req: Request) {
   try {
-    const { threadId, messages } = (await req.json()) as {
-      threadId?: string;
-      messages: ChatCompletionMessageParam[];
-    };
-    const question = messages.slice(-1);
-    const history = (threadId && threads.get(threadId)) || withoutToolCalls(messages.slice(0, -1));
-
-    // runTools() calls the model, runs the tools it asks for, sends the
-    // results back, and repeats until the model answers.
-    const runner = client.chat.completions.runTools(
-      {
-        model: process.env.OPENAI_MODEL ?? "gpt-5.2",
-        messages: [
-          {
-            role: "system",
-            content: generateSystemPrompt({
-              library: librarySpec,
-              promptOptions,
-            }),
-          },
-          ...history,
-          ...question,
-        ],
-        tools: [],
-        ...(process.env.REASONING_EFFORT ? { reasoning_effort: process.env.REASONING_EFFORT as any } : {}),
-        stream: true,
+    const parsed = requestSchema.safeParse(await req.json());
+    if (!parsed.success || parsed.data.messages.at(-1)?.role !== "user") {
+      return Response.json({ error: "Send a conversation ending with a user message." }, { status: 400 });
+    }
+    const capture = new URL(req.url).searchParams.get("capture") === "sf";
+    if (capture && process.env.ENABLE_RECORDING_PRESET !== "1") {
+      return Response.json({ error: "The optional recording preset is disabled." }, { status: 403 });
+    }
+    if (capture && parsed.data.messages.at(-1)?.content.trim() !== SF_RECORDING_PROMPT) {
+      return Response.json({ error: "This recording preset is only for the reference sightseeing prompt. Use normal chat for other requests." }, { status: 400 });
+    }
+    const configuredEffort = process.env.REASONING_EFFORT;
+    const reasoning_effort = efforts.find((value) => value === configuredEffort);
+    const messages: ChatCompletionMessageParam[] = [
+      { role: "system", content: generateSystemPrompt({ library: librarySpec, promptOptions }) + (capture ? `\n\n${sfRecordingContext}` : "") },
+      ...parsed.data.messages,
+    ];
+    // Always a real upstream request. No fixture response, replay, delay or buffering.
+    const stream = await new OpenAI().chat.completions.create({
+      model: process.env.OPENAI_MODEL ?? "gpt-5.2",
+      messages,
+      ...(reasoning_effort ? { reasoning_effort } : {}),
+      stream: true,
+    }, { signal: req.signal });
+    return new Response(stream.toReadableStream(), {
+      headers: {
+        "Content-Type": "application/x-ndjson",
+        "Cache-Control": "no-store, no-transform",
+        "X-Accel-Buffering": "no",
+        "X-OpenUI-Mode": capture ? "reference-context-live-model" : "generative",
       },
-      { signal: req.signal, maxChatCompletions: 5 }, // propagate browser aborts
-    );
-
-    const turn = [...history, ...question];
-    runner.on("message", (message) => turn.push(message));
-    runner.done().then(
-      () => {
-        if (threadId) threads.set(threadId, turn);
-      },
-      () => {},
-    );
-
-    // NDJSON stream of every completion's chunks — the client parses it with
-    // openAIReadableStreamAdapter().
-    const stream = runner.toReadableStream();
-
-    // Surface upstream failures (bad key, unknown model) as an HTTP error.
-    await Promise.race([runner.emitted("chunk"), runner.done()]);
-
-    return new Response(stream, {
-      headers: { "Content-Type": "application/x-ndjson", "Cache-Control": "no-cache" },
     });
-  } catch (err) {
-    console.error(err);
-    const message = err instanceof Error ? err.message : "Unknown error";
-    return Response.json({ error: message }, { status: 500 });
+  } catch (error) {
+    if (error instanceof SyntaxError) return Response.json({ error: "Invalid request body." }, { status: 400 });
+    // Avoid exposing provider credentials or internal request metadata to the browser.
+    console.error("Chat request failed:", error instanceof OpenAI.APIError ? error.status : "request error");
+    return Response.json({ error: "The response could not be generated. Please try again." }, { status: 502 });
   }
 }

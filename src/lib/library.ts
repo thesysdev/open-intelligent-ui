@@ -1,7 +1,7 @@
 import { createLibrary } from "@openuidev/react-lang";
 import { openuiChatLibrary } from "@openuidev/react-ui/genui-lib";
-import { RouteMap, RouteStop, RouteStops, RouteSuggestions } from "./route/components";
 import { RouteCard } from "./route/root";
+import { TravelHeading, TravelCitation, TravelProse, TravelImage, TravelGallery, TravelStop, TravelItinerary, TravelMap } from "./travel/components";
 
 export const library = createLibrary({
   root: "Card",
@@ -9,11 +9,11 @@ export const library = createLibrary({
     ...(openuiChatLibrary.componentGroups ?? []),
     {
       name: "Travel",
-      components: ["RouteMap", "RouteStops", "RouteSuggestions", "RouteStop"],
+      components: ["TravelHeading", "TravelCitation", "TravelProse", "TravelImage", "TravelGallery", "TravelStop", "TravelItinerary", "TravelMap"],
       notes: [
-        "- For itineraries, day trips or sightseeing routes: CardHeader, then RouteMap([s1, s2, ...]), then RouteStops([s1, s2, ...]) using the same stop refs, then RouteSuggestions('Add to your day', [x1, x2]) with 2 extra stops not in the route, then an optional Callout with tips.",
+        "- For travel: TravelHeading, TravelProse, a three-photo TravelGallery, TravelMap and TravelItinerary sharing identical TravelStop refs, followed by transport advice. Card accepts all display components.",
       ],
     },
   ],
-  components: Object.values({ ...openuiChatLibrary.components, Card: RouteCard, RouteMap, RouteStops, RouteSuggestions, RouteStop }),
+  components: Object.values({ ...openuiChatLibrary.components, Card: RouteCard, TravelHeading, TravelCitation, TravelProse, TravelImage, TravelGallery, TravelStop, TravelItinerary, TravelMap }),
 });

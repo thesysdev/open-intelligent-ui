@@ -1,0 +1,146 @@
+/* Adapted from thesysdev/openui#1327 (c265b2ab): 68px icon rail,
+   one reading column, 56px pill composer, floating header and soft fades.
+   This local adapter works with the published AgentInterface 0.16.3 API. */
+.sf-shell {
+  --sf-column: 691px;
+  --sf-gutter: 24px;
+  height: 100dvh;
+  width: 100%;
+  overflow: hidden;
+  background: #fff;
+}
+.sf-shell .openui-agent-container { background: #f9f9f9; }
+.sf-shell .openui-agent-sidebar-container {
+  width: 68px;
+  min-width: 68px;
+  padding: 20px 18px;
+  gap: 0;
+  background: transparent;
+  cursor: default;
+  transition: width .18s ease, min-width .18s ease;
+}
+.sf-shell--expanded .openui-agent-sidebar-container { width: 260px; min-width: 260px; padding-inline: 16px; }
+.sf-navigation { display: flex; flex-direction: column; width: 100%; height: 100%; gap: 16px; }
+.sf-navigation-brand { display: flex; align-items: center; justify-content: space-between; height: 32px; flex-shrink: 0; }
+.sf-navigation-brand img { width: 36px; max-width: none; height: auto; margin-left: -2px; }
+.sf-shell--expanded .sf-navigation-brand img { width: auto; height: 28px; margin-left: 4px; }
+.sf-icon-button { width: 32px; height: 32px; display: inline-flex; align-items: center; justify-content: center; flex-shrink: 0; border-radius: 50%; color: #333; }
+.sf-icon-button:hover { background: #eaeaea; }
+.sf-icon-button svg { width: 20px; height: 20px; }
+.sf-new-chat { display: flex; align-items: center; justify-content: center; flex-shrink: 0; gap: 10px; width: 32px; height: 32px; border-radius: 50%; color: #fff; background: #171717; }
+.sf-new-chat:hover { background: #333; }
+.sf-new-chat svg { width: 16px; height: 16px; flex-shrink: 0; }
+.sf-shell--expanded .sf-new-chat { width: 100%; justify-content: flex-start; padding-inline: 12px; background: #ebebeb; border-radius: 9px; color: #171717; font-size: 14px; }
+.sf-shell--expanded .sf-new-chat:hover { background: #e1e1e1; }
+.sf-history { display: flex; flex-direction: column; gap: 10px; min-height: 0; flex: 1; overflow: auto; }
+.sf-history-heading { padding: 10px 12px 0; font-size: 12px; color: #888; }
+.sf-shell .openui-agent-sidebar-container__overlay { display: none; }
+.sf-shell .openui-agent-thread-container { min-width: 0; margin: 4px 4px 4px 0; border-radius: 18px; outline: 1px solid #ebebeb; background: #fff; }
+.sf-shell .openui-agent-thread-chat-panel { min-width: 0; position: relative; }
+.sf-shell .openui-agent-mobile-header { display: none; }
+.sf-shell .openui-agent-thread-header { display: flex; position: absolute; z-index: 4; inset: 0 0 auto; min-height: 60px; padding: 12px 20px; border: 0; background: #ffffffeb; }
+.sf-shell .openui-agent-thread-header__title { display: none; }
+.sf-shell .openui-agent-thread-header__actions { flex: 1; width: 100%; }
+.sf-chat-header { width: 100%; display: flex; align-items: center; justify-content: space-between; gap: 16px; }
+.sf-chat-heading { display: flex; align-items: center; gap: 10px; font-size: 18px; font-weight: 500; letter-spacing: -.3px; }
+.sf-header-new { display: flex; align-items: center; gap: 6px; padding: 6px 10px; border-radius: 999px; font-size: 13px; color: #555; }
+.sf-header-new svg { width: 16px; height: 16px; }
+.sf-header-new:hover { background: #f4f4f4; }
+.sf-mobile-menu { display: none; }
+.sf-shell .openui-agent-thread-scroll-container { flex: 1; }
+.sf-shell .openui-agent-thread-scroll-container::before { display: none; }
+.sf-shell .openui-agent-thread-scroll-container::after { bottom: 0; height: 110px; background: linear-gradient(to top,#fff 0%,#fffffffa 24%,#ffffffbb 48%,#ffffff44 74%,#ffffff00 100%); pointer-events: none; }
+.sf-shell .openui-agent-thread-scroll-area { padding: 76px 0 136px; scroll-padding-top: 76px; scroll-padding-bottom: 136px; scrollbar-gutter: auto; scrollbar-width: thin; }
+.sf-shell .openui-agent-thread-messages,
+.sf-shell .openui-agent-thread-composer {
+  width: 100%;
+  max-width: calc(var(--sf-column) + var(--sf-gutter) * 2);
+  margin-inline: auto;
+  padding-inline: var(--sf-gutter);
+}
+.sf-shell .openui-agent-thread-messages { gap: 42px; }
+.sf-shell .openui-agent-thread-message-assistant { padding: 0; gap: 0; width: 100%; }
+.sf-shell .openui-agent-thread-message-assistant__content { overflow: visible; width: 100%; min-width: 0; }
+.sf-shell .openui-shell-thread-message-assistant { display: flex; flex-direction: column; gap: 0; overflow: visible; width: 100%; }
+.sf-shell .openui-shell-thread-message-assistant__content { overflow: visible; width: 100%; min-width: 0; }
+.sf-shell .openui-shell-thread-message-assistant::before { content: attr(data-generation-label); display: block; min-height: 28px; margin-bottom: 18px; color: #999; font: 400 16px/28px var(--iui-font); }
+.sf-shell .openui-agent-thread-message-user { padding: 0; }
+.sf-shell .openui-genui-user-message { max-width: 70%; }
+.sf-shell .openui-agent-thread-message-user__content,
+.sf-shell .openui-shell-thread-message-user__content { max-width: 100%; padding: 12px 18px; border-radius: 26px; background: #e7f3ff; color: #28475c; font: 400 18px/28px var(--iui-font); }
+.sf-shell .openui-agent-thread-message-user .openui-markdown { color: inherit; font: inherit; }
+.sf-shell .rt-root:has(.tv-heading, .tv-prose, .tv-gallery, .tv-itinerary, .tv-map-slot),
+.sf-shell .tv-prose, .sf-shell .tv-stop-description { font-size: 18px; line-height: 28px; }
+.sf-shell .tv-title { font-size: 21px; line-height: 30px; }
+.sf-shell .tv-section-heading { font-size: 20px; line-height: 28px; }
+.sf-shell .tv-stop-title { font-size: 18px; line-height: 26px; }
+.sf-shell .tv-stop-time { font-size: 14px; line-height: 20px; }
+.sf-shell .openui-agent-composer-slot { position: absolute; z-index: 5; left: 0; right: 0; bottom: 0; }
+.sf-shell .openui-agent-thread-composer { margin: 0 auto 24px; }
+.sf-shell .openui-agent-thread-composer__input-wrapper {
+  display: flex;
+  flex-direction: row;
+  align-items: flex-end;
+  gap: 12px;
+  min-height: 56px;
+  padding: 11px 12px 11px 22px;
+  border: 1px solid #ebebeb;
+  border-radius: 28px;
+  box-shadow: 0 4px 16px rgb(0 0 0 / 6%);
+  background: #fff;
+}
+.sf-shell .openui-agent-thread-composer__input { flex: 1; min-width: 0; padding: 4px 0; min-height: 32px; max-height: 200px; background: transparent; border: 0; color: #171717; font: 400 18px/24px var(--iui-font); }
+.sf-shell .openui-agent-thread-composer__input::placeholder { color: #9d9d9d; }
+.sf-shell .openui-agent-thread-composer__action-bar { display: flex; align-items: center; flex-shrink: 0; padding: 0; }
+.sf-shell .openui-agent-thread-composer__submit-button.openui-icon-button { width: 34px; height: 34px; min-height: 34px; border: 0; border-radius: 50%; background: #171717; color: #fff; box-shadow: none; }
+.sf-shell .openui-agent-thread-composer__submit-button.openui-icon-button:disabled { background: #eaeaea; color: #9b9b9b; }
+.sf-shell .openui-agent-thread-scroll-latest { z-index: 6; bottom: 112px; }
+.sf-shell .openui-agent-welcome-screen { width: 100%; max-width: calc(var(--sf-column) + var(--sf-gutter) * 2); margin: auto; padding: 80px var(--sf-gutter) 80px; text-align: center; align-items: center; }
+.sf-shell .openui-agent-welcome-screen__title { font-size: 30px; line-height: 1.25; font-weight: 500; letter-spacing: -.7px; }
+.sf-shell .openui-agent-welcome-screen__description { font-size: 16px; line-height: 24px; color: #777; }
+.sf-shell .openui-agent-welcome-screen__header,
+.sf-shell .openui-agent-welcome-screen__content { align-items: center; text-align: center; }
+.sf-shell .openui-agent-welcome-screen__content { gap: 10px; }
+.sf-shell .openui-agent-welcome-screen__desktop { width: 100%; max-width: none; align-items: center; }
+.sf-shell .openui-agent-welcome-screen__desktop-composer { width: 100%; }
+.sf-shell .openui-agent-thread-container:has(.openui-agent-welcome-screen) .openui-agent-thread-scroll-container { flex-grow: 0; }
+.sf-shell .openui-agent-thread-container:has(.openui-agent-welcome-screen) .openui-agent-thread-scroll-area { padding: 0; }
+.sf-shell .openui-agent-thread-container:has(.openui-agent-welcome-screen) .openui-agent-thread-scroll-container::after { display: none; }
+.sf-shell .openui-agent-desktop-welcome-composer { width: 100%; max-width: none; min-height: 56px; display: flex; flex-direction: row; align-items: flex-end; gap: 12px; padding: 11px 12px 11px 22px; border-radius: 28px; border: 1px solid #ebebeb; box-shadow: 0 4px 16px rgb(0 0 0 / 6%); background: #fff; }
+.sf-shell .openui-agent-desktop-welcome-composer__input { min-width: 0; flex: 1; padding: 4px 0; font: 400 18px/24px var(--iui-font); }
+.sf-shell .openui-agent-desktop-welcome-composer__action-bar { flex-shrink: 0; }
+.sf-shell .openui-agent-desktop-welcome-composer__submit-button.openui-icon-button { width: 34px; height: 34px; border: 0; border-radius: 50%; background: #171717; color: #fff; }
+.sf-shell .openui-agent-desktop-welcome-composer__submit-button.openui-icon-button:disabled { background: #eaeaea; color: #9b9b9b; }
+
+/* The recording canvas supplies the brand labels above both panels. Only
+   navigation is hidden: this is still the real input, request and renderer. */
+.sf-shell--capture .openui-agent-sidebar-container,
+.sf-shell--capture .openui-agent-thread-header,
+.sf-shell--capture .openui-agent-mobile-header { display: none; }
+.sf-shell--capture .openui-agent-container { background: #fff; }
+.sf-shell--capture .openui-agent-thread-container { margin: 0; border-radius: 0; outline: 0; }
+.sf-shell--capture .openui-agent-thread-composer { margin-bottom: 24px; }
+body:has(.sf-shell--capture) [data-openui-devtools-root] { display: none !important; }
+
+@media (max-width: 767px) {
+  .sf-shell { --sf-gutter: 20px; }
+  .sf-shell .openui-agent-sidebar-container { display: none; }
+  .sf-shell--expanded .openui-agent-sidebar-container { display: flex; position: absolute; z-index: 12; top: 0; bottom: 0; left: 0; width: 260px; height: 100%; transform: none; background: #f9f9f9; box-shadow: 4px 0 24px #0001; }
+  .sf-shell .openui-agent-thread-container { margin: 0; border-radius: 0; outline: 0; }
+  .sf-mobile-menu { display: inline-flex; }
+  .sf-shell .openui-agent-thread-header { display: flex; }
+  .sf-shell .openui-genui-user-message { max-width: 86%; }
+  .sf-shell .openui-agent-thread-message-user__content,
+  .sf-shell .openui-shell-thread-message-user__content { font-size: 16px; line-height: 25px; }
+  .sf-shell .openui-agent-thread-composer { padding: 0 var(--sf-gutter); margin-bottom: 16px; }
+  .sf-shell .openui-agent-welcome-screen { padding-top: 90px; }
+  .sf-shell .openui-agent-welcome-screen__title { font-size: 27px; }
+  .sf-shell--capture .openui-agent-thread-header,
+  .sf-shell--capture .openui-agent-sidebar-container { display: none; }
+}
+
+.sf-shell--capture .tv-map-slot, .sf-shell--capture .tv-map-wrap { height: 432px; min-height: 432px; }
+.sf-shell--capture .tv-map-wrap.is-expanded { height: auto; }
+.sf-shell--capture .tv-stop { grid-template-columns: 124px minmax(0,1fr); gap: 14px; padding-block: 22px; }
+.sf-shell--capture .tv-stop:first-child { padding-top: 0; }
+.sf-shell--capture .tv-stop > .tv-photo { width: 124px; height: 124px; }

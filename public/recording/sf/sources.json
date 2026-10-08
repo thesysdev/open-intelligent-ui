@@ -1,0 +1,70 @@
+{
+  "reference": "https://chatgpt.com/share/6ac7789b-1854-83e8-b6eb-7678790d179e",
+  "usage": "Reference-controlled recording only. Normal responses choose their own images.",
+  "assets": [
+    {
+      "file": "timeanddate.png",
+      "source": "https://www.google.com/s2/favicons?domain=https://www.timeanddate.com&sz=32"
+    },
+    {
+      "file": "sfchronicle.png",
+      "source": "https://www.google.com/s2/favicons?domain=https://www.sfchronicle.com&sz=32"
+    },
+    {
+      "file": "sfmta.png",
+      "source": "https://www.google.com/s2/favicons?domain=https://www.sfmta.com&sz=32"
+    },
+    {
+      "file": "fleetweek.png",
+      "source": "https://www.google.com/s2/favicons?domain=https://fleetweeksf.org&sz=32"
+    },
+    {
+      "file": "hero-bridge.jpg",
+      "source": "https://images.openai.com/static-rsc-4/-f_ncl6obkz3WGniCqBtiXDiRt01kWaF-CWeeISjkCGAXtbx5f72fN4h5uQ5hcEk4_FJMoz1AQi3haEXHpucFn2GKY-Q7tkpE6Kl9qsbbIsDHtb2fNmXYddpfrRip-9KU3oXZQ8tnJySS_axYOPfw7RpB4DxVCiur29OTr18ZXA1RIxYIZeAODYB5nP5Ju4w?purpose=inline"
+    },
+    {
+      "file": "hero-palace.jpg",
+      "source": "https://images.openai.com/static-rsc-4/9xNXzkvW38EuLS9zetzDZg8GiNtpEnyjz1WEGDGy_UkwPGB9UeTFGtEsuhWymBXUph1snAm28o2BCg0OMoNg-SLSDrtaDhEfKo0ndBcDrLh3OZrw-PsV1nD5jwXUpgwROb7nW24iTCYcpC7C3MOta6PHPC8mqUBH0nVq6IRhp4Q?purpose=inline"
+    },
+    {
+      "file": "ferry-building.jpg",
+      "source": "https://images.openai.com/static-rsc-4/F0yMS1cQSL67zzx_tk6_ajoODAy5noSTRWYT154bjurZ-Z8QZBFwtCGNB0StI3zBTmWVoCl2LMxEh0OGTj01mL5fJRtEyrpBKgKSWWWPMyObSMPtN93OCY_vSWwfIu4MeTRTj6mnRuvBORgY0B2iPnRlPZCW6OmfssJlOUZGEEA?purpose=inline"
+    },
+    {
+      "file": "lombard.jpg",
+      "source": "https://images.openai.com/static-rsc-4/-68ECsX19RXJfe6f9c01gZ4SnNGJCyC34RgvMbKYXiOohDJbcQ3h0euqvQCS-rBqq505-bxq--9Fqw3tSlbpy_C2qjxDQsWZJ6iC3jeRxmTBYGz_oQPWBAMqWazMP-kUzZORtEHfyt6g-uPkBjQ0b1BOdYT4yRTfQnQOU4-K3sw?purpose=inline"
+    },
+    {
+      "file": "hero-lombard.jpg",
+      "source": "https://images.openai.com/static-rsc-4/LZfBprhUYzVzLamTpRDT9sV-lCDitLLTd_euKJYLvrq4tAbR78ut254Bg8earJ2NCMtkADvgeOe18iZkwYIoFLtDlJwEDapEm95XmyCyBLRWtBgsA_CmWcSgYDN8I1v1zdDpJcsWFahIFIhy1dhd2193Z7CZzaiHO8roZVRgZqa-VQm0kmAmwJLxJhtRdIMK?purpose=inline"
+    },
+    {
+      "file": "chinatown.jpg",
+      "source": "https://images.openai.com/static-rsc-4/pkuNcNF3nj3WL2eqhdkYrP_RETL72Lqn2LhtKHwFa-p01-lYI4aYMF0SSl5VXOD29COd4PgqEJjrhrYXTHWdPHLYXfjWk31cCYxibP6QpSMnvioh1huuDhYv2hUNXq7grwlxoSwni4oV2fQIMOWYxh-KYDh-cYxR5PWavRpg1Qo?purpose=inline"
+    },
+    {
+      "file": "twin-peaks.jpg",
+      "source": "https://images.openai.com/static-rsc-4/nqTE--GCgsEJ7uUbwJKA4o8TNhUHI_amEhFfvB_GQk8cGjGjcljooCVVqCSrVFoTwYOndP76vn3kMyAGSjOnoKu-e8FasXYSqreWVm5UxSksNqqOEZW_FE5b3GjvHoTFELE43Mhw6irhA837xWshgstPdaTAa6MwdPKQmSOKT0r63ZTKQ22bG6Pi0jZZQ4rc?purpose=inline"
+    },
+    {
+      "file": "golden-gate.jpg",
+      "source": "https://images.openai.com/static-rsc-4/GbiOeDPzpU84ryRwz7v6GgnKKdjgCYGXfnj9Bk7FhQHtxzUARey_WhyUqd17BhX0SeTWbt7Gx9iyO9FzQfApFqO7eXXlLILT-wg5wAVTghEFULKqntZAeLQ0jrPOCpx9hlHT6I5nEGRX-gwJnBJq7Mp8_o0lEKnxiukZWH6Etik?purpose=inline"
+    },
+    {
+      "file": "crissy-field.jpg",
+      "source": "https://images.openai.com/static-rsc-4/xv71_TeXggqWxPyCjmTthauXV8hwjQg0dKb5ulvm_bC6AYh44cg7QKK7FJT_58QAEvAmS0ngSrbfypeAYnt6KBSLPz3xmWwQa3h-4omSeCLzEfMIIgPzSVxvuslN0oWGYJs-1M1LGwfWZyPEPucOXbttJMQ4oZo2PWvsgcnBhbHpJhhhtF2dHK8IL2YSyVhU?purpose=inline"
+    },
+    {
+      "file": "palace.jpg",
+      "source": "https://images.openai.com/static-rsc-4/c1yTlOGpDVQI9E1slC7C6v-919afkgNLBVhP1PTvJzi8xru2gEOa1D7DJtprtzo_Fz65AVrM32MDLEls8G4cKOOUc-ZSMnz6ey6ERwx2GsOuurxiLbsesjwlemUIE0fvUckowq1XMkqVUtg9g9WeOpwHbUyE13A_mUYRtEPF0tM?purpose=inline"
+    },
+    {
+      "file": "painted-ladies.jpg",
+      "source": "https://images.openai.com/static-rsc-4/UbGXU-yrl343gV9t7enXSqkHLgAehvk22ppEpr3P_SlNAXDJLHRgGQx2NUN1E7xDGDqjFjYTPMdFIY9eSWnOcijjOpu0xdt1t8GmfvPmgZEFmCHrcRxDv07KLqTJtwg9BI4t_2XIXuqBB3VzC1gWWpwX5k1Tks2uGkA804zdbO8?purpose=inline"
+    },
+    {
+      "file": "pier-39.jpg",
+      "source": "https://images.openai.com/static-rsc-4/Nse3Acnf6a8Bx3k-bPxe2_2mHJ0QBCrqoBQvX3NeBTvRphX_EGrgEP9cDfqWDzF9Tf0hQyD6mRMKSHx3CbyHl19biA1W6sn-v-U2Yjb8VlWcEqFXeSsmes1oSplfxah41xRey_7bRHsqfs34Vn-KN6OXJy86F-X_nvVhevNxSHw?purpose=inline"
+    }
+  ]
+}

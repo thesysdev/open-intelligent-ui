@@ -2,8 +2,8 @@
   "root": "Card",
   "components": {
     "Card": {
-      "signature": "Card(children: (TextContent | MarkDownRenderer | CardHeader | Callout | TextCallout | CodeBlock | Image | ImageBlock | ImageGallery | Separator | HorizontalBarChart | RadarChart | PieChart | RadialChart | SingleStackedBarChart | ScatterChart | AreaChart | BarChart | LineChart | Table | TagBlock | Form | Buttons | IconButton | Steps | InlineHeader | EntityList | EditableTable | SnippetCardBlock | OverviewCardBlock | ContextCardBlock | CompositeCardBlock | VisualCardBlock | ListBlock | FollowUpBlock | SectionBlock | Tabs | Carousel | RouteMap | RouteStops | RouteSuggestions)[])",
-      "description": "Vertical container for all content in a chat response. Children stack top to bottom automatically. Optional sources ([{ title, sourceName, url }]) render as a Sources strip at the bottom and back inline [n] citations in TextContent."
+      "signature": "Card(children: (TextContent | MarkDownRenderer | CardHeader | Callout | TextCallout | CodeBlock | Image | ImageBlock | ImageGallery | Separator | HorizontalBarChart | RadarChart | PieChart | RadialChart | SingleStackedBarChart | ScatterChart | AreaChart | BarChart | LineChart | Table | TagBlock | Form | Buttons | IconButton | Steps | InlineHeader | EntityList | EditableTable | SnippetCardBlock | OverviewCardBlock | ContextCardBlock | CompositeCardBlock | VisualCardBlock | ListBlock | FollowUpBlock | SectionBlock | Tabs | Carousel | TravelGallery | TravelHeading | TravelItinerary | TravelMap | TravelProse | TravelImage | TravelStop)[], sources?: {url?: string, title: string, sourceName: string}[])",
+      "description": "Vertical response container. Pass one array of content children. Travel citations belong inline in TravelProse/TravelStop, not in root sources."
     },
     "CardHeader": {
       "signature": "CardHeader(title?: string, subtitle?: string)",
@@ -337,21 +337,37 @@
       "signature": "VisualCardBlock(items: VisualCardItem[], layout?: \"grid\" | \"carousel\", responsive?: boolean, action?: ActionExpression, gap?: number | string)",
       "description": "A grid or carousel of photo-first cards: a full-bleed background image with a tag on top and a bold text panel at the bottom; an optional action makes every card clickable."
     },
-    "RouteMap": {
-      "signature": "RouteMap(stops: RouteStop[])",
-      "description": "Interactive map that plots RouteStop items in visiting order with a walking path. Always reuse the SAME RouteStop references in RouteStops below it."
+    "TravelHeading": {
+      "signature": "TravelHeading(text: string, level: \"title\" | \"section\")",
+      "description": "A restrained response heading. Use title once, then section for smaller section headings."
     },
-    "RouteStops": {
-      "signature": "RouteStops(stops: RouteStop[])",
-      "description": "Photo cards for each RouteStop (real photos, story, tips, remove-from-route toggle)."
+    "TravelCitation": {
+      "signature": "TravelCitation(label: string, url: string, icon?: string)",
+      "description": "A compact inline source link. Use an actual supporting source URL; icon is an optional emoji or safe source favicon URL."
     },
-    "RouteSuggestions": {
-      "signature": "RouteSuggestions(title: string, stops: RouteStop[])",
-      "description": "Optional extra stops the user can add to the route with one tap (adds a pin to RouteMap and a card to RouteStops). Use 2 stops that are NOT already in the route."
+    "TravelProse": {
+      "signature": "TravelProse(text: string, citations?: TravelCitation[])",
+      "description": "An ordinary response paragraph. Supports **bold** and [label](https://url) inline. Optional citations appear as small inline source pills."
     },
-    "RouteStop": {
-      "signature": "RouteStop(name: string, wikiTitle: string, lat: number, lng: number, time: string, story: string, beforeYouGo: string)",
-      "description": "One stop on a route. wikiTitle is the exact English Wikipedia article title (used to load real photos). lat/lng are decimal coordinates. time e.g. '9:00 · 1 hr'. story: 1-2 sentences of history. beforeYouGo: one practical tip."
+    "TravelImage": {
+      "signature": "TravelImage(src: string, alt: string, link?: string, wikiTitle?: string)",
+      "description": "One real destination image. Use a supplied URL; otherwise leave src empty and provide a Wikipedia article title as wikiTitle."
+    },
+    "TravelGallery": {
+      "signature": "TravelGallery(images: TravelImage[])",
+      "description": "A row of destination photographs. Usually three images, with consistent crops and working local save toggles."
+    },
+    "TravelStop": {
+      "signature": "TravelStop(id: string, name: string, time: string, description: string, imageUrl: string, lat: number, lng: number, emoji: string, category: string, link?: string, wikiTitle?: string, citations?: TravelCitation[])",
+      "description": "A reusable destination with a stable id, visiting time, short practical description, real photo URL, coordinates, emoji and category. Reference the SAME stop in TravelMap and TravelItinerary. Omit unknown optional links; never invent images."
+    },
+    "TravelItinerary": {
+      "signature": "TravelItinerary(title: string, stops: TravelStop[])",
+      "description": "A simple itinerary: heading followed by divided image/text rows. Reuse the stop references from TravelMap."
+    },
+    "TravelMap": {
+      "signature": "TravelMap(stops: TravelStop[], route?: {lat: number, lng: number}[])",
+      "description": "A real interactive street map with emoji destination markers, category filtering and expand. Reuse the SAME TravelStop refs in TravelItinerary. Optional route coordinates trace the supplied route; otherwise stops connect in visiting order as a route overview."
     }
   },
   "componentGroups": [
@@ -553,13 +569,17 @@
     {
       "name": "Travel",
       "components": [
-        "RouteMap",
-        "RouteStops",
-        "RouteSuggestions",
-        "RouteStop"
+        "TravelHeading",
+        "TravelCitation",
+        "TravelProse",
+        "TravelImage",
+        "TravelGallery",
+        "TravelStop",
+        "TravelItinerary",
+        "TravelMap"
       ],
       "notes": [
-        "- For itineraries, day trips or sightseeing routes: CardHeader, then RouteMap([s1, s2, ...]), then RouteStops([s1, s2, ...]) using the same stop refs, then RouteSuggestions('Add to your day', [x1, x2]) with 2 extra stops not in the route, then an optional Callout with tips."
+        "- For travel: TravelHeading, TravelProse, a three-photo TravelGallery, TravelMap and TravelItinerary sharing identical TravelStop refs, followed by transport advice. Card accepts all display components."
       ]
     }
   ],
@@ -819,17 +839,29 @@
       "VisualCardBlock": {
         "$ref": "#/$defs/VisualCardBlock"
       },
-      "RouteMap": {
-        "$ref": "#/$defs/RouteMap"
+      "TravelHeading": {
+        "$ref": "#/$defs/TravelHeading"
       },
-      "RouteStops": {
-        "$ref": "#/$defs/RouteStops"
+      "TravelCitation": {
+        "$ref": "#/$defs/TravelCitation"
       },
-      "RouteSuggestions": {
-        "$ref": "#/$defs/RouteSuggestions"
+      "TravelProse": {
+        "$ref": "#/$defs/TravelProse"
       },
-      "RouteStop": {
-        "$ref": "#/$defs/RouteStop"
+      "TravelImage": {
+        "$ref": "#/$defs/TravelImage"
+      },
+      "TravelGallery": {
+        "$ref": "#/$defs/TravelGallery"
+      },
+      "TravelStop": {
+        "$ref": "#/$defs/TravelStop"
+      },
+      "TravelItinerary": {
+        "$ref": "#/$defs/TravelItinerary"
+      },
+      "TravelMap": {
+        "$ref": "#/$defs/TravelMap"
       }
     },
     "required": [
@@ -917,10 +949,14 @@
       "CompositeCardBlock",
       "VisualCardItem",
       "VisualCardBlock",
-      "RouteMap",
-      "RouteStops",
-      "RouteSuggestions",
-      "RouteStop"
+      "TravelHeading",
+      "TravelCitation",
+      "TravelProse",
+      "TravelImage",
+      "TravelGallery",
+      "TravelStop",
+      "TravelItinerary",
+      "TravelMap"
     ],
     "additionalProperties": false,
     "$defs": {
@@ -1046,15 +1082,49 @@
                   "$ref": "#/$defs/Carousel"
                 },
                 {
-                  "$ref": "#/$defs/RouteMap"
+                  "$ref": "#/$defs/TravelGallery"
                 },
                 {
-                  "$ref": "#/$defs/RouteStops"
+                  "$ref": "#/$defs/TravelHeading"
                 },
                 {
-                  "$ref": "#/$defs/RouteSuggestions"
+                  "$ref": "#/$defs/TravelItinerary"
+                },
+                {
+                  "$ref": "#/$defs/TravelMap"
+                },
+                {
+                  "$ref": "#/$defs/TravelProse"
+                },
+                {
+                  "$ref": "#/$defs/TravelImage"
+                },
+                {
+                  "$ref": "#/$defs/TravelStop"
                 }
               ]
+            }
+          },
+          "sources": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "url": {
+                  "type": "string"
+                },
+                "title": {
+                  "type": "string"
+                },
+                "sourceName": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "title",
+                "sourceName"
+              ],
+              "additionalProperties": false
             }
           }
         },
@@ -1063,7 +1133,7 @@
         ],
         "additionalProperties": false,
         "id": "Card",
-        "description": "Vertical container for all content in a chat response. Children stack top to bottom automatically. Optional sources ([{ title, sourceName, url }]) render as a Sources strip at the bottom and back inline [n] citations in TextContent."
+        "description": "Vertical response container. Pass one array of content children. Travel citations belong inline in TravelProse/TravelStop, not in root sources."
       },
       "TextContent": {
         "type": "object",
@@ -4775,88 +4845,81 @@
         "id": "Carousel",
         "description": "Horizontal scrollable carousel"
       },
-      "RouteMap": {
+      "TravelGallery": {
         "type": "object",
         "properties": {
-          "stops": {
+          "images": {
+            "maxItems": 6,
             "type": "array",
             "items": {
-              "$ref": "#/$defs/RouteStop"
+              "$ref": "#/$defs/TravelImage"
             }
           }
         },
         "required": [
-          "stops"
+          "images"
         ],
         "additionalProperties": false,
-        "id": "RouteMap",
-        "description": "Interactive map that plots RouteStop items in visiting order with a walking path. Always reuse the SAME RouteStop references in RouteStops below it."
+        "id": "TravelGallery",
+        "description": "A row of destination photographs. Usually three images, with consistent crops and working local save toggles."
       },
-      "RouteStop": {
+      "TravelImage": {
         "type": "object",
         "properties": {
-          "name": {
+          "src": {
+            "type": "string"
+          },
+          "alt": {
+            "type": "string"
+          },
+          "link": {
             "type": "string"
           },
           "wikiTitle": {
             "type": "string"
-          },
-          "lat": {
-            "type": "number"
-          },
-          "lng": {
-            "type": "number"
-          },
-          "time": {
-            "type": "string"
-          },
-          "story": {
-            "type": "string"
-          },
-          "beforeYouGo": {
-            "type": "string"
           }
         },
         "required": [
-          "name",
-          "wikiTitle",
-          "lat",
-          "lng",
-          "time",
-          "story",
-          "beforeYouGo"
+          "src",
+          "alt"
         ],
         "additionalProperties": false,
-        "id": "RouteStop",
-        "description": "One stop on a route. wikiTitle is the exact English Wikipedia article title (used to load real photos). lat/lng are decimal coordinates. time e.g. '9:00 · 1 hr'. story: 1-2 sentences of history. beforeYouGo: one practical tip."
+        "id": "TravelImage",
+        "description": "One real destination image. Use a supplied URL; otherwise leave src empty and provide a Wikipedia article title as wikiTitle."
       },
-      "RouteStops": {
+      "TravelHeading": {
         "type": "object",
         "properties": {
-          "stops": {
-            "type": "array",
-            "items": {
-              "$ref": "#/$defs/RouteStop"
-            }
+          "text": {
+            "type": "string"
+          },
+          "level": {
+            "type": "string",
+            "enum": [
+              "title",
+              "section"
+            ]
           }
         },
         "required": [
-          "stops"
+          "text",
+          "level"
         ],
         "additionalProperties": false,
-        "id": "RouteStops",
-        "description": "Photo cards for each RouteStop (real photos, story, tips, remove-from-route toggle)."
+        "id": "TravelHeading",
+        "description": "A restrained response heading. Use title once, then section for smaller section headings."
       },
-      "RouteSuggestions": {
+      "TravelItinerary": {
         "type": "object",
         "properties": {
           "title": {
             "type": "string"
           },
           "stops": {
+            "maxItems": 50,
             "type": "array",
             "items": {
-              "$ref": "#/$defs/RouteStop"
+              "$ref": "#/$defs/TravelStop"
             }
           }
         },
@@ -4865,8 +4928,153 @@
           "stops"
         ],
         "additionalProperties": false,
-        "id": "RouteSuggestions",
-        "description": "Optional extra stops the user can add to the route with one tap (adds a pin to RouteMap and a card to RouteStops). Use 2 stops that are NOT already in the route."
+        "id": "TravelItinerary",
+        "description": "A simple itinerary: heading followed by divided image/text rows. Reuse the stop references from TravelMap."
+      },
+      "TravelStop": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "time": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "imageUrl": {
+            "type": "string"
+          },
+          "lat": {
+            "type": "number",
+            "minimum": -90,
+            "maximum": 90
+          },
+          "lng": {
+            "type": "number",
+            "minimum": -180,
+            "maximum": 180
+          },
+          "emoji": {
+            "type": "string"
+          },
+          "category": {
+            "type": "string"
+          },
+          "link": {
+            "type": "string"
+          },
+          "wikiTitle": {
+            "type": "string"
+          },
+          "citations": {
+            "type": "array",
+            "items": {
+              "$ref": "#/$defs/TravelCitation"
+            }
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "time",
+          "description",
+          "imageUrl",
+          "lat",
+          "lng",
+          "emoji",
+          "category"
+        ],
+        "additionalProperties": false,
+        "id": "TravelStop",
+        "description": "A reusable destination with a stable id, visiting time, short practical description, real photo URL, coordinates, emoji and category. Reference the SAME stop in TravelMap and TravelItinerary. Omit unknown optional links; never invent images."
+      },
+      "TravelCitation": {
+        "type": "object",
+        "properties": {
+          "label": {
+            "type": "string"
+          },
+          "url": {
+            "type": "string"
+          },
+          "icon": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "label",
+          "url"
+        ],
+        "additionalProperties": false,
+        "id": "TravelCitation",
+        "description": "A compact inline source link. Use an actual supporting source URL; icon is an optional emoji or safe source favicon URL."
+      },
+      "TravelMap": {
+        "type": "object",
+        "properties": {
+          "stops": {
+            "maxItems": 50,
+            "type": "array",
+            "items": {
+              "$ref": "#/$defs/TravelStop"
+            }
+          },
+          "route": {
+            "maxItems": 2000,
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "lat": {
+                  "type": "number",
+                  "minimum": -90,
+                  "maximum": 90
+                },
+                "lng": {
+                  "type": "number",
+                  "minimum": -180,
+                  "maximum": 180
+                }
+              },
+              "required": [
+                "lat",
+                "lng"
+              ],
+              "additionalProperties": false
+            }
+          }
+        },
+        "required": [
+          "stops"
+        ],
+        "additionalProperties": false,
+        "id": "TravelMap",
+        "description": "A real interactive street map with emoji destination markers, category filtering and expand. Reuse the SAME TravelStop refs in TravelItinerary. Optional route coordinates trace the supplied route; otherwise stops connect in visiting order as a route overview."
+      },
+      "TravelProse": {
+        "type": "object",
+        "properties": {
+          "text": {
+            "type": "string"
+          },
+          "citations": {
+            "type": "array",
+            "items": {
+              "$ref": "#/$defs/TravelCitation"
+            }
+          }
+        },
+        "required": [
+          "text"
+        ],
+        "additionalProperties": false,
+        "id": "TravelProse",
+        "description": "An ordinary response paragraph. Supports **bold** and [label](https://url) inline. Optional citations appear as small inline source pills."
       },
       "Slice": {
         "type": "object",

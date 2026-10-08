@@ -1,26 +1,10 @@
-"use client";
-import "@openuidev/react-ui/styles/index.css";
-import "leaflet/dist/leaflet.css";
-import "@/lib/route/route.css";
+import { AgentShell } from "@/components/agent-shell";
 
-import {
-  AgentInterface,
-  fetchLLM,
-  openAIMessageFormat,
-  openAIReadableStreamAdapter,
-} from "@openuidev/react-ui";
-import { library } from "@/lib/library";
-
-const llm = fetchLLM({
-  url: "/api/chat",
-  streamAdapter: openAIReadableStreamAdapter(),
-  messageFormat: openAIMessageFormat,
-});
-
-export default function Home() {
-  return (
-    <div style={{ height: "100vh", width: "100vw", overflow: "hidden" }}>
-      <AgentInterface llm={llm} componentLibrary={library} agentName="OpenUI" theme={{ mode: "light" }} />
-    </div>
-  );
+export default async function Home({
+  searchParams,
+}: {
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
+}) {
+  const query = await searchParams;
+  return <AgentShell capture={query.capture === "sf"} />;
 }
