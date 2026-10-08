@@ -13,9 +13,11 @@ This branch starts from `49f1f6a` and selectively brings forward the parts neede
 
 The shell uses the published `@openuidev/react-ui@0.16.3` slots and hooks. It does not depend on PR #1327's unpublished `ChatHeader` or `card` starter API. `src/components/agent-shell.css` documents the adaptation.
 
+Main’s Gateway integration (`655d344`, PR #2) is retained for normal chat, including image search and the ability to build customization forms from existing primitives. This branch’s composable travel map supersedes the older specialized route map.
+
 ## Normal generative mode
 
-Open `/` and submit a request. `AgentInterface` posts the conversation through `fetchLLM` to `/api/chat`. The server generates the system prompt from `src/generated/spec.json`, adds travel guidance from `src/lib/prompt-options.ts`, and makes a live streaming Chat Completions request. The OpenAI stream adapter passes partial output into the OpenUI renderer.
+Open `/` and submit a request. `AgentInterface` posts the conversation through `fetchLLM` to `/api/chat`. The server generates a cloud prompt from `src/generated/spec.json`, adds travel guidance from `src/lib/prompt-options.ts`, and makes a live Gateway Responses request with image search. The Responses adapter passes partial output into the OpenUI renderer. The optional film preset retains its separate live Chat Completions transport.
 
 The registered travel components are small enough to combine in different responses:
 
@@ -31,7 +33,7 @@ The registered travel components are small enough to combine in different respon
 
 Use the **same `TravelStop` references** in `TravelMap` and `TravelItinerary`. Their `Card` owns a `RouteStoreProvider`, so selection and route edits stay within that response. Stable IDs distinguish repeated visits to places with the same name. The travel group exposes the new composable components alongside all restyled base primitives; the older specialised route components are not offered to the model.
 
-For another city, the model supplies new places, coordinates, descriptions, and image references. A Wikipedia title can provide a fallback stop photograph when no known image URL is supplied. The agent does not perform live web search in this branch; event schedules, fares, opening hours, and similar facts need supplied evidence before being presented as verified current information.
+For another city, the model supplies new places, coordinates, descriptions, and image references. A Wikipedia title can provide a fallback stop photograph when no known image URL is supplied. The Gateway performs image search; this branch does not enable general web research, so event schedules, fares, opening hours, and similar facts need supplied evidence before being presented as verified current information.
 
 ## Explicit recording preset
 
@@ -54,7 +56,7 @@ This preset conditions the right-hand run on known reference content. It demonst
 
 ## Run and capture
 
-Create `.env.local` with `OPENAI_API_KEY`, `OPENAI_BASE_URL`, and `OPENAI_MODEL` for a compatible provider. Set optional `REASONING_EFFORT` only when the provider/model supports it.
+Create `.env.local` with `THESYS_API_KEY` and optional `THESYS_MODEL` for normal Gateway chat. The recording provider can be configured separately with `OPENAI_API_KEY`, `OPENAI_BASE_URL`, and `OPENAI_MODEL`; its API key falls back to `THESYS_API_KEY`. Set optional `REASONING_EFFORT` only when the provider/model supports it.
 
 ```bash
 pnpm install
@@ -72,7 +74,7 @@ pnpm start
 
 A different local port can be supplied with `pnpm dev --port 3002` or `pnpm start --port 3002`. Keep the server flag disabled for normal deployments unless the recording preset is intentionally required.
 
-The existing `scripts/record.mjs` is the earlier phone-sized route demo recorder. It targets the older `.rt-*` components and a specific external CDP session; it is not the comparison film workflow.
+The earlier phone-sized recorder was removed on main. Use the capture route and its walkthrough control for the comparison film.
 
 ## Timing semantics
 

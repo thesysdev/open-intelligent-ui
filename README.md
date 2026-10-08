@@ -9,11 +9,12 @@ This focused branch keeps the restyled base component library and response-scope
 Use Node 24 and pnpm. Create `.env.local` with your server-side provider settings:
 
 ```dotenv
-OPENAI_API_KEY=your_thesys_api_key
-OPENAI_BASE_URL=https://api.thesys.dev/v1/embed
-OPENAI_MODEL=openai/gpt-5.2
+THESYS_API_KEY=your_thesys_api_key
+THESYS_MODEL=openai/gpt-5.5
 ENABLE_RECORDING_PRESET=0
 ```
+
+Normal chat uses OpenUI Gateway’s Responses API, including image search and library validation. The recording preset keeps its live Chat Completions transport; optionally configure `OPENAI_API_KEY`, `OPENAI_BASE_URL`, and `OPENAI_MODEL` for that mode. Its key falls back to `THESYS_API_KEY`.
 
 `REASONING_EFFORT` is optional and must be supported by the selected model. Never put the API key in a `NEXT_PUBLIC_` variable.
 
@@ -32,7 +33,7 @@ Then try another city to check that the content changes. Select a map pin, open 
 
 For the matching San Francisco film take, explicitly set `ENABLE_RECORDING_PRESET=1` on the server, restart it, and open [localhost:3000/?capture=sf](http://localhost:3000/?capture=sf). Submit the exact prompt above. This mode supplies the reference itinerary and image choices to the **live model**; it does not return a stored answer or replay a stream. The capture query alone cannot enable it.
 
-The capture view hides navigation and development inspection controls, keeps the real input and renderer, and uses a 691px reading column. A 969×1080 CSS viewport matches the source recording's panel proportions. The completed response shows its measured request-to-stream-completion time. A reference-conditioned film take is a controlled product demonstration, **not a model-speed benchmark**.
+The capture view hides navigation and development inspection controls, keeps the real input and renderer, and uses a 691px reading column. A 969×1080 CSS viewport matches the source recording's panel proportions. The shell measures completion after streaming, response photos, and the map reveal settle. The movie displays that original elapsed time alongside its playback rate. A reference-conditioned film take is a controlled product demonstration, **not a model-speed benchmark**.
 
 See [the response-agent notes](docs/response-agent.md) for components, provenance, capture details, and verification steps. Reference asset URLs are recorded in [sources.json](public/recording/sf/sources.json).
 

@@ -9,6 +9,8 @@ import {
   AgentInterface,
   fetchLLM,
   openAIMessageFormat,
+  openAIConversationMessageFormat,
+  openAIResponsesAdapter,
   openAIReadableStreamAdapter,
   useThread,
   useThreadList,
@@ -121,8 +123,8 @@ export function AgentShell({ capture = false }: { capture?: boolean }) {
   const [expanded, setExpanded] = useState(false);
   const llm = useMemo(() => fetchLLM({
     url: capture ? "/api/chat?capture=sf" : "/api/chat",
-    streamAdapter: openAIReadableStreamAdapter(),
-    messageFormat: openAIMessageFormat,
+    streamAdapter: capture ? openAIReadableStreamAdapter() : openAIResponsesAdapter(),
+    messageFormat: capture ? openAIMessageFormat : openAIConversationMessageFormat,
     fetch: measuredFetch,
   }), [capture]);
 
