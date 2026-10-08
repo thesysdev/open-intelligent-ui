@@ -91,15 +91,20 @@ export type ImageData = { src: string; alt: string; link?: string; wikiTitle?: s
 function Photo({ photo, bookmark = false }: { photo: Partial<ImageData>; bookmark?: boolean }) {
   const [saved, setSaved] = useState(false);
   const [failedUrls, setFailedUrls] = useState<string[]>([]);
-  const [wikiImage, setWikiImage] = useState<{ title: string; url?: string } | null>(null);
+  const [wikiImages, setWikiImages] = useState<{ title: string; urls: string[] } | null>(null);
+  // Compare normalized URLs: failedUrls holds what the <img> actually loaded,
+  // which differs from the raw string when it has spaces or accented letters.
+  const primary = safeUrl(photo.src, true);
+  const primaryOk = !!primary && !failedUrls.includes(primary);
   useEffect(() => {
-    if ((safeUrl(photo.src, true) && !failedUrls.includes(photo.src!)) || !photo.wikiTitle) return;
+    if (primaryOk || !photo.wikiTitle) return;
     let active = true;
     const title = photo.wikiTitle;
-    fetchWiki(title).then((info) => { if (active) setWikiImage({ title, url: info.photos[0] }); });
+    fetchWiki(title).then((info) => { if (active) setWikiImages({ title, urls: info.photos }); });
     return () => { active = false; };
-  }, [photo.src, photo.wikiTitle, failedUrls]);
-  const src = [photo.src, wikiImage?.title === photo.wikiTitle ? wikiImage?.url : undefined]
+  }, [primaryOk, photo.wikiTitle]);
+  // Try the supplied image, then each Wikipedia photo in turn.
+  const src = [primary, ...(wikiImages && wikiImages.title === photo.wikiTitle ? wikiImages.urls : [])]
     .map((url) => safeUrl(url, true)).find((url) => url && !failedUrls.includes(url));
   const href = safeUrl(photo.link);
   const image = src
