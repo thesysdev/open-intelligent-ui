@@ -8,6 +8,12 @@ In ChatGPT's Intelligent UI, a request such as "plan a day in San Francisco" ret
 
 > This project is independent and is not affiliated with or endorsed by OpenAI. "Intelligent UI" refers to the ChatGPT feature that this demo recreates.
 
+## Demo video
+
+ChatGPT's Intelligent UI (left) and this project (right) answering the same request. Select the image to play the video.
+
+[![ChatGPT and OpenUI side by side, each showing a one-day San Francisco route with photos and a map](docs/openui-chatgpt-comparison.jpg)](docs/openui-chatgpt-comparison.mp4)
+
 ## What's in the demo
 
 The model streams OpenUI Lang through OpenUI Gateway, and the app renders it as an answer built from custom travel components. They are defined in this repository (`src/lib/travel/components.tsx`) with OpenUI's `defineComponent` and registered alongside OpenUI's built-in chat components:
@@ -72,6 +78,7 @@ Open http://localhost:3000 and try: `I'm in San Francisco for a day, plan a sigh
 | `src/lib/travel/vector-basemap.ts` | Loads MapLibre and defines the vector map style and the raster fallback style. |
 | `src/lib/travel/travel.css` | Styles for the travel components and map. |
 | `src/generated/spec.json` | Library spec sent to Gateway in the system prompt. Regenerate with `pnpm generate` after changing a component schema. |
+| `docs/openui-chatgpt-comparison.mp4` | Side-by-side video of ChatGPT and this project; `docs/openui-chatgpt-comparison.jpg` is its README preview. |
 | `.env.example` | The environment variables to copy into `.env.local`. |
 | `AGENTS.md` | Notes for coding agents about this Next.js version. |
 
