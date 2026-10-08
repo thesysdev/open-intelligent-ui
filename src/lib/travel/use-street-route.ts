@@ -4,9 +4,8 @@ import { coordinate, type LatLng } from "./map-utils";
 const cache = new Map<string, LatLng[]>();
 
 /**
- * Street geometry for a "lng,lat;lng,lat" key, fetched in the background so the
- * answer never waits for a map service. Public OSRM's driving profile is a road
- * overview, not mixed-mode travel guidance.
+ * Street geometry for a "lng,lat;lng,lat" key from /api/street-route, fetched in
+ * the background so the answer never waits for a map service.
  * Returns points, `null` when routing failed, or `undefined` while loading.
  */
 export function useStreetRoute(routingKey: string, enabled: boolean): LatLng[] | null | undefined {
@@ -19,14 +18,14 @@ export function useStreetRoute(routingKey: string, enabled: boolean): LatLng[] |
     const debounce = setTimeout(async () => {
       timeout = setTimeout(() => controller.abort(), 10000);
       try {
-        const response = await fetch(`https://router.project-osrm.org/route/v1/driving/${routingKey}?overview=full&geometries=geojson&steps=false`, { signal: controller.signal });
+        const response = await fetch(`/api/street-route?coords=${encodeURIComponent(routingKey)}`, { signal: controller.signal });
         if (!response.ok) throw new Error("Route service unavailable");
-        const data: { code?: string; routes?: { geometry?: { coordinates?: unknown[] } }[] } = await response.json();
-        const points = (data.routes?.[0]?.geometry?.coordinates ?? []).flatMap((point) => {
-          const result = Array.isArray(point) ? coordinate({ lat: point[1], lng: point[0] }) : null;
+        const data: { points?: unknown[] } = await response.json();
+        const points = (data.points ?? []).flatMap((point) => {
+          const result = Array.isArray(point) ? coordinate({ lat: point[0], lng: point[1] }) : null;
           return result ? [result] : [];
         });
-        if (data.code !== "Ok" || points.length < 2) throw new Error("No street route available");
+        if (points.length < 2) throw new Error("No street route available");
         if (cache.size >= 64) cache.delete(cache.keys().next().value!);
         cache.set(routingKey, points);
         if (active) setResult({ key: routingKey, points });

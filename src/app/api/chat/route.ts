@@ -23,6 +23,20 @@ const tools = [{ type: "image_search" } as unknown as Tool];
 const MAX_ITEMS = 60;
 const MAX_BODY_BYTES = 1_000_000;
 
+// AgentInterface saves component state (the user's map edits) at the end of the
+// answer as "]]>openui:context\n[{...}]". Rewrite it as a sentence the model reads.
+const CONTEXT_MARKER = "]]>openui:context";
+function describeRouteEdits(content: string): string {
+  const at = content.indexOf(CONTEXT_MARKER);
+  if (at < 0) return content;
+  let state: Record<string, { value?: unknown }> = {};
+  try { state = (JSON.parse(content.slice(at + CONTEXT_MARKER.length).trim()) as typeof state[])[0] ?? {}; } catch { return content.slice(0, at); }
+  const removed = Array.isArray(state.routeRemoved?.value) ? state.routeRemoved.value : [];
+  const added = Array.isArray(state.routeAdded?.value) ? state.routeAdded.value.map((stop: { name?: string; id?: string }) => stop?.name || stop?.id).filter(Boolean) : [];
+  const edits = [removed.length && `removed stops (by id): ${removed.join(", ")}`, added.length && `added stops: ${added.join(", ")}`].filter(Boolean);
+  return content.slice(0, at) + (edits.length ? `\n\n(User's edits to this route: ${edits.join("; ")}.)` : "");
+}
+
 // The browser sends the whole conversation each turn. Keep only user and
 // assistant text: earlier image-search calls already ran inside Gateway, and
 // trusted instructions never come from the browser.
@@ -33,7 +47,7 @@ function toInput(messages: unknown): ResponseInputItem[] | null {
     const { role, content } = item as { role?: unknown; content?: unknown };
     if (role !== "user" && role !== "assistant") return [];
     if (typeof content !== "string" && !Array.isArray(content)) return [];
-    return [{ role, content } as ResponseInputItem];
+    return [{ role, content: role === "assistant" && typeof content === "string" ? describeRouteEdits(content) : content } as ResponseInputItem];
   });
   return items.length ? items.slice(-MAX_ITEMS) : null;
 }

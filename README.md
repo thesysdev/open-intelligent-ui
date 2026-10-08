@@ -13,7 +13,9 @@ Theme tokens (colors, type, radii, shadows, chat bubbles) live in `src/lib/respo
 
 The existing `AgentInterface` uses the same theme, its built-in welcome slot, and four live starter prompts. `src/app/shell.css` adds a quiet sidebar, rounded composer and send button, pill starters, and soft message bubbles. This uses the [documented AgentInterface customization API](https://github.com/thesysdev/skills/blob/main/skills/openui/references/agent-interface.md); the chat state, transport, navigation, and streaming implementation remain unchanged.
 
-The travel components live in `src/lib/travel/`; `src/lib/route/` holds the response `Card` root and the per-response route state. They're registered in `src/lib/library.ts`, and the prompt example is in `src/lib/prompt-options.ts`. New sightseeing requests use the updated layout automatically, including when users ask for another city or customize a route.
+The travel components live in `src/lib/travel/`; `src/lib/route/` holds the response `Card` root and the route state hook. Route edits (removed stops, added suggestions, the selected stop) live in OpenUI's own response state via `useStateField`, so `AgentInterface` saves them with the message; `/api/chat` turns them into a short note so the model knows the user's current route on the next turn.
+
+Wikipedia photo fallbacks and street-route geometry go through the app's own server routes, `/api/wiki` and `/api/street-route`, which validate input and cache results. Street geometry comes from the public OSRM demo server's driving profile: a road overview, not walking or transit directions. They're registered in `src/lib/library.ts`, and the prompt example is in `src/lib/prompt-options.ts`. New sightseeing requests use the updated layout automatically, including when users ask for another city or customize a route.
 
 ## Setup
 
@@ -42,4 +44,4 @@ pnpm build
 
 Try the San Francisco prompt above, then another destination such as Lisbon. Check the photo strip, map pins appearing during the stream, the final route reveal, map filters/expansion, and the customization form on desktop and mobile. The form uses 24px between question groups and 40px before its primary action.
 
-Maps use OpenFreeMap / OpenStreetMap geometry with visible attribution and an Esri raster fallback. OSRM provides a street-route overview; when unavailable, a labelled direct connection remains. This is not turn-by-turn walking or mixed-mode navigation. Content and photos are generated live; this branch does not contain the film's fixed San Francisco recording preset.
+Maps use OpenFreeMap / OpenStreetMap geometry with visible attribution and an Esri raster fallback. When street routing is unavailable, a labelled direct connection remains. Content and photos are generated live; this branch does not contain the film's fixed San Francisco recording preset.

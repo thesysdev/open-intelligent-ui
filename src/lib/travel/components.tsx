@@ -152,7 +152,8 @@ function withAdded(stops: TravelStopData[], added: readonly TravelStopData[]) {
 }
 
 function StopImage({ stop }: { stop: TravelStopData }) {
-  return <Photo photo={{ src: stop.imageUrl || stop.photos?.[0], alt: stop.name, wikiTitle: stop.wikiTitle, focalX: stop.imageFocalX }} />;
+  // Without a wikiTitle, the place name is usually a valid Wikipedia title too.
+  return <Photo photo={{ src: stop.imageUrl || stop.photos?.[0], alt: stop.name, wikiTitle: stop.wikiTitle || stop.name, focalX: stop.imageFocalX }} />;
 }
 
 export function TravelStopRow({ stop }: { stop: TravelStopData }) {

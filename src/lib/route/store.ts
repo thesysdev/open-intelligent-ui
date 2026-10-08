@@ -1,6 +1,7 @@
 "use client";
 
-import { createContext, createElement, useContext, useId, useState, useSyncExternalStore, type ReactNode } from "react";
+import { useStateField } from "@openuidev/react-lang";
+import { createContext, createElement, useContext, useId, type ReactNode } from "react";
 
 export type StopData = {
   id?: string;
@@ -22,98 +23,70 @@ export type StopData = {
 
 export const getStopKey = (stop: StopData) => stop.id || stop.name || "";
 
-/** Each response owns its edits; shared photo caching below remains read-only. */
-export function createRouteStore(namespace: string) {
-  const removed = new Set<string>();
-  let added: StopData[] = [];
-  const listeners = new Set<() => void>();
-  let version = 0;
-  let selected: string | null = null;
-  const bump = () => { version++; listeners.forEach((listener) => listener()); };
-  return {
-    namespace,
-    mapId: `${namespace}-map`,
-    stopId: (key: string) => `${namespace}-stop-${encodeURIComponent(key)}`,
-    subscribe: (listener: () => void) => { listeners.add(listener); return () => { listeners.delete(listener); }; },
-    getSnapshot: () => version,
-    getServerSnapshot: () => 0,
-    getSelected: () => selected,
-    selectStop(key: string | null) { selected = key; bump(); },
-    toggleStop(key: string) {
-      if (!key) return;
-      if (removed.has(key)) removed.delete(key);
-      else removed.add(key);
-      bump();
-    },
-    addStop(stop: StopData) {
-      const key = getStopKey(stop);
-      if (!key || added.some((candidate) => getStopKey(candidate) === key)) return;
-      added = [...added, { ...stop }];
-      removed.delete(key);
-      bump();
-    },
-    isRemoved: (key: string) => removed.has(key),
-    isAdded: (key: string) => added.some((stop) => getStopKey(stop) === key),
-    getAdded: (): readonly StopData[] => added,
-  };
-}
-
-type RouteStore = ReturnType<typeof createRouteStore>;
-const RouteStoreContext = createContext<RouteStore | null>(null);
+// The Card root gives every component in one response the same id prefix.
+const RouteNamespace = createContext<string | null>(null);
 
 export function RouteStoreProvider({ children }: { children: ReactNode }) {
   const id = useId();
-  const [store] = useState(() => createRouteStore(`route-${id}`));
-  return createElement(RouteStoreContext.Provider, { value: store }, children);
+  return createElement(RouteNamespace.Provider, { value: `route-${id}` }, children);
 }
 
+/**
+ * Per-response route edits (removed stops, added suggestions, selected stop),
+ * kept in OpenUI's own response state via useStateField. AgentInterface saves
+ * that state with the message, so edits stay with the thread and reach the
+ * model as context on the next turn.
+ */
 export function useRouteStore() {
-  const context = useContext(RouteStoreContext);
+  const context = useContext(RouteNamespace);
   const id = useId();
-  // Standalone route components also stay isolated when no response provider exists.
-  const [local] = useState(() => createRouteStore(`route-${id}`));
-  const store = context ?? local;
-  useSyncExternalStore(store.subscribe, store.getSnapshot, store.getServerSnapshot);
-  return store;
+  const namespace = context ?? `route-${id}`;
+  const removed = useStateField<string[]>("routeRemoved", []);
+  const added = useStateField<StopData[]>("routeAdded", []);
+  const selected = useStateField<string | null>("routeSelected", null);
+  const removedKeys = (removed.value as string[] | undefined) ?? [];
+  const addedStops = (added.value as StopData[] | undefined) ?? [];
+  return {
+    mapId: `${namespace}-map`,
+    stopId: (key: string) => `${namespace}-stop-${encodeURIComponent(key)}`,
+    /** Changes whenever stops are removed or added. */
+    version: JSON.stringify([removedKeys, addedStops.map(getStopKey)]),
+    getSelected: () => (selected.value as string | null | undefined) ?? null,
+    selectStop: (key: string | null) => selected.setValue(key),
+    toggleStop(key: string) {
+      if (!key) return;
+      removed.setValue(removedKeys.includes(key) ? removedKeys.filter((k) => k !== key) : [...removedKeys, key]);
+    },
+    addStop(stop: StopData) {
+      const key = getStopKey(stop);
+      if (!key || addedStops.some((candidate) => getStopKey(candidate) === key)) return;
+      // Only plain stop fields: this is saved with the message.
+      const { id: stopId, name, wikiTitle, lat, lng, time, story, beforeYouGo, category, photos, imageUrl, imageFocalX, emoji, description, link } = stop;
+      added.setValue([...addedStops, { id: stopId, name, wikiTitle, lat, lng, time, story, beforeYouGo, category, photos, imageUrl, imageFocalX, emoji, description, link }]);
+      if (removedKeys.includes(key)) removed.setValue(removedKeys.filter((k) => k !== key));
+    },
+    isRemoved: (key: string) => removedKeys.includes(key),
+    isAdded: (key: string) => addedStops.some((stop) => getStopKey(stop) === key),
+    getAdded: (): readonly StopData[] => addedStops,
+  };
 }
 
 export type WikiInfo = { lat?: number; lng?: number; photos: string[] };
-type WikiSummary = { thumbnail?: { source?: string }; coordinates?: { lat?: number; lon?: number } };
-type WikiMedia = { items?: { type?: string; srcset?: { src: string }[] }[] };
 const wikiCache = new Map<string, Promise<WikiInfo>>();
 
+/** Photos and coordinates for a Wikipedia title, via /api/wiki. Failures are retried next time. */
 export function fetchWiki(title: string): Promise<WikiInfo> {
   if (!wikiCache.has(title)) {
-    const t = encodeURIComponent(title.replace(/ /g, "_"));
-    // A missing article is a real answer; any other failure is retried next time.
-    const get = (url: string) => fetch(url).then((r) => {
-      if (r.status === 404) return {};
-      if (!r.ok) throw new Error(`Wikipedia ${r.status}`);
-      return r.json();
-    });
-    const p = Promise.all([
-      get(`https://en.wikipedia.org/api/rest_v1/page/summary/${t}`),
-      get(`https://en.wikipedia.org/api/rest_v1/page/media-list/${t}`),
-    ])
-      .then(([s, m]: [WikiSummary, WikiMedia]) => {
-        const photos: string[] = [];
-        const key = (u: string) => decodeURIComponent(u.split("?")[0].split("/").slice(-1)[0]).replace(/^\d+px-/, "");
-        if (s?.thumbnail?.source) photos.push(s.thumbnail.source);
-        for (const it of m?.items ?? []) {
-          if (it.type !== "image" || !it.srcset?.length) continue;
-          const src: string = it.srcset[0].src;
-          if (/\.svg|icon|logo|map|flag|seal/i.test(src)) continue;
-          const url = src.startsWith("//") ? `https:${src}` : src;
-          if (!photos.some((p) => key(p) === key(url))) photos.push(url);
-          if (photos.length >= 3) break;
-        }
-        return { lat: s?.coordinates?.lat, lng: s?.coordinates?.lon, photos };
+    const request = fetch(`/api/wiki?title=${encodeURIComponent(title)}`)
+      .then((response) => {
+        if (!response.ok) throw new Error(`wiki ${response.status}`);
+        return response.json() as Promise<WikiInfo>;
       })
       .catch(() => {
         wikiCache.delete(title);
         return { photos: [] };
       });
-    wikiCache.set(title, p);
+    wikiCache.set(title, request);
   }
   return wikiCache.get(title)!;
 }

@@ -42,7 +42,7 @@ export function TravelMapView({ stops, path, streaming = false }: { stops: StopD
   const [mapError, setMapError] = useState(false);
   const route = useRouteStore();
   const selected = route.getSelected();
-  const version = route.getSnapshot();
+  const version = route.version;
 
   // Emoji follows both coordinates in the schema, so its presence marks complete
   // coordinate tokens. Numeric prefixes such as -1 / -12 must not move the map.

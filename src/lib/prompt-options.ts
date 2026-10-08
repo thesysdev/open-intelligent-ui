@@ -31,6 +31,7 @@ customizeButtons = Buttons([Button("Personalize my trip", Action([@ToAssistant("
     "Travel images: before writing a sightseeing route, run image_search once with one query per stop and per suggestion. Copy returned Image URLs exactly into TravelImage.src and TravelStop.imageUrl; never invent or edit image URLs. When a place has no result, leave the URL empty and give its exact Wikipedia title as wikiTitle.",
     "Travel stops: each TravelStop needs a unique id, plausible coordinates, a useful time and a concise description. Emit TravelMap before the stop definitions so its pins appear while streaming.",
     "Customize your route: end a travel answer with a section TravelHeading and a Form (time, transport, interests) using short option labels with empty descriptions. Give each RadioGroup a default that exactly matches an option value, add no required rules, and use one primary Button with Action([@ToAssistant(...)]). On the next turn, rebuild the route from the submitted values.",
+    "Route edits: an earlier answer may end with \"(User's edits to this route: ...)\" listing TravelStop ids the user removed and places they added. Treat that edited route as the current one in follow-ups and rebuilt itineraries.",
     "Do not present opening times, event schedules, weather or fares as verified without evidence.",
   ],
 };
