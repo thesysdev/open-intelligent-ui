@@ -36,7 +36,6 @@ Open http://localhost:3000 and try: `I'm in San Francisco for a day, plan a sigh
 | --- | --- | --- |
 | `THESYS_API_KEY` | Yes | OpenUI Gateway key, used only on the server. |
 | `THESYS_MODEL` | No | A `{provider}/{model}` id. Defaults to `openai/gpt-5.5`. |
-| `REASONING_EFFORT` | No | For reasoning models; `low` makes the first UI appear much sooner. |
 
 ## How it works
 
