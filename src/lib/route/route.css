@@ -3,6 +3,8 @@
 .rt-map{position:absolute;inset:0;background:#e9eef2}
 .rt-map .maplibregl-ctrl-attrib{background:rgba(255,255,255,.88);color:#676767;font:10px/1.5 system-ui}
 .rt-marker{width:26px;height:26px;cursor:pointer}
+.rt-map .maplibregl-canvas-container,.rt-map .maplibregl-marker{transition:opacity .25s ease}
+.rt-map-pending .maplibregl-canvas-container,.rt-map-pending .maplibregl-marker,.rt-map-pending .maplibregl-control-container{opacity:0}
 .rt-marker:focus-visible{outline:none}
 .rt-marker:focus-visible .rt-pin{outline:2px solid #2563eb;outline-offset:2px}
 .rt-chip{position:absolute;top:10px;left:10px;z-index:500;background:#fff;border-radius:999px;padding:5px 11px;font-size:12px;font-weight:600;box-shadow:0 1px 4px rgba(0,0,0,.18);border:0}

@@ -125,6 +125,8 @@ function MapView({ base }: { base: StopData[] }) {
   const fitted = useRef(false);
   const [lib, setLib] = useState<MapLibre | null>(null);
   const [ready, setReady] = useState(false);
+  // Hidden until the first fit, so it never flashes a default city before the stops arrive.
+  const [placed, setPlaced] = useState(false);
   const [expanded, setExpanded] = useState(false);
   const version = useRouteVersion();
   const [coords, setCoords] = useState<Record<string, [number, number]>>({});
@@ -153,8 +155,8 @@ function MapView({ base }: { base: StopData[] }) {
     const instance = new lib.Map({
       container: el.current,
       style: MAP_STYLE,
-      center: [-122.43, 37.79],
-      zoom: 11,
+      center: [0, 20],
+      zoom: 1,
       attributionControl: { compact: true },
     });
     map.current = instance;
@@ -169,6 +171,7 @@ function MapView({ base }: { base: StopData[] }) {
       map.current = null;
       fitted.current = false;
       setReady(false);
+      setPlaced(false);
     };
   }, [lib]);
 
@@ -205,7 +208,10 @@ function MapView({ base }: { base: StopData[] }) {
     setRoute(instance, pts);
     // Jump into place the first time; animate later changes such as an added stop.
     fitPoints(lib, instance, pts, 14, fitted.current);
-    if (pts.length) fitted.current = true;
+    if (pts.length) {
+      fitted.current = true;
+      setPlaced(true);
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [lib, ready, titles, coords, version]);
 
@@ -217,7 +223,7 @@ function MapView({ base }: { base: StopData[] }) {
   const active = stops.filter((s) => s.name && !isRemoved(s.name)).length;
   return (
     <div className="rt-map-wrap" style={{ height: expanded ? 420 : 240 }}>
-      <div ref={el} className="rt-map" />
+      <div ref={el} className={`rt-map ${placed ? "" : "rt-map-pending"}`} />
       <div key={active} className="rt-chip rt-chip-count">
         {active} stops
       </div>
