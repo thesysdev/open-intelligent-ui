@@ -28,12 +28,12 @@ The "Customize your route" form at the end of each answer uses OpenUI's built-in
 
 ## Setup
 
-Requires Node 24 and pnpm.
+Requires Node 24.
 
 ```bash
 cp .env.example .env.local   # add your THESYS_API_KEY
-pnpm install
-pnpm dev
+npm install
+npm run dev
 ```
 
 Open http://localhost:3000 and try: `I'm in San Francisco for a day, plan a sightseeing route for me`
@@ -77,18 +77,16 @@ Open http://localhost:3000 and try: `I'm in San Francisco for a day, plan a sigh
 | `src/lib/travel/use-dialog.ts` | Hook for the expanded map dialog: scroll lock, focus trap, Escape to close. |
 | `src/lib/travel/vector-basemap.ts` | Loads MapLibre and defines the vector map style and the raster fallback style. |
 | `src/lib/travel/travel.css` | Styles for the travel components and map. |
-| `src/generated/spec.json` | Library spec sent to Gateway in the system prompt. Regenerate with `pnpm generate` after changing a component schema. |
+| `src/generated/spec.json` | Library spec sent to Gateway in the system prompt. Regenerate with `npm run generate` after changing a component schema. |
 | `docs/openui-chatgpt-comparison.mp4` | Side-by-side video of ChatGPT and this project; `docs/openui-chatgpt-comparison.jpg` is its README preview. |
 | `.env.example` | The environment variables to copy into `.env.local`. |
-| `AGENTS.md` | Notes for coding agents about this Next.js version. |
 
 ## Checks
 
 ```bash
-pnpm generate          # after changing a component schema
-pnpm exec tsc --noEmit
-pnpm lint
-pnpm build
+npm run generate       # after changing a component schema
+npx tsc --noEmit
+npm run build
 ```
 
 Then try the San Francisco prompt and another city such as Lisbon. Check the photo strip, pins appearing during the stream, the route reveal, map filters and expansion, adding and removing places, and the customize form, on desktop and mobile.

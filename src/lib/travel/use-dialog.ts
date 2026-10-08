@@ -20,6 +20,5 @@ export function useDialog(container: RefObject<HTMLElement | null>, open: boolea
     window.addEventListener("keydown", keydown);
     return () => { document.body.style.overflow = oldOverflow; window.removeEventListener("keydown", keydown); previous?.focus(); };
     // `close` only flips state; re-running on its identity would steal focus.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open]);
 }
