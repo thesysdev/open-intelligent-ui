@@ -1,6 +1,6 @@
 import type { Theme } from "@openuidev/react-ui";
 
-// Applied only within generated responses, including their portalled menus.
+// Shared palette and typography for the built-in shell and generated responses.
 export const responseTheme = {
   "background": "#ffffff",
   "foreground": "#ffffff",

@@ -8,7 +8,9 @@ An [OpenUI](https://openui.com) demo that recreates the "plan a sightseeing rout
 - `TravelMap`: a real street map with emoji pins, category filters, expansion, and map-to-itinerary selection. Pins arrive without resetting the camera; once streaming ends, the map frames the route and draws its line.
 - The existing OpenUI form components still provide the route-customization flow and send the selected preferences back with `@ToAssistant`.
 
-Generated responses use `src/lib/response-theme.ts` and `src/lib/response-theme.css` for typography, spacing, monochrome controls, soft borders, and consistent sliders. The theme is scoped to each response and its portalled menus; it does not change the sidebar, chat header, welcome screen, or composer. The older `RouteMap`, `RouteStop`, `RouteStops`, and `RouteSuggestions` names remain registered for compatibility, with per-response interaction state.
+Generated responses use `src/lib/response-theme.ts` and `src/lib/response-theme.css` for typography, spacing, monochrome controls, soft borders, and consistent sliders. Response overrides are scoped to each response and its portalled menus. The older `RouteMap`, `RouteStop`, `RouteStops`, and `RouteSuggestions` names remain registered for compatibility, with per-response interaction state.
+
+The existing `AgentInterface` uses the same theme, its built-in welcome slot, and four live starter prompts. `src/app/shell.css` adds a quiet sidebar, rounded composer and send button, pill starters, and soft message bubbles. This uses the [documented AgentInterface customization API](https://github.com/thesysdev/skills/blob/main/skills/openui/references/agent-interface.md); the chat state, transport, navigation, and streaming implementation remain unchanged.
 
 The components live in `src/lib/travel/` and `src/lib/route/`. They're registered in `src/lib/library.ts`, and the prompt example is in `src/lib/prompt-options.ts`. New sightseeing requests use the updated layout automatically, including when users ask for another city or customize a route.
 
