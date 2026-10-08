@@ -3,6 +3,7 @@
 import { defineComponent } from "@openuidev/react-lang";
 import { openuiChatLibrary } from "@openuidev/react-ui/genui-lib";
 import "../response-theme.css";
+import "./route.css";
 import { z } from "zod/v4";
 import { RouteStoreProvider } from "./store";
 import { TravelGallery, TravelHeading, TravelItinerary, TravelMap, TravelProse, TravelImage, TravelStop, TravelSuggestions, safeUrl } from "../travel/components";
