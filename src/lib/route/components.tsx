@@ -25,6 +25,7 @@ const RouteStopSchema = z.object({
   time: z.string(),
   story: z.string(),
   beforeYouGo: z.string(),
+  photos: z.array(z.string()).max(3).optional(),
 });
 
 function useWiki(title?: string) {
@@ -48,12 +49,29 @@ function withAdded(stops: StopData[]) {
   return [...stops, ...getAdded().filter((a) => !names.has(a.name))];
 }
 
-function Photos({ title, count = 3 }: { title?: string; count?: number }) {
+const isImageUrl = (url: unknown): url is string => typeof url === "string" && /^https:\/\//.test(url);
+
+// Prefers the image-search URLs the model put on the stop, then Wikipedia
+// photos for any slot that is empty or whose image fails to load.
+function Photos({ title, photos, count = 3 }: { title?: string; photos?: string[]; count?: number }) {
   const wiki = useWiki(title);
+  const [failed, setFailed] = useState<string[]>([]);
+  const found = (photos ?? []).filter(isImageUrl);
+  const urls = [...new Set([...found, ...(wiki?.photos ?? [])])].filter((url) => !failed.includes(url)).slice(0, count);
   return (
     <div className="rt-photos" style={{ gridTemplateColumns: `repeat(${count},1fr)` }}>
       {Array.from({ length: count }, (_, i) =>
-        wiki?.photos[i] ? <img key={i} src={wiki.photos[i]} alt={title ?? ""} /> : <div key={i} className="rt-photo-skel" />,
+        urls[i] ? (
+          <img
+            key={urls[i]}
+            src={urls[i]}
+            alt={title ?? ""}
+            referrerPolicy="no-referrer"
+            onError={() => setFailed((f) => [...f, urls[i]])}
+          />
+        ) : (
+          <div key={i} className="rt-photo-skel" />
+        ),
       )}
     </div>
   );
@@ -64,7 +82,7 @@ function StopCard({ stop, index, isNew }: { stop: StopData; index: number; isNew
   const off = !!stop.name && isRemoved(stop.name);
   return (
     <div id={stop.name ? slug(stop.name) : undefined} className={`rt-card ${off ? "rt-removed" : ""} ${isNew ? "rt-card-new" : ""}`}>
-      <Photos title={stop.wikiTitle} />
+      <Photos title={stop.wikiTitle} photos={stop.photos} />
       <div className="rt-title">
         <span className="rt-num">{index + 1}</span>
         {stop.name}
@@ -96,7 +114,7 @@ export const RouteStop = defineComponent({
   name: "RouteStop",
   props: RouteStopSchema,
   description:
-    "One stop on a route. wikiTitle is the exact English Wikipedia article title (used to load real photos). lat/lng are decimal coordinates. time e.g. '9:00 · 1 hr'. story: 1-2 sentences of history. beforeYouGo: one practical tip.",
+    "One stop on a route. wikiTitle is the exact English Wikipedia article title (used to load real photos). lat/lng are decimal coordinates. time e.g. '9:00 · 1 hr'. story: 1-2 sentences of history. beforeYouGo: one practical tip. photos: up to 3 image URLs copied exactly from image search results for this place; omit if none were found.",
   component: ({ props }) => <StopCard stop={props} index={0} />,
 });
 
@@ -242,7 +260,7 @@ function SuggestionCard({ stop }: { stop: StopData }) {
   const done = !!stop.name && isAdded(stop.name);
   return (
     <div className="rt-sugg">
-      <Photos title={stop.wikiTitle} count={1} />
+      <Photos title={stop.wikiTitle} photos={stop.photos} count={1} />
       <div className="rt-sugg-name">{stop.name}</div>
       {stop.time && <div className="rt-sugg-time">{stop.time}</div>}
       <button

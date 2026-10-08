@@ -6,15 +6,15 @@ import "@/lib/route/route.css";
 import {
   AgentInterface,
   fetchLLM,
-  openAIMessageFormat,
-  openAIReadableStreamAdapter,
+  openAIConversationMessageFormat,
+  openAIResponsesAdapter,
 } from "@openuidev/react-ui";
 import { library } from "@/lib/library";
 
 const llm = fetchLLM({
   url: "/api/chat",
-  streamAdapter: openAIReadableStreamAdapter(),
-  messageFormat: openAIMessageFormat,
+  streamAdapter: openAIResponsesAdapter(),
+  messageFormat: openAIConversationMessageFormat,
 });
 
 export default function Home() {
