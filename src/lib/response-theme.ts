@@ -109,5 +109,7 @@ export const responseTheme = {
   "shadowL": "0 2px 8px rgb(0 0 0 / 4%)",
   "shadowXl": "0 4px 20px rgb(0 0 0 / 6%)",
   "shadow2xl": "0 8px 32px rgb(0 0 0 / 10%)",
-  "shadow3xl": "0 16px 48px rgb(0 0 0 / 12%)"
+  "shadow3xl": "0 16px 48px rgb(0 0 0 / 12%)",
+  "chatUserResponseBg": "#f4f4f4",
+  "chatUserResponseText": "#0d0d0d"
 } satisfies Theme;

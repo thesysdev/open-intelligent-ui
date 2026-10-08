@@ -164,12 +164,11 @@
   padding-inline: 24px;
 }
 
-.chat-shell :is(.openui-shell-thread-message-user__content, .openui-agent-thread-message-user__content) {
+/* Colors come from the chatUserResponseBg / chatUserResponseText theme tokens. */
+.chat-shell .openui-agent-thread-message-user__content {
   max-width: 85%;
   padding: 12px 20px;
   border-radius: 24px;
-  background: #f4f4f4;
-  color: #0d0d0d;
 }
 
 .chat-shell .openui-agent-container--mobile .openui-agent-welcome-screen {

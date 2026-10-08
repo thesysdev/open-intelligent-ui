@@ -1,4 +1,4 @@
-.rt-root:has(.tv-heading, .tv-prose, .tv-gallery, .tv-itinerary, .tv-map-slot) {
+.rt-root:has(.tv-heading, .tv-prose, .tv-gallery, .tv-itinerary, .tv-suggestions, .tv-map-slot) {
   gap: 16px;
   background: transparent;
   color: #111;
@@ -33,6 +33,22 @@
 .tv-stop { display: grid; grid-template-columns: 114px minmax(0, 1fr); align-items: start; gap: 12px; padding: 20px 0; border-bottom: 1px solid #ededed; scroll-margin-block: 104px; transition: background .18s ease; }
 .tv-stop:first-child { padding-top: 0; }
 .tv-stop:last-child { padding-bottom: 0; border-bottom: 0; }
+.tv-stop.is-removed > .tv-photo, .tv-stop.is-removed .tv-stop-time, .tv-stop.is-removed .tv-stop-title, .tv-stop.is-removed .tv-stop-description { opacity: .45; }
+.tv-stop-tag { display: inline-block; margin-left: 8px; padding: 0 8px; border-radius: 999px; background: var(--iui-ink, #0d0d0d); color: #fff; font-size: 11px; line-height: 18px; vertical-align: 1px; }
+.tv-stop-toggle, .tv-suggestion-add { display: inline-flex; align-items: center; justify-content: center; min-height: 32px; padding: 6px 14px; border: 1px solid var(--iui-border, #e7e7e7); border-radius: 999px; background: var(--iui-canvas, #fff); color: var(--iui-ink, #0d0d0d); font-family: inherit; font-size: 13px; font-weight: 500; line-height: 18px; cursor: pointer; transition: background .15s ease, border-color .15s ease; }
+.tv-stop-toggle { margin-top: 12px; }
+.tv-stop-toggle:hover, .tv-suggestion-add:not(:disabled):hover { background: var(--iui-surface, #f7f7f8); border-color: var(--iui-border-strong, #cecece); }
+.tv-suggestions { display: flex; flex-direction: column; gap: 16px; }
+.tv-suggestion-list { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 12px; }
+.tv-suggestion { display: flex; flex-direction: column; gap: 10px; min-width: 0; }
+.tv-suggestion > .tv-photo { aspect-ratio: 1.5; }
+.tv-suggestion-content .tv-stop-title { margin-bottom: 2px; }
+.tv-suggestion-content .tv-stop-time { margin-bottom: 0; }
+.tv-suggestion-add { align-self: flex-start; border-color: var(--iui-ink, #0d0d0d); background: var(--iui-ink, #0d0d0d); color: #fff; }
+.tv-suggestion-add:not(:disabled):hover { background: #2f2f2f; border-color: #2f2f2f; }
+.tv-suggestion-add.is-added { border-color: var(--iui-border, #e7e7e7); background: var(--iui-surface, #f7f7f8); color: var(--iui-muted, #676767); cursor: default; }
+.tv-suggestion-add:disabled:not(.is-added) { opacity: .5; cursor: default; }
+.tv-stop-toggle:focus-visible, .tv-suggestion-add:focus-visible, .tv-map-marker:focus-visible { outline: 2px solid #3985f5; outline-offset: 3px; }
 .tv-stop > .tv-photo { width: 114px; height: 114px; }
 .tv-stop-content { min-width: 0; }
 .tv-stop-time { margin-bottom: 4px; color: #777; font-size: 12px; font-weight: 500; line-height: 16px; }
@@ -57,7 +73,7 @@
 .tv-map-expand { position: absolute; top: 12px; right: 12px; z-index: 500; min-height: 28px; padding: 4px 10px; }
 .tv-map-expand svg { width: 14px; height: 14px; }
 .tv-map-pill:hover, .tv-map-info:hover { background: #f9f9f9; }
-.tv-map-marker { background: transparent; border: 0; }
+.tv-map-marker { cursor: pointer; }
 .tv-map-marker-content { position: relative; display: flex; width: 34px; flex-direction: column; align-items: center; }
 .tv-map-pin { display: flex; align-items: center; justify-content: center; width: 34px; height: 34px; flex-shrink: 0; background: #fff; border: 1px solid #e2e2e2; border-radius: 50%; box-shadow: 0 1px 4px rgb(0 0 0 / 20%); font-size: 18px; line-height: 1; }
 .tv-map-pin.is-selected { outline: 3px solid #3985f5; }
@@ -66,11 +82,11 @@
 .tv-map-error { top: auto; bottom: 28px; }
 .tv-map-overview { position: absolute; bottom: 22px; left: 12px; z-index: 500; padding: 2px 7px; border-radius: 6px; background: rgb(255 255 255 / 92%); color: #666; font-size: 10px; line-height: 16px; }
 .tv-map-status { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0; }
-.tv-map-surface .leaflet-control-attribution { max-width: calc(100% - 50px); padding: 1px 4px; background: rgb(255 255 255 / 90%); color: #666; font-size: 8px; line-height: 10px; }
-.tv-map-surface .leaflet-control-attribution a { color: #555; }
-.tv-map-surface .leaflet-control-zoom { border: 1px solid rgb(0 0 0 / 10%); border-radius: 10px; overflow: hidden; box-shadow: 0 1px 4px rgb(0 0 0 / 12%); opacity: 0; transition: opacity .15s ease; }
-.tv-map-wrap:hover .leaflet-control-zoom, .tv-map-wrap:focus-within .leaflet-control-zoom { opacity: 1; }
-.tv-map-surface .leaflet-control-zoom a { width: 28px; height: 28px; color: #555; font-size: 20px; line-height: 28px; }
+.tv-map-surface .maplibregl-ctrl-attrib { max-width: calc(100% - 50px); padding: 1px 4px; background: rgb(255 255 255 / 90%); color: #666; font-size: 8px; line-height: 10px; }
+.tv-map-surface .maplibregl-ctrl-attrib a { color: #555; }
+.tv-map-surface .maplibregl-ctrl-group { border: 1px solid rgb(0 0 0 / 10%); border-radius: 10px; overflow: hidden; box-shadow: 0 1px 4px rgb(0 0 0 / 12%); opacity: 0; transition: opacity .15s ease; }
+.tv-map-wrap:hover .maplibregl-ctrl-group, .tv-map-wrap:focus-within .maplibregl-ctrl-group { opacity: 1; }
+.tv-map-surface .maplibregl-ctrl-group button { width: 28px; height: 28px; }
 .tv-map-wrap :focus-visible, .tv-bookmark:focus-visible, .tv-stop-title button:focus-visible, .tv-stop-title a:focus-visible, .tv-citation:focus-visible { outline: 2px solid #3985f5; outline-offset: 3px; }
 @media (max-width: 520px) {
   .tv-stop { grid-template-columns: 84px minmax(0, 1fr); gap: 12px; padding-block: 18px; }
@@ -89,7 +105,7 @@
 @keyframes tv-word-in { from { opacity: 0; filter: blur(2px); } to { opacity: 1; filter: blur(0); } }
 .tv-stream-word { animation: tv-word-in 320ms ease-out both; animation-delay: var(--word-delay, 0ms); }
 @keyframes tv-pin-in { from { opacity: 0; transform: scale(.75); } to { opacity: 1; transform: scale(1); } }
-.tv-map-marker-content { animation: tv-pin-in 260ms cubic-bezier(.2,.7,.3,1) both; transform-origin: 50% 17px; }
+.tv-map-marker-content { animation: tv-pin-in 104ms cubic-bezier(.2,.7,.3,1) both; transform-origin: 50% 17px; }
 .tv-photo img { animation: tv-word-in 300ms ease-out both; }
 @media (prefers-reduced-motion: reduce) { .tv-stream-word, .tv-map-marker-content, .tv-photo img { animation: none; } }
 

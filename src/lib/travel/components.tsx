@@ -4,7 +4,7 @@ import { defineComponent, useIsStreaming } from "@openuidev/react-lang";
 import { useEffect, useState, type CSSProperties, type ReactNode } from "react";
 import { z } from "zod/v4";
 import { fetchWiki, getStopKey, useRouteStore, type StopData } from "../route/store";
-import { TravelMapView } from "./map";
+import { coordinate, TravelMapView } from "./map";
 import "./travel.css";
 
 export function safeUrl(value: unknown, local = false): string | undefined {
@@ -134,6 +134,12 @@ export const TravelGallery = defineComponent({
 
 export type TravelStopData = StopData & { citations?: unknown[] };
 
+/** The model's stops followed by any the user added from TravelSuggestions. */
+function withAdded(stops: TravelStopData[], added: readonly TravelStopData[]) {
+  const keys = new Set(stops.map(getStopKey));
+  return [...stops, ...added.filter((stop) => !keys.has(getStopKey(stop)))];
+}
+
 function StopImage({ stop }: { stop: TravelStopData }) {
   return <Photo photo={{ src: stop.imageUrl || stop.photos?.[0], alt: stop.name, wikiTitle: stop.wikiTitle, focalX: stop.imageFocalX }} />;
 }
@@ -143,12 +149,14 @@ export function TravelStopRow({ stop }: { stop: TravelStopData }) {
   const key = getStopKey(stop);
   const href = safeUrl(stop.link);
   const title = <>{stop.name}</>;
-  return <article id={key ? route.stopId(key) : undefined} className={`tv-stop ${route.getSelected() === key ? "is-selected" : ""}`}>
+  const removed = !!key && route.isRemoved(key);
+  return <article id={key ? route.stopId(key) : undefined} className={`tv-stop ${route.getSelected() === key ? "is-selected" : ""} ${removed ? "is-removed" : ""}`}>
     <StopImage stop={stop} />
     <div className="tv-stop-content">
-      {stop.time && <div className="tv-stop-time">{stop.time}</div>}
+      {(stop.time || route.isAdded(key)) && <div className="tv-stop-time">{stop.time}{route.isAdded(key) && <span className="tv-stop-tag">Added</span>}</div>}
       <h3 className="tv-stop-title">{href ? <a href={href} target="_blank" rel="noreferrer">{title}</a> : <button type="button" onClick={() => { route.selectStop(key); document.getElementById(`${route.mapId}-travel`)?.scrollIntoView({ behavior: "smooth", block: "center" }); }}>{title}</button>}</h3>
       {(stop.description || stop.story) && <p className="tv-stop-description"><StreamingText text={stop.description || stop.story} />{nodeProps<CitationData>(stop.citations).map((citation, i) => <Citation key={`${citation.url}-${i}`} citation={citation} />)}</p>}
+      {key && <button type="button" className="tv-stop-toggle" aria-pressed={removed} onClick={() => route.toggleStop(key)}>{removed ? "Add back" : "Remove from my route"}</button>}
     </div>
   </article>;
 }
@@ -157,7 +165,7 @@ export const TravelStop = defineComponent({
   name: "TravelStop",
   props: z.object({
     id: z.string(), name: z.string(), time: z.string(), description: z.string(), imageUrl: z.string(),
-    lat: z.number().min(-90).max(90), lng: z.number().min(-180).max(180), emoji: z.string(), category: z.string(),
+    lat: z.number().min(-90).max(90), lng: z.number().min(-180).max(180), emoji: z.string().describe("One emoji character for the map pin, e.g. 🌉 ⛴️ 🏛️ 🌳 — never a letter, number or symbol"), category: z.string(),
     link: z.string().optional(), wikiTitle: z.string().optional(), citations: z.array(TravelCitation.ref).optional(), imageFocalX: z.number().min(0).max(100).optional(),
   }),
   description: "A reusable destination with a stable id, visiting time, short practical description, real photo URL, coordinates, emoji and category. Reference the SAME stop in TravelMap and TravelItinerary. Omit unknown optional links; never invent images.",
@@ -168,9 +176,39 @@ export const TravelItinerary = defineComponent({
   name: "TravelItinerary",
   props: z.object({ title: z.string(), stops: z.array(TravelStop.ref).max(50) }),
   description: "A simple itinerary: heading followed by divided image/text rows. Reuse the stop references from TravelMap.",
-  component: ({ props }) => <section className="tv-itinerary">
+  component: function TravelItineraryComponent({ props }) {
+    const route = useRouteStore();
+    const stops = withAdded(nodeProps<TravelStopData>(props.stops), route.getAdded());
+    return <section className="tv-itinerary">
+      {props.title && <h2 className="tv-heading tv-section-heading">{props.title}</h2>}
+      <div className="tv-stop-list">{stops.map((stop, i) => <TravelStopRow key={getStopKey(stop) || `pending-${i}`} stop={stop} />)}</div>
+    </section>;
+  },
+});
+
+function SuggestionCard({ stop }: { stop: TravelStopData }) {
+  const route = useRouteStore();
+  const key = getStopKey(stop);
+  const added = !!key && route.isAdded(key);
+  return <article className="tv-suggestion">
+    <StopImage stop={stop} />
+    <div className="tv-suggestion-content">
+      <h3 className="tv-stop-title">{stop.name}</h3>
+      {stop.time && <div className="tv-stop-time">{stop.time}</div>}
+    </div>
+    <button type="button" className={`tv-suggestion-add ${added ? "is-added" : ""}`} disabled={!key || added || !coordinate(stop)} onClick={() => { route.addStop(stop); route.selectStop(key); }}>
+      {added ? "Added to route" : "+ Add to my route"}
+    </button>
+  </article>;
+}
+
+export const TravelSuggestions = defineComponent({
+  name: "TravelSuggestions",
+  props: z.object({ title: z.string(), stops: z.array(TravelStop.ref).max(4) }),
+  description: "Optional extra places the user can add to the route. Use 2–3 TravelStops that are NOT in the itinerary, each with its own unique id. Adding one puts a pin on TravelMap and appends it to TravelItinerary.",
+  component: ({ props }) => <section className="tv-suggestions">
     {props.title && <h2 className="tv-heading tv-section-heading">{props.title}</h2>}
-    <div className="tv-stop-list">{nodeProps<TravelStopData>(props.stops).map((stop, i) => <TravelStopRow key={getStopKey(stop) || `pending-${i}`} stop={stop} />)}</div>
+    <div className="tv-suggestion-list">{nodeProps<TravelStopData>(props.stops).map((stop, i) => <SuggestionCard key={getStopKey(stop) || `pending-${i}`} stop={stop} />)}</div>
   </section>,
 });
 
@@ -183,6 +221,7 @@ export const TravelMap = defineComponent({
   description: "A real interactive street map with emoji destination markers, category filtering and expand. Reuse the SAME TravelStop refs in TravelItinerary. Optional route coordinates trace the supplied route; otherwise stops connect in visiting order as a route overview.",
   component: function TravelMapComponent({ props }) {
     const streaming = useIsStreaming();
-    return <TravelMapView stops={nodeProps<TravelStopData>(props.stops)} path={props.route} streaming={streaming} />;
+    const route = useRouteStore();
+    return <TravelMapView stops={withAdded(nodeProps<TravelStopData>(props.stops), route.getAdded())} path={props.route} streaming={streaming} />;
   },
 });

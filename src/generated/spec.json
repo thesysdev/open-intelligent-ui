@@ -2,7 +2,7 @@
   "root": "Card",
   "components": {
     "Card": {
-      "signature": "Card(children: (TextContent | MarkDownRenderer | CardHeader | Callout | TextCallout | CodeBlock | Image | ImageBlock | ImageGallery | Separator | HorizontalBarChart | RadarChart | PieChart | RadialChart | SingleStackedBarChart | ScatterChart | AreaChart | BarChart | LineChart | Table | TagBlock | Form | Buttons | IconButton | Steps | InlineHeader | EntityList | EditableTable | SnippetCardBlock | OverviewCardBlock | ContextCardBlock | CompositeCardBlock | VisualCardBlock | ListBlock | FollowUpBlock | SectionBlock | Tabs | Carousel | RouteMap | RouteStops | RouteSuggestions | RouteStop | TravelGallery | TravelHeading | TravelItinerary | TravelMap | TravelProse | TravelImage | TravelStop)[], sources?: {url?: string, title: string, sourceName: string}[])",
+      "signature": "Card(children: (TextContent | MarkDownRenderer | CardHeader | Callout | TextCallout | CodeBlock | Image | ImageBlock | ImageGallery | Separator | HorizontalBarChart | RadarChart | PieChart | RadialChart | SingleStackedBarChart | ScatterChart | AreaChart | BarChart | LineChart | Table | TagBlock | Form | Buttons | IconButton | Steps | InlineHeader | EntityList | EditableTable | SnippetCardBlock | OverviewCardBlock | ContextCardBlock | CompositeCardBlock | VisualCardBlock | ListBlock | FollowUpBlock | SectionBlock | Tabs | Carousel | RouteMap | RouteStops | RouteSuggestions | RouteStop | TravelGallery | TravelHeading | TravelItinerary | TravelSuggestions | TravelMap | TravelProse | TravelImage | TravelStop)[], sources?: {url?: string, title: string, sourceName: string}[])",
       "description": "Vertical response container. Pass one array of content children. Travel citations belong inline in TravelProse/TravelStop, not in root sources."
     },
     "CardHeader": {
@@ -384,6 +384,10 @@
     "TravelMap": {
       "signature": "TravelMap(stops: TravelStop[], route?: {lat: number, lng: number}[])",
       "description": "A real interactive street map with emoji destination markers, category filtering and expand. Reuse the SAME TravelStop refs in TravelItinerary. Optional route coordinates trace the supplied route; otherwise stops connect in visiting order as a route overview."
+    },
+    "TravelSuggestions": {
+      "signature": "TravelSuggestions(title: string, stops: TravelStop[])",
+      "description": "Optional extra places the user can add to the route. Use 2–3 TravelStops that are NOT in the itinerary, each with its own unique id. Adding one puts a pin on TravelMap and appends it to TravelItinerary."
     }
   },
   "componentGroups": [
@@ -592,10 +596,11 @@
         "TravelGallery",
         "TravelStop",
         "TravelItinerary",
-        "TravelMap"
+        "TravelMap",
+        "TravelSuggestions"
       ],
       "notes": [
-        "- For travel: TravelHeading, TravelProse, a three-photo TravelGallery, TravelMap and TravelItinerary sharing identical TravelStop refs, followed by transport advice. Card accepts all display components. Use image_search once with queries for the destination photos and stops, and copy returned Image URLs exactly into TravelImage.src and TravelStop.imageUrl. If no image is returned, leave src empty and use wikiTitle. Finish with a Customize your route Form using the standard form components and an @ToAssistant primary action. Read the submitted form values when rebuilding the route."
+        "- For travel: TravelHeading, TravelProse, a three-photo TravelGallery, TravelMap and TravelItinerary sharing identical TravelStop refs, then TravelSuggestions with 2–3 extra places not in the itinerary (each its own TravelStop with a unique id), followed by transport advice. Card accepts all display components. Use image_search once with queries for the destination photos and stops, and copy returned Image URLs exactly into TravelImage.src and TravelStop.imageUrl. If no image is returned, leave src empty and use wikiTitle. Finish with a Customize your route Form using the standard form components and an @ToAssistant primary action. Read the submitted form values when rebuilding the route."
       ]
     }
   ],
@@ -890,6 +895,9 @@
       },
       "TravelMap": {
         "$ref": "#/$defs/TravelMap"
+      },
+      "TravelSuggestions": {
+        "$ref": "#/$defs/TravelSuggestions"
       }
     },
     "required": [
@@ -988,7 +996,8 @@
       "TravelGallery",
       "TravelStop",
       "TravelItinerary",
-      "TravelMap"
+      "TravelMap",
+      "TravelSuggestions"
     ],
     "additionalProperties": false,
     "$defs": {
@@ -1133,6 +1142,9 @@
                 },
                 {
                   "$ref": "#/$defs/TravelItinerary"
+                },
+                {
+                  "$ref": "#/$defs/TravelSuggestions"
                 },
                 {
                   "$ref": "#/$defs/TravelMap"
@@ -5189,6 +5201,28 @@
         "additionalProperties": false,
         "id": "TravelCitation",
         "description": "A compact inline source link. Use an actual supporting source URL; icon is an optional emoji or safe source favicon URL."
+      },
+      "TravelSuggestions": {
+        "type": "object",
+        "properties": {
+          "title": {
+            "type": "string"
+          },
+          "stops": {
+            "maxItems": 4,
+            "type": "array",
+            "items": {
+              "$ref": "#/$defs/TravelStop"
+            }
+          }
+        },
+        "required": [
+          "title",
+          "stops"
+        ],
+        "additionalProperties": false,
+        "id": "TravelSuggestions",
+        "description": "Optional extra places the user can add to the route. Use 2–3 TravelStops that are NOT in the itinerary, each with its own unique id. Adding one puts a pin on TravelMap and appends it to TravelItinerary."
       },
       "TravelMap": {
         "type": "object",

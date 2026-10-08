@@ -1,12 +1,16 @@
-import { maplibreGL } from "@maplibre/maplibre-gl-leaflet";
-import { setWorkerUrl, type StyleSpecification } from "maplibre-gl";
-import type { Map as LeafletMap } from "leaflet";
+import type { StyleSpecification } from "maplibre-gl";
 
-// Next emits a versioned same-origin worker. No hosted executable or API key.
-setWorkerUrl(new URL("maplibre-gl/dist/maplibre-gl-worker.mjs", import.meta.url).toString());
+export type MapLibre = typeof import("maplibre-gl");
+
+/** Loads MapLibre on first use; Next emits its worker as a versioned same-origin asset. */
+export async function loadMapLibre(): Promise<MapLibre> {
+  const lib = await import("maplibre-gl");
+  lib.setWorkerUrl(new URL("maplibre-gl/dist/maplibre-gl-worker.mjs", import.meta.url).toString());
+  return lib;
+}
 
 /** Restrained, destination-independent cartography using public OpenMapTiles geometry. */
-const style: StyleSpecification = {
+export const vectorStyle: StyleSpecification = {
   version: 8,
   glyphs: "https://tiles.openfreemap.org/fonts/{fontstack}/{range}.pbf",
   sources: { places: { type: "vector", url: "https://tiles.openfreemap.org/planet", attribution: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> · <a href="https://openfreemap.org">OpenFreeMap</a>' } },
@@ -26,6 +30,9 @@ const style: StyleSpecification = {
   ],
 };
 
-export function addVectorBasemap(map: LeafletMap) {
-  return maplibreGL({ style, attributionControl: false }).addTo(map);
-}
+/** Raster street tiles, used only if the vector basemap fails to load. */
+export const rasterStyle: StyleSpecification = {
+  version: 8,
+  sources: { streets: { type: "raster", tiles: ["https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}"], tileSize: 256, maxzoom: 19, attribution: "Tiles © Esri — OpenStreetMap contributors" } },
+  layers: [{ id: "streets", type: "raster", source: "streets" }],
+};
