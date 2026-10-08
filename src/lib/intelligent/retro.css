@@ -1,0 +1,383 @@
+.iui-retro {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 30px 24px 24px;
+  border-radius: 24px;
+  background: #181c31;
+  color: #f9e7b6;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  box-sizing: border-box;
+  line-height: 1.5;
+}
+.iui-retro * {
+  box-sizing: border-box;
+}
+.iui-retro button {
+  font: inherit;
+  cursor: pointer;
+  touch-action: manipulation;
+  user-select: none;
+  -webkit-user-select: none;
+  border: 0;
+}
+.iui-retro button:focus-visible,
+.iui-retro-shell:focus-visible {
+  outline: 3px solid #f6c65c;
+  outline-offset: 4px;
+}
+.iui-retro-brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 18px;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+.iui-retro-brand h2 {
+  font:
+    800 19px/1.3 ui-monospace,
+    SFMono-Regular,
+    Menlo,
+    monospace;
+  letter-spacing: 2px;
+  color: #f6c65c;
+  margin: 0;
+  text-transform: uppercase;
+}
+.iui-retro-brand > span {
+  font-size: 9px;
+  background: #b84b6a;
+  padding: 4px 6px;
+  color: #fff;
+  border-radius: 3px;
+  text-transform: uppercase;
+}
+.iui-retro-modes {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 22px;
+}
+.iui-retro-modes button {
+  background: transparent;
+  color: #f9e7b6;
+  padding: 7px 12px;
+  border: 1px solid #626785;
+  border-radius: 8px;
+  text-transform: uppercase;
+  font-size: 11px;
+}
+.iui-retro-modes button[aria-pressed="true"] {
+  background: #edcf83;
+  color: #23263c;
+  border-color: #edcf83;
+}
+.iui-retro-shell {
+  width: 100%;
+  max-width: 390px;
+  position: relative;
+  padding: 21px 21px 26px;
+  border: 3px solid #fff0d7;
+  border-right-color: #a68d87;
+  border-bottom-color: #8e7472;
+  border-radius: 22px 22px 65px 22px;
+  background: #e9cbb0;
+  box-shadow:
+    7px 10px 0 #0b1022,
+    0 18px 30px #080b1b55;
+  outline: none;
+}
+.iui-retro-shell-brand {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+  font-size: 10px;
+  font-weight: bold;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: #54576c;
+}
+.iui-retro-shell-brand b {
+  color: #bb4b67;
+}
+.iui-retro-frame {
+  background: #353648;
+  border-radius: 12px 12px 36px 12px;
+  padding: 15px 13px 20px;
+  box-shadow: inset 3px 4px 8px #191b29;
+}
+.iui-retro-score {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  color: #d9d2bd;
+  font-size: 11px;
+  text-transform: uppercase;
+  margin-bottom: 8px;
+  font-variant-numeric: tabular-nums;
+}
+.iui-retro-screen {
+  position: relative;
+  border: 5px solid #859d78;
+  aspect-ratio: 1;
+  background: #b8d0a0;
+}
+.iui-retro-screen canvas {
+  width: 100%;
+  height: 100%;
+  display: block;
+  image-rendering: pixelated;
+}
+.iui-retro-overlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  background: #b8d0a0ed;
+  color: #283e36;
+  padding: 20px;
+}
+.iui-retro-overlay > strong {
+  font-size: 26px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+}
+.iui-retro-overlay > p {
+  font-size: 11px;
+  line-height: 1.8;
+  margin: 12px 0 20px;
+  max-width: 200px;
+}
+.iui-retro-overlay button {
+  background: #293d36;
+  color: #d8e9b9;
+  padding: 10px 17px;
+  border-radius: 4px;
+  font-size: 11px;
+  letter-spacing: 1px;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+.iui-retro-power {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  margin-top: 12px;
+  font-size: 9px;
+  color: #c5bdab;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+.iui-retro-power b {
+  font-weight: 400;
+  color: #f17c85;
+}
+.iui-retro-controls {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 15px;
+  margin-top: 29px;
+}
+.iui-retro-dpad {
+  width: 143px;
+  flex-shrink: 0;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  grid-template-rows: repeat(3, 1fr);
+  gap: 3px;
+  aspect-ratio: 1;
+}
+.iui-retro-key {
+  display: grid;
+  place-items: center;
+  background: #30354e;
+  color: #fff;
+  border-radius: 8px;
+  box-shadow: 0 5px 0 #161c30;
+  font-size: 19px !important;
+  font-weight: 900;
+  padding: 0;
+  touch-action: none !important;
+}
+.iui-retro-key:active {
+  transform: translateY(4px);
+  box-shadow: 0 1px 0 #161c30;
+}
+.iui-retro-up {
+  grid-area: 1/2;
+}
+.iui-retro-left {
+  grid-area: 2/1;
+}
+.iui-retro-right {
+  grid-area: 2/3;
+}
+.iui-retro-down {
+  grid-area: 3/2;
+}
+.iui-retro-dpad > span {
+  grid-area: 2/2;
+  display: grid;
+  place-items: center;
+  border-radius: 5px;
+  background: #30354e;
+  color: #7c8098;
+}
+.iui-retro-action-buttons {
+  display: flex;
+  gap: 10px;
+  transform: rotate(-25deg);
+}
+.iui-retro-action-buttons button {
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  background: #b84b6a;
+  color: #fff;
+  box-shadow: 0 5px 0 #80324c;
+  font-weight: 800;
+}
+.iui-retro-action-buttons button:active {
+  transform: translateY(3px);
+  box-shadow: 0 2px 0 #80324c;
+}
+.iui-retro-system-buttons {
+  display: flex;
+  justify-content: center;
+  gap: 25px;
+  margin-top: 26px;
+}
+.iui-retro-system-buttons > div {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+.iui-retro-system-buttons button {
+  background: #79748a;
+  color: #fff;
+  padding: 6px 16px;
+  border-radius: 20px;
+  transform: rotate(-17deg);
+  font-size: 10px;
+  text-transform: uppercase;
+  font-weight: bold;
+}
+.iui-retro-system-buttons span {
+  font-size: 8px;
+  text-transform: uppercase;
+  color: #757187;
+}
+.iui-retro-speaker {
+  display: flex;
+  justify-content: flex-end;
+  gap: 4px;
+  margin: 15px 15px 3px 0;
+  transform: rotate(-35deg);
+  transform-origin: 90% center;
+}
+.iui-retro-speaker i {
+  height: 24px;
+  width: 4px;
+  background: #b19d92;
+  border-radius: 5px;
+}
+.iui-retro-help {
+  font-size: 10px;
+  text-transform: uppercase;
+  text-align: center;
+  line-height: 2;
+  color: #9fa8c7;
+  margin: 23px 0 0;
+}
+.iui-retro-help span {
+  color: #e7c47a;
+}
+.iui-retro-sr {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+}
+@media (max-width: 520px) {
+  .iui-retro {
+    padding: 24px 16px;
+    border-radius: 20px;
+  }
+  .iui-retro-shell {
+    padding: 18px 15px 24px;
+  }
+  .iui-retro-dpad {
+    width: 125px;
+  }
+  .iui-retro-action-buttons button {
+    width: 46px;
+    height: 46px;
+  }
+  .iui-retro-overlay > strong {
+    font-size: 23px;
+  }
+  .iui-retro-controls {
+    gap: 12px;
+  }
+  .iui-retro-brand h2 {
+    font-size: 17px;
+  }
+  .iui-retro-shell-brand {
+    font-size: 9px;
+    letter-spacing: 1px;
+  }
+}
+@media (max-width: 370px) {
+  .iui-retro {
+    padding: 20px 12px;
+  }
+  .iui-retro-shell {
+    padding: 14px 11px 21px;
+  }
+  .iui-retro-frame {
+    padding: 12px 9px 17px;
+  }
+  .iui-retro-dpad {
+    width: 105px;
+  }
+  .iui-retro-action-buttons {
+    gap: 8px;
+  }
+  .iui-retro-action-buttons button {
+    width: 40px;
+    height: 40px;
+  }
+  .iui-retro-overlay {
+    padding: 12px;
+  }
+  .iui-retro-overlay > strong {
+    font-size: 20px;
+  }
+  .iui-retro-overlay > p {
+    font-size: 10px;
+    margin: 8px 0 13px;
+  }
+  .iui-retro-overlay button {
+    font-size: 10px;
+    padding: 8px 12px;
+  }
+  .iui-retro-power {
+    font-size: 8px;
+    letter-spacing: 0;
+  }
+  .iui-retro-modes {
+    gap: 6px;
+  }
+  .iui-retro-modes button {
+    padding: 7px 10px;
+    font-size: 10px;
+  }
+}

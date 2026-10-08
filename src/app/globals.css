@@ -1,64 +1,304 @@
-*,
-*::before,
-*::after {
-  box-sizing: border-box;
-  border: 0 solid;
-  margin: 0;
-  padding: 0;
+/* Foundations informed by OpenAI's Apps SDK UI guidelines.
+   Keep the existing OpenUI primitives and map their tokens to the native
+   conversational palette instead of adding a second component framework. */
+:root {
+  --iui-font: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  --iui-canvas: #ffffff;
+  --iui-surface: #f7f7f8;
+  --iui-surface-hover: #eeeeef;
+  --iui-ink: #0d0d0d;
+  --iui-muted: #676767;
+  --iui-faint: #8f8f8f;
+  --iui-border: #e7e7e7;
+  --iui-border-strong: #cecece;
+  --iui-radius: 16px;
+  --iui-control-gap: 8px;
+  --iui-label-gap: 12px;
+  --iui-field-gap: 24px;
+  --iui-section-gap: 32px;
+  --iui-action-gap: 40px;
+  --iui-range-track: #e5e5e5;
+  --iui-range-thumb: #303030;
+  --iui-focus: #0285ff;
+  --iui-blue: #0285ff;
+  --iui-green: #008764;
+  --iui-shadow: 0 4px 20px rgb(0 0 0 / 6%);
+  color-scheme: light;
 }
 
-html {
-  line-height: 1.5;
-  -webkit-text-size-adjust: 100%;
+*, *::before, *::after { box-sizing: border-box; border: 0 solid; margin: 0; padding: 0; }
+html { line-height: 1.5; -webkit-text-size-adjust: 100%; }
+html, body { margin: 0; height: 100%; }
+body { font-family: var(--iui-font); font-size: 16px; font-weight: 400; color: var(--iui-ink); background: var(--iui-canvas); -webkit-font-smoothing: antialiased; }
+h1, h2, h3, h4, h5, h6 { font-size: inherit; font-weight: inherit; }
+a { color: inherit; text-decoration: inherit; }
+img, svg, video, canvas { display: block; max-width: 100%; }
+img, video { height: auto; }
+table { border-collapse: collapse; }
+button, input, select, textarea { font: inherit; color: inherit; }
+button { background: transparent; cursor: pointer; }
+button:disabled { cursor: not-allowed; }
+:focus-visible { outline: 2px solid var(--iui-focus); outline-offset: 3px; }
+::selection { background: #d8eaff; color: #0d0d0d; }
+
+/* The explicit body/portal specificity survives ThemeProvider's runtime sheet.
+   Portal menus inherit exactly the same design tokens as in-flow controls. */
+html body, .intelligent-app, body [class*="openui-theme-portal-"] {
+  --openui-background: var(--iui-canvas);
+  --openui-foreground: var(--iui-canvas);
+  --openui-popover-background: var(--iui-canvas);
+  --openui-sunk-light: #fafafa;
+  --openui-sunk: var(--iui-surface);
+  --openui-sunk-deep: #ececec;
+  --openui-elevated-light: #f7f7f8;
+  --openui-elevated: #ffffff;
+  --openui-elevated-strong: #e7e7e7;
+  --openui-elevated-intense: #cecece;
+  --openui-overlay: rgb(0 0 0 / 40%);
+  --openui-highlight-subtle: #fafafa;
+  --openui-highlight: var(--iui-surface);
+  --openui-highlight-strong: var(--iui-surface-hover);
+  --openui-highlight-intense: #e3e3e3;
+  --openui-inverted-background: var(--iui-ink);
+  --openui-text-neutral-primary: var(--iui-ink);
+  --openui-text-neutral-secondary: var(--iui-muted);
+  --openui-text-neutral-tertiary: var(--iui-faint);
+  --openui-text-neutral-link: var(--iui-ink);
+  --openui-text-brand: var(--iui-ink);
+  --openui-text-accent-primary: var(--iui-canvas);
+  --openui-text-accent-secondary: #dadada;
+  --openui-text-accent-tertiary: #b4b4b4;
+  --openui-interactive-accent-default: var(--iui-ink);
+  --openui-interactive-accent-hover: #2f2f2f;
+  --openui-interactive-accent-disabled: #b4b4b4;
+  --openui-interactive-accent-pressed: #454545;
+  --openui-chat-user-response-bg: #f4f4f4;
+  --openui-chat-user-response-text: var(--iui-ink);
+  --openui-border-default: var(--iui-border);
+  --openui-border-interactive: var(--iui-border-strong);
+  --openui-border-interactive-emphasis: #8f8f8f;
+  --openui-border-interactive-selected: var(--iui-ink);
+  --openui-border-accent: var(--iui-ink);
+  --openui-border-accent-emphasis: #8f8f8f;
+  --openui-info-background: #edf5ff;
+  --openui-success-background: #edf9f2;
+  --openui-alert-background: #fff8e7;
+  --openui-danger-background: #fff0ee;
+  --openui-purple-background: #f4f0ff;
+  --openui-pink-background: #fff0f6;
+  --openui-text-info-primary: #0068bc;
+  --openui-text-success-primary: #00805d;
+  --openui-text-alert-primary: #946200;
+  --openui-text-danger-primary: #c1322c;
+  --openui-text-purple-primary: #7040c1;
+  --openui-text-pink-primary: #b7377c;
+  --openui-border-info-emphasis: #0285ff;
+  --openui-border-success-emphasis: #008764;
+  --openui-border-alert-emphasis: #e2ab23;
+  --openui-border-danger-emphasis: #e02e2a;
+  --openui-font-body: var(--iui-font);
+  --openui-font-heading: var(--iui-font);
+  --openui-font-label: var(--iui-font);
+  --openui-font-numbers: var(--iui-font);
+  --openui-font-weight-regular: 400;
+  --openui-font-weight-medium: 500;
+  --openui-font-weight-bold: 600;
+  --openui-font-weight-heavy: 600;
+  --openui-text-body-xs: 400 12px/1.5 var(--iui-font);
+  --openui-text-body-xs-heavy: 500 12px/1.5 var(--iui-font);
+  --openui-text-body-sm: 400 14px/1.5 var(--iui-font);
+  --openui-text-body-sm-heavy: 500 14px/1.5 var(--iui-font);
+  --openui-text-body-default: 400 16px/1.6 var(--iui-font);
+  --openui-text-body-default-heavy: 500 16px/1.6 var(--iui-font);
+  --openui-text-body-lg: 400 18px/1.5 var(--iui-font);
+  --openui-text-body-lg-heavy: 500 18px/1.5 var(--iui-font);
+  --openui-text-heading-xs: 600 16px/1.4 var(--iui-font);
+  --openui-text-heading-sm: 600 18px/1.4 var(--iui-font);
+  --openui-text-heading-md: 600 22px/1.3 var(--iui-font);
+  --openui-text-heading-lg: 600 26px/1.25 var(--iui-font);
+  --openui-text-heading-xl: 600 30px/1.2 var(--iui-font);
+  --openui-text-heading-md-letter-spacing: -0.4px;
+  --openui-text-heading-lg-letter-spacing: -0.6px;
+  --openui-text-heading-xl-letter-spacing: -0.7px;
+  --openui-text-label-xs: 400 12px/1.4 var(--iui-font);
+  --openui-text-label-xs-heavy: 500 12px/1.4 var(--iui-font);
+  --openui-text-label-sm: 400 14px/1.4 var(--iui-font);
+  --openui-text-label-sm-heavy: 500 14px/1.4 var(--iui-font);
+  --openui-text-label-default: 400 15px/1.4 var(--iui-font);
+  --openui-text-label-default-heavy: 500 15px/1.4 var(--iui-font);
+  --openui-text-label-lg: 400 18px/1.4 var(--iui-font);
+  --openui-text-label-lg-heavy: 500 18px/1.4 var(--iui-font);
+  --openui-text-numbers-xs: 400 12px/1.5 var(--iui-font);
+  --openui-text-numbers-xs-heavy: 500 12px/1.5 var(--iui-font);
+  --openui-text-numbers-sm: 400 14px/1.5 var(--iui-font);
+  --openui-text-numbers-sm-heavy: 500 14px/1.5 var(--iui-font);
+  --openui-text-numbers-default: 400 16px/1.5 var(--iui-font);
+  --openui-text-numbers-default-heavy: 500 16px/1.5 var(--iui-font);
+  --openui-text-numbers-lg: 400 18px/1.5 var(--iui-font);
+  --openui-text-numbers-lg-heavy: 500 18px/1.5 var(--iui-font);
+  --openui-text-numbers-heading-sm: 500 18px/1.3 var(--iui-font);
+  --openui-text-numbers-heading-md: 500 24px/1.2 var(--iui-font);
+  --openui-text-numbers-heading-lg: 500 28px/1.2 var(--iui-font);
+  --openui-text-numbers-heading-xl: 500 32px/1.2 var(--iui-font);
+  --openui-radius-s: 6px;
+  --openui-radius-m: 8px;
+  --openui-radius-l: 10px;
+  --openui-radius-xl: 12px;
+  --openui-radius-2xl: 14px;
+  --openui-radius-3xl: 16px;
+  --openui-radius-4xl: 20px;
+  --openui-radius-5xl: 24px;
+  --openui-shadow-s: none;
+  --openui-shadow-m: none;
+  --openui-shadow-l: 0 2px 8px rgb(0 0 0 / 4%);
+  --openui-shadow-xl: var(--iui-shadow);
+  --openui-shadow-2xl: 0 8px 32px rgb(0 0 0 / 10%);
+  --openui-shadow-3xl: 0 16px 48px rgb(0 0 0 / 12%);
 }
 
-h1,
-h2,
-h3,
-h4,
-h5,
-h6 {
-  font-size: inherit;
-  font-weight: inherit;
-}
-
-a {
-  color: inherit;
-  text-decoration: inherit;
-}
-
-img,
-svg,
-video,
-canvas {
+/* Shared response primitives */
+body .openui-card { gap: 24px; }
+body .openui-card-standard { width: 100%; }
+body .openui-card-sunk { padding: 20px; }
+body .openui-header { gap: 6px; margin-bottom: 0; }
+body .openui-header-top-left { font-size: 21px; line-height: 1.35; letter-spacing: -.4px; }
+body .openui-header-bottom { font-size: 15px; line-height: 1.6; }
+body .openui-button-base { border-radius: 999px; box-shadow: none; font-weight: 500; justify-content: center; min-height: 38px; padding: 8px 16px; }
+body .openui-button-base-extra-small { min-height: 28px; padding: 4px 10px; font-size: 12px; }
+body .openui-button-base-small { min-height: 32px; padding: 6px 12px; font-size: 13px; }
+body .openui-button-base-large { min-height: 44px; padding: 10px 20px; }
+body .openui-button-base-primary { border-color: transparent; }
+body .openui-button-base-secondary { border-color: var(--iui-border); background: var(--iui-canvas); }
+body .openui-button-base-secondary:not(:disabled):hover { background: var(--iui-surface); }
+body .openui-icon-button { border-radius: 50%; }
+body .openui-input, body .openui-textarea, body .openui-select-trigger { background: var(--iui-canvas); border-color: var(--iui-border-strong); border-radius: 10px; min-height: 42px; padding: 10px 12px; }
+body .openui-input-small { min-height: 34px; padding: 6px 10px; }
+/* The upstream Form writes its gap inline; keep form grouping consistent with
+   the trip and wardrobe forms while giving the final action its own space. */
+body [role="form"]:has(> .openui-form-control) { gap: var(--iui-field-gap) !important; }
+body [role="form"] > .openui-buttons:last-child { margin-top: calc(var(--iui-action-gap) - var(--iui-field-gap)); }
+body .openui-textarea { min-height: 96px; resize: vertical; }
+body .openui-input:focus, body .openui-textarea:focus, body .openui-select-trigger:focus-visible { box-shadow: 0 0 0 2px rgb(2 133 255 / 15%); outline: none; }
+body .openui-input:not(.openui-input-error):focus, body .openui-textarea:not(.openui-textarea-error):focus { border-color: var(--iui-focus); }
+body .openui-select-content, body .openui-date-picker-renderer-floating-content { border-radius: 14px; box-shadow: var(--iui-shadow); }
+body .openui-select-item { border-radius: 8px; padding-top: 9px; padding-bottom: 9px; }
+body .openui-checkbox-item-root { border-radius: 5px; }
+/* Shared range geometry: 24px pill track, 18px thumb, 40px interaction area.
+   Native experience controls and the original OpenUI/Radix slider use the same tokens. */
+body .iui-range {
+  appearance: none;
+  -webkit-appearance: none;
   display: block;
-  max-width: 100%;
-}
-
-img,
-video {
-  height: auto;
-}
-
-table {
-  border-collapse: collapse;
-}
-
-button,
-input,
-select,
-textarea {
-  font: inherit;
-  color: inherit;
-}
-
-button {
+  width: 100%;
+  min-width: 0;
+  height: 40px;
+  padding: 0;
+  margin: 0;
   background: transparent;
+  border: 0;
   cursor: pointer;
 }
-
-html,
-body {
+body .iui-range::-webkit-slider-runnable-track {
+  height: 24px;
+  border: 3px solid transparent;
+  border-radius: 999px;
+  background: var(--iui-range-track);
+}
+body .iui-range::-webkit-slider-thumb {
+  appearance: none;
+  -webkit-appearance: none;
+  width: 18px;
+  height: 18px;
   margin: 0;
-  height: 100%;
+  border: 0;
+  border-radius: 50%;
+  background: var(--iui-range-thumb);
+}
+body .iui-range::-moz-range-track {
+  height: 24px;
+  border-radius: 999px;
+  background: var(--iui-range-track);
+}
+body .iui-range::-moz-range-thumb {
+  width: 18px;
+  height: 18px;
+  border: 0;
+  border-radius: 50%;
+  background: var(--iui-range-thumb);
+}
+body .iui-range::-moz-range-progress { background: transparent; }
+body .iui-range:focus-visible { outline: 2px solid var(--iui-focus); outline-offset: 2px; border-radius: 12px; }
+body .iui-range:disabled { opacity: .45; cursor: not-allowed; }
+body .openui-slider-container { height: 40px; padding: 0 3px; background: transparent; }
+body .openui-slider-root { height: 40px; min-width: 0; }
+body .openui-slider-root::before { content: ""; position: absolute; inset: 8px -3px; border-radius: 999px; background: var(--iui-range-track); }
+body .openui-slider-track { height: 24px; }
+body .openui-slider-range { background: transparent; }
+body .openui-slider-thumb-handle { width: 18px; height: 18px; border-radius: 50%; background: var(--iui-range-thumb); outline: none; box-shadow: none; }
+body .openui-slider-thumb-handle-inner, body .openui-slider-thumb-handle-inner:hover { background: var(--iui-range-thumb); }
+body .openui-slider-thumb:focus-visible { outline: 2px solid var(--iui-focus); outline-offset: 4px; border-radius: 50%; }
+body .openui-slider-thumb-handle-inner-dot { display: none; }
+body .openui-slider-block__label { font-weight: 500; }
+body .openui-slider-labels { margin-top: 0; }
+body .openui-option-card { border-color: var(--iui-border); border-radius: 14px; padding: 16px; }
+body .openui-option-card--selected { background: var(--iui-surface); border-color: var(--iui-ink); }
+body .openui-chip-item { border-radius: 999px; }
+body .openui-tag { border-radius: 999px; font-weight: 500; }
+body .openui-tag-sm { padding-inline: 8px; }
+body .openui-tag-icon svg { stroke-width: 1.8; }
+body .openui-table-container { border-radius: 14px; border-color: var(--iui-border); }
+body .openui-table-head { background: var(--iui-surface); padding: 12px 16px; }
+body .openui-table-head .openui-table-head-label { color: var(--iui-ink); font-weight: 500; }
+body .openui-table-cell { padding: 13px 16px; }
+body .openui-table-row:nth-child(even) { background: transparent; }
+body .openui-table-row:hover { background: var(--iui-surface); }
+body .openui-tabs-list { padding: 4px; gap: 4px; border-radius: 12px; }
+body .openui-tabs-trigger { padding: 8px 14px; min-width: auto; border-radius: 9px; font-size: 14px; }
+body .openui-tabs-trigger[data-state="active"] { background: var(--iui-canvas); border-color: var(--iui-border); font-weight: 500; box-shadow: 0 1px 3px rgb(0 0 0 / 3%); }
+body .openui-tabs-clear .openui-tabs-trigger[data-state="active"] { background: transparent; }
+body .openui-tabs-content { padding: 4px 0; }
+body .openui-accordion { border-radius: 14px; padding: 16px 18px 0; }
+body .openui-accordion-clear { padding: 0; }
+body .openui-accordion-trigger { font-weight: 500; padding-block: 17px; text-align: left; gap: 16px; }
+body .openui-callout { padding: 14px 16px; border-left-width: 3px; border-radius: 0 12px 12px 0; background: var(--iui-surface); gap: 4px; }
+body .openui-callout-description { font-size: 14px; }
+body .openui-callout-info { background: var(--openui-info-background); }
+body .openui-callout-success { background: var(--openui-success-background); }
+body .openui-callout-warning { background: var(--openui-alert-background); }
+body .openui-callout-danger { background: var(--openui-danger-background); }
+body .openui-metric-indicator__main-value { font-weight: 500; letter-spacing: -.6px; }
+body .openui-chart-container { font-family: var(--iui-font); }
+body .openui-chart-legend, body .openui-chart-tooltip, body .openui-chart-tooltip-content { text-transform: none; }
+body .openui-chart-legend-item-indicator { border-radius: 50%; width: 8px; height: 8px; }
+body .openui-chart-tooltip { padding: 12px; border-radius: 12px; box-shadow: var(--iui-shadow); }
+body .openui-chart-cartesian-grid { stroke: var(--iui-border); stroke-dasharray: 3 4; }
+body .openui-list-item-title { font-weight: 500; }
+body .openui-list-item-indicator-number { display: inline-flex; align-items: center; justify-content: center; flex: 0 0 24px; width: 24px; height: 24px; font-size: 13px; line-height: 1; font-variant-numeric: tabular-nums; background: var(--iui-ink); color: var(--iui-canvas); border-radius: 50%; }
+body .openui-list-item-indicator-no-subtitle .openui-list-item-indicator-number { flex-basis: 20px; width: 20px; height: 20px; font-size: 12px; }
+body .openui-list-item-content-wrapper { min-width: 0; gap: 16px; }
+body .openui-list-item-content { min-width: 0; gap: 4px; }
+body .openui-image-text__image-container { border-radius: 12px; }
+body .openui-calendar-single-day-button, body .openui-date-picker-single-day-button { border-radius: 50%; }
+body .openui-follow-up-block { gap: var(--iui-control-gap); }
+body .openui-follow-up-block__header { border: 0; margin: 0; padding: 0 0 4px; }
+body .openui-follow-up-item, body .openui-follow-up-item:last-child { border: 1px solid var(--iui-border); border-radius: 22px; padding: 11px 16px; min-height: 44px; line-height: 1.5; }
+body .openui-follow-up-item:hover { background: var(--iui-surface); }
+body .openui-follow-up-item-text { min-width: 0; }
+body .openui-follow-up-item-icon { flex: 0 0 16px; width: 16px; height: 16px; }
+
+@media (max-width: 600px) {
+  body .openui-header-top-left { font-size: 19px; }
+  body .openui-card-sunk { padding: 16px; }
+  body .openui-table-cell, body .openui-table-head { padding: 11px 12px; }
+  body .openui-tabs-trigger { padding: 8px 11px; }
+  body .openui-accordion { padding: 14px 14px 0; }
+  body .openui-accordion-clear { padding: 0; }
+  body .openui-pie-chart-container-wrapper.legend-stacked.layout-row,
+  body .openui-radial-chart-container-wrapper.legend-stacked.layout-row { flex-direction: column; max-height: none; }
+  body .openui-pie-chart-container-wrapper.legend-stacked.layout-row .openui-pie-chart-legend-container,
+  body .openui-radial-chart-container-wrapper.legend-stacked.layout-row .openui-radial-chart-legend-container { height: auto; width: 100%; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { scroll-behavior: auto !important; animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; }
 }

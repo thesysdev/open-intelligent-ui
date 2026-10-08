@@ -1,0 +1,91 @@
+.iui-creative{font-family:inherit;color:var(--iui-text,#171717)}
+.iui-creative h2,.iui-creative h3,.iui-creative p{margin:0}
+.iui-creative .iui-panel-heading{gap:16px;align-items:flex-start}
+.iui-creative .iui-panel-heading h2{font-size:20px;font-weight:600;letter-spacing:-.45px;line-height:1.3}
+.iui-creative .iui-panel-heading p{font-size:13px;line-height:1.5;margin-top:4px}
+.iui-creative button{font:inherit;cursor:pointer;-webkit-tap-highlight-color:transparent}
+.iui-creative button:focus-visible,.iui-creative input:focus-visible{outline:2px solid var(--iui-text,#171717);outline-offset:3px}
+.iui-creative button:disabled{opacity:.36;cursor:not-allowed}
+.iui-creative .iui-segments{display:flex;gap:3px;align-items:center;width:fit-content;background:var(--iui-subtle,#f7f7f7);border:1px solid var(--iui-border,#e8e8e8);border-radius:999px;padding:3px}
+.iui-creative .iui-segments button{padding:6px 12px;font-size:12px;line-height:1.25;border:0;border-radius:999px;background:transparent;color:var(--iui-muted,#6e6e6e);white-space:nowrap}
+.iui-creative .iui-segments button[aria-pressed=true]{background:var(--iui-text,#171717);color:var(--iui-surface,#fff)}
+.iui-creative-footnote{font-size:11px!important;color:var(--iui-muted,#777);line-height:1.5;margin-top:10px!important}
+.iui-room-scene{overflow:hidden;border-radius:14px;margin-top:20px;background:#eae8df}
+.iui-room-scene svg{width:100%;display:block}
+.iui-room-walls{transition:fill .35s ease}
+.iui-room-toolbar,.iui-garden-toolbar{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:16px 0}
+.iui-room-toolbar>.iui-muted,.iui-garden-toolbar>.iui-muted{font-size:12px}
+.iui-paint-swatches{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+.iui-paint-swatch{padding:0;border:1px solid var(--iui-border,#e8e8e8);border-radius:13px;overflow:hidden;text-align:left;background:var(--iui-surface,#fff);color:var(--iui-text,#171717);transition:box-shadow .2s,transform .2s}
+.iui-paint-swatch:hover{transform:translateY(-2px)}
+.iui-paint-swatch[aria-pressed=true]{box-shadow:0 0 0 2px var(--iui-text,#171717)}
+.iui-paint-swatch>span:first-child{display:block;height:82px}
+.iui-paint-swatch>span:last-child{display:block;position:relative;padding:10px 12px 12px}
+.iui-paint-swatch strong,.iui-paint-swatch small{display:block;font-size:12px;line-height:1.4;font-weight:400}
+.iui-paint-swatch small{color:var(--iui-muted,#777);font-size:11px;margin-top:1px}
+.iui-paint-swatch b{position:absolute;right:10px;bottom:13px;border-radius:50%;background:var(--iui-text,#171717);color:var(--iui-surface,#fff);font-size:9px;display:grid;place-items:center;width:14px;height:14px}
+.iui-fold-card{padding:18px;border:1px solid var(--iui-border,#e7e7e7);border-radius:18px;margin-top:20px}
+.iui-fold-meta{display:flex;align-items:center;justify-content:space-between;font-size:11px;color:var(--iui-muted,#777)}
+.iui-fold-meta>span:first-child{color:#c76c23;text-transform:uppercase;font-weight:500}
+.iui-fold-progress{display:flex;gap:5px;margin:12px 0 14px}
+.iui-fold-progress button{position:relative;flex:1;height:4px;min-width:0;border:0;border-radius:3px;background:var(--iui-border,#dedede);padding:0}
+.iui-fold-progress button:after{content:"";position:absolute;inset:-5px 0}
+.iui-fold-progress button.is-complete{background:#f58a32}
+.iui-fold-canvas{background:var(--iui-subtle,#f7f7f5);border-radius:12px}
+.iui-fold-canvas svg{display:block;width:100%;max-height:290px}
+.iui-fold-arrow{fill:none;stroke:#777;stroke-width:1.5;stroke-linecap:round}
+.iui-fold-crease{fill:none;stroke:#b66a30;stroke-width:1.5;stroke-dasharray:6 5}
+.iui-paper-shape{transform-origin:center;animation:iui-paper-enter .22s ease-out}
+@keyframes iui-paper-enter{from{opacity:.4;transform:translateY(4px)}to{opacity:1;transform:translateY(0)}}
+.iui-fold-instruction{min-height:102px;padding-top:17px}
+.iui-fold-instruction h3{font-size:16px;font-weight:500;line-height:1.45}
+.iui-fold-instruction p{font-size:13px;line-height:1.6;margin-top:5px;color:var(--iui-secondary,#454545)}
+.iui-fold-tip{background:var(--iui-subtle,#f7f7f5);border-radius:9px;padding:12px 13px;min-height:55px;font-size:11px;line-height:1.5;color:var(--iui-muted,#777);display:flex;align-items:center}
+.iui-fold-nav{display:flex;justify-content:space-between;gap:10px;margin-top:20px}
+.iui-fold-nav button{background:none;border:0;padding:0;color:var(--iui-text,#171717);font-size:12px}
+.iui-garden-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}
+.iui-garden-grid>button{position:relative;padding:22px 10px 18px;min-height:132px;border:2px solid transparent;border-radius:10px;display:flex;flex-direction:column;align-items:center;justify-content:center}
+.iui-garden-grid>button:hover{filter:brightness(.98)}
+.iui-garden-grid>button[aria-pressed=true]{border-color:currentColor}
+.iui-garden-grid>button svg{width:34px;height:34px;margin-bottom:8px}
+.iui-garden-grid strong{font-size:14px;font-weight:500;color:#172315}
+.iui-garden-grid small{font-size:12px;color:#344231;margin-top:3px}
+.iui-garden-selected{position:absolute;top:6px;right:8px;font-size:12px}
+.iui-garden-sixteen{grid-template-columns:repeat(4,minmax(0,1fr));gap:6px}
+.iui-garden-sixteen>button{padding:13px 3px 10px;min-height:92px}
+.iui-garden-sixteen>button svg{width:26px;height:26px;margin-bottom:6px}
+.iui-garden-sixteen strong{font-size:11px}
+.iui-plant-editor{border:1px solid var(--iui-border,#e8e8e8);border-radius:12px;margin-top:14px;padding:14px}
+.iui-plant-editor>div:first-child{display:flex;align-items:center;justify-content:space-between}
+.iui-plant-editor h3{font-size:13px;font-weight:500}
+.iui-plant-editor>div:first-child button{font-size:20px;background:none;border:0;color:var(--iui-muted,#777);line-height:1}
+.iui-plant-options{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:7px;margin-top:12px}
+.iui-plant-options button{border:1px solid var(--iui-border,#e8e8e8);background:var(--iui-surface,#fff);color:var(--iui-text,#171717);padding:9px 4px;border-radius:9px;font-size:10px;display:flex;flex-direction:column;align-items:center;gap:4px}
+.iui-plant-options button[aria-pressed=true]{border-color:var(--iui-text,#171717);background:var(--iui-subtle,#f7f7f7)}
+.iui-plant-options svg{width:24px;height:24px;display:block}
+.iui-plant-editor p{font-size:11px;line-height:1.55;color:var(--iui-muted,#777);margin-top:12px;min-height:34px}
+.iui-garden-footer{display:flex;gap:12px;justify-content:space-between;align-items:center;border-top:1px solid var(--iui-border,#e8e8e8);margin-top:17px;padding-top:13px;font-size:11px;color:var(--iui-muted,#777)}
+.iui-garden-footer button{border:0;padding:0;background:none;color:inherit;font-size:11px}
+.iui-repair .iui-panel-heading h2{font-size:18px}
+.iui-repair .iui-panel-heading p{font-size:12px}
+.iui-repair .iui-panel-heading .iui-segments button{font-size:10px;padding:6px 9px}
+.iui-repair-diagram{margin-top:14px;border:1px solid #8db3c8;border-radius:18px;overflow:hidden;background:var(--iui-surface,#fff)}
+.iui-repair-diagram svg{width:100%;display:block}
+.iui-repair-part{transition:opacity .25s,transform .45s cubic-bezier(.2,.7,.2,1)}
+.iui-repair-instruction{padding-top:22px;min-height:164px}
+.iui-repair-instruction>span{color:#4583a6;font-size:11px}
+.iui-repair-instruction h3{font-size:16px;font-weight:500;margin-top:10px}
+.iui-repair-instruction p{font-size:12px;line-height:1.5;margin-top:12px}
+.iui-repair-instruction p.iui-muted{font-size:11px;margin-top:4px}
+.iui-repair-check{display:flex;gap:8px;align-items:center;font-size:12px;margin-top:12px;cursor:pointer}
+.iui-repair-check input{accent-color:var(--iui-text,#171717);width:14px;height:14px;margin:0}
+.iui-repair-footer{display:flex;justify-content:space-between;gap:12px;align-items:center;border-top:1px solid var(--iui-border,#e8e8e8);padding-top:14px;margin-top:20px}
+.iui-repair-footer>div{display:flex;gap:6px;align-items:center}
+.iui-repair-footer>div:first-child{gap:7px}
+.iui-repair-footer>div:first-child button{height:6px;width:6px;padding:0;border:0;border-radius:50%;background:var(--iui-border,#ddd);position:relative}
+.iui-repair-footer>div:first-child button:after{content:"";position:absolute;inset:-7px}
+.iui-repair-footer>div:first-child button.is-checked{background:#83aaa0}
+.iui-repair-footer>div:first-child button.is-current{background:#4285a5}
+.iui-repair-footer .iui-button{font-size:11px;padding:7px 11px}
+@media(max-width:520px){.iui-paint-swatch>span:first-child{height:64px}.iui-paint-swatch>span:last-child{padding:8px}.iui-paint-swatch strong{font-size:10px}.iui-paint-swatch small{font-size:9px}.iui-paint-swatch b{right:6px;bottom:9px;width:11px;height:11px;font-size:7px}.iui-fold-card{padding:13px}.iui-fold-instruction{min-height:120px}.iui-room-toolbar>.iui-muted{font-size:10px}.iui-garden-grid strong{font-size:12px}.iui-garden-sixteen strong{font-size:9px}.iui-repair .iui-panel-heading{flex-wrap:wrap}.iui-repair-instruction{min-height:180px}.iui-creative .iui-panel-heading h2{font-size:18px}}
+@media(prefers-reduced-motion:reduce){.iui-room-walls,.iui-repair-part,.iui-paint-swatch{transition:none}.iui-paper-shape{animation:none}}

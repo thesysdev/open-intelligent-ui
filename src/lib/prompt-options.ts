@@ -2,8 +2,58 @@ import { openuiChatPromptOptions } from "@openuidev/react-ui/genui-lib/prompt-op
 
 export const promptOptions = {
   ...openuiChatPromptOptions,
+  additionalRules: [
+    ...(openuiChatPromptOptions.additionalRules ?? []),
+    "Create clear, thoughtful answers in the OpenAI Intelligent UI visual style using this library. Prefer the purpose-built interactive component whenever it fits the question; do not simulate its controls in prose.",
+    "For statistics, GDP, drone business, probability, bikes, paint colors, origami, gardens, savings, meal planning, wardrobe or bill splitting, choose the matching Intelligent UI component. Their controls run locally and need no tools.",
+    "Each Intelligent UI component contains its own title. Do not duplicate that title in a CardHeader directly above it. A concise TextContent introduction and one relevant FollowUpBlock are sufficient.",
+    "The interactive learning and creative components have built-in illustrative datasets. Frame them as examples. Do not present the built-in drone market figures or savings results as current verified data or guaranteed returns.",
+    "Only use RouteMap for actual location-based routes, and include real coordinates and exact Wikipedia titles. Reuse stop references between the map and stop list. Assign a helpful optional category such as Landmarks, History, Culture or Nature.",
+    "Use RoadTripPlanner for the ten-day Pacific Northwest example. Its itinerary is specific to that region; use the Travel components for other destinations.",
+    "For meal planning provide numeric ingredient quantities tied to baseGuests, practical checklist steps and descriptive dish cards. For bill splitting people indices are zero-based, and every item must have at least one person assigned.",
+  ],
   examples: [
     ...(openuiChatPromptOptions.examples ?? []),
+    `Example — Pacific Northwest road trip:
+root = Card([trip])
+trip = RoadTripPlanner("Ten days in the Pacific Northwest")`,
+    `Example — Interactive explanation:
+root = Card([intro, explorer])
+intro = TextContent("A bicycle is five connected systems. Select a part below to explore how it works.")
+explorer = BicycleExplorer("7-speed bicycle")`,
+    `Example — Learn probability:
+root = Card([game])
+game = MontyHall("Should you switch doors?")`,
+    `Example — Statistics simulation:
+root = Card([simulation])
+simulation = DistributionExplorer("The central limit theorem")`,
+    `Example — Economy:
+root = Card([economy])
+economy = EconomyExplorer("What makes up GDP?")`,
+    `Example — Drone photography market:
+root = Card([market])
+market = DroneMarket("The business of drone photography")`,
+    `Example — Choose a room color:
+root = Card([preview])
+preview = RoomColorPreview("Find your room’s next color")`,
+    `Example — Origami:
+root = Card([guide])
+guide = OrigamiGuide("Let’s fold an origami baby fox!")`,
+    `Example — Garden:
+root = Card([garden])
+garden = GardenPlanner("Your small-space garden")`,
+    `Example — Bicycle assembly:
+root = Card([guide])
+guide = BikeRepair("Rocket youth bike")`,
+    `Example — Retro arcade:
+root = Card([game])
+game = RetroGame("A little break", "snake")`,
+    `Example — Savings:
+root = Card([calculator])
+calculator = SavingsCalculator("Your retirement, in perspective", "USD", 10000, 500, 30, 5)`,
+    `Example — Split a bill:
+root = Card([bill])
+bill = BillSplitter("Dinner with friends", "USD", ["You", "Alex", "Sam"], [{name: "Dinner", amount: 90, people: [0, 1, 2]}, {name: "Dessert", amount: 18, people: [0, 2]}], 8, 20)`,
     `Example — Sightseeing route:
 
 root = Card([header, map, stops, more, tips])

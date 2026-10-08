@@ -2,8 +2,8 @@
   "root": "Card",
   "components": {
     "Card": {
-      "signature": "Card(children: (TextContent | MarkDownRenderer | CardHeader | Callout | TextCallout | CodeBlock | Image | ImageBlock | ImageGallery | Separator | HorizontalBarChart | RadarChart | PieChart | RadialChart | SingleStackedBarChart | ScatterChart | AreaChart | BarChart | LineChart | Table | TagBlock | Form | Buttons | IconButton | Steps | InlineHeader | EntityList | EditableTable | SnippetCardBlock | OverviewCardBlock | ContextCardBlock | CompositeCardBlock | VisualCardBlock | ListBlock | FollowUpBlock | SectionBlock | Tabs | Carousel | RouteMap | RouteStops | RouteSuggestions)[])",
-      "description": "Vertical container for all content in a chat response. Children stack top to bottom automatically. Optional sources ([{ title, sourceName, url }]) render as a Sources strip at the bottom and back inline [n] citations in TextContent."
+      "signature": "Card(children: (TextContent | MarkDownRenderer | CardHeader | Callout | TextCallout | CodeBlock | Image | ImageBlock | ImageGallery | Separator | HorizontalBarChart | RadarChart | PieChart | RadialChart | SingleStackedBarChart | ScatterChart | AreaChart | BarChart | LineChart | Table | TagBlock | Form | Buttons | IconButton | Steps | InlineHeader | EntityList | EditableTable | SnippetCardBlock | OverviewCardBlock | ContextCardBlock | CompositeCardBlock | VisualCardBlock | ListBlock | FollowUpBlock | SectionBlock | Tabs | Carousel | RouteMap | RouteStops | RouteSuggestions | BicycleExplorer | DistributionExplorer | EconomyExplorer | DroneExplorer | DroneMarket | MontyHall | RetroGame | BillSplitter | SavingsCalculator | RecipePlanner | WardrobePlanner | RoadTripPlanner | RoomColorPreview | OrigamiGuide | GardenPlanner | BikeRepair)[], sources?: {url?: string, title: string, sourceName: string}[])",
+      "description": "Root response container. Compose clear text, visualizations, interactive tools and everyday planning components. Avoid redundant headings when an interactive component already has a title."
     },
     "CardHeader": {
       "signature": "CardHeader(title?: string, subtitle?: string)",
@@ -350,8 +350,72 @@
       "description": "Optional extra stops the user can add to the route with one tap (adds a pin to RouteMap and a card to RouteStops). Use 2 stops that are NOT already in the route."
     },
     "RouteStop": {
-      "signature": "RouteStop(name: string, wikiTitle: string, lat: number, lng: number, time: string, story: string, beforeYouGo: string)",
-      "description": "One stop on a route. wikiTitle is the exact English Wikipedia article title (used to load real photos). lat/lng are decimal coordinates. time e.g. '9:00 · 1 hr'. story: 1-2 sentences of history. beforeYouGo: one practical tip."
+      "signature": "RouteStop(name: string, wikiTitle: string, lat: number, lng: number, time: string, story: string, beforeYouGo: string, category?: string)",
+      "description": "One stop on a route. wikiTitle is the exact English Wikipedia article title (used to load real photos). lat/lng are decimal coordinates. time e.g. '9:00 · 1 hr'. story: 1-2 sentences of history. beforeYouGo: one practical tip. Optional category groups the map, e.g. 'Landmarks', 'Museums' or 'Neighborhoods'."
+    },
+    "BicycleExplorer": {
+      "signature": "BicycleExplorer(title: string)",
+      "description": "Interactive side-view seven-speed bicycle with selectable Frame, Wheels, Drivetrain, Brakes and Cockpit systems, explanations and moving pedals. Use for explaining bicycle mechanics."
+    },
+    "DistributionExplorer": {
+      "signature": "DistributionExplorer(title: string)",
+      "description": "Interactive central limit theorem simulation with sample size, population distributions, live histograms and sampling controls. Use for explaining statistics and the CLT."
+    },
+    "EconomyExplorer": {
+      "signature": "EconomyExplorer(title: string)",
+      "description": "Interactive GDP explainer with adjustable consumer spending, investment, government spending and net exports. Values are illustrative, not current economic data."
+    },
+    "DroneExplorer": {
+      "signature": "DroneExplorer(title: string)",
+      "description": "Interactive drone photography composition explainer: camera tilt, altitude, illustrated landscape and thirds grid."
+    },
+    "DroneMarket": {
+      "signature": "DroneMarket(title: string)",
+      "description": "Interactive drone photography market overview with photo categories, illustrative growth chart, comparison KPIs, revenue sliders and business table. Example figures are not live market data."
+    },
+    "MontyHall": {
+      "signature": "MontyHall(title: string)",
+      "description": "Playable Monty Hall probability demonstration. Pick one of three doors, switch or stay, and simulate 1000 games."
+    },
+    "RetroGame": {
+      "signature": "RetroGame(title: string, game: \"snake\" | \"breakout\" | \"pong\")",
+      "description": "Playable retro handheld console with Snake, Breakout and Pong, real collision physics, scoring, keyboard and touch directional controls, pause and restart. game selects the initial game. Retro beige handheld housing and green pixel screen."
+    },
+    "BillSplitter": {
+      "signature": "BillSplitter(title: string, currency: string, people: string[], items: {name: string, amount: number, people: number[]}[], taxPercent: number, tipPercent: number)",
+      "description": "Interactive dinner bill splitter with editable people, items, shared-item assignments, equal splitting, tax and tip. Amounts are in currency units, people arrays contain zero-based person indexes. Shows cent-exact totals and copyable shares."
+    },
+    "SavingsCalculator": {
+      "signature": "SavingsCalculator(title: string, currency: string, initialSavings: number, monthlyContribution: number, years: number, annualReturn: number)",
+      "description": "Interactive compound savings or retirement calculator with editable sliders, a live growth chart, contributions and growth totals. Calculates monthly compounding and end-of-month contributions. years 1–50, annualReturn as a percentage 0–15. State assumptions; do not present hypothetical growth as guaranteed."
+    },
+    "RecipePlanner": {
+      "signature": "RecipePlanner(title: string, description: string, baseGuests: number, ingredients: {name: string, quantity: number, unit: string}[], steps: {time: string, title: string, description: string}[], dishes: {name: string, description: string, imageUrl: string}[])",
+      "description": "Scalable meal planner with illustrated dish cards, a guest stepper, calculated shopping quantities, a copyable shopping list and interactive timed cooking checklist. Ingredient quantities are for baseGuests; use unit empty for whole items, kg or g for weight. Use real image URLs when available, otherwise an empty imageUrl for an illustrated dish."
+    },
+    "WardrobePlanner": {
+      "signature": "WardrobePlanner(title: string, description: string, items: {id: string, name: string, category: string, color: string, kind: \"shirt\" | \"tee\" | \"jacket\" | \"trousers\" | \"shoes\" | \"bag\", imageUrl?: string}[], outfits: {name: string, occasion: string, itemIds: string[]}[])",
+      "description": "Interactive capsule wardrobe with clothing illustrations or supplied real photos, category filters, selectable coordinated outfits, saved favorites and a copyable shortlist. kind determines the illustration. color is a hex color. Outfit itemIds must match item id values. Never invent product prices or shopping links."
+    },
+    "RoadTripPlanner": {
+      "signature": "RoadTripPlanner(title: string)",
+      "description": "A specific ten-day Pacific Northwest road-trip experience from Seattle through Olympic Peninsula and Oregon coast to Portland, the Columbia Gorge and Mount Hood. Includes real map filters, destination photos, ten editable day stops, party-size and travel-style budget assumptions, seasonal preferences and copyable itinerary. Use ONLY for this Pacific Northwest example. For arbitrary destinations use RouteMap, RouteStops and RouteSuggestions instead."
+    },
+    "RoomColorPreview": {
+      "signature": "RoomColorPreview(title: string)",
+      "description": "Interactive room wall-color preview with six muted paint swatches, original comparison, and a recolorable illustrated living room. Use for paint choices and interior color exploration."
+    },
+    "OrigamiGuide": {
+      "signature": "OrigamiGuide(title: string)",
+      "description": "Twelve-step interactive origami fox guide with a distinct paper-fold illustration per step, orange progress segments, folding tips, and previous/next navigation."
+    },
+    "GardenPlanner": {
+      "signature": "GardenPlanner(title: string)",
+      "description": "Editable 4-by-4-foot kitchen garden plan with four planters or sixteen squares, plant selection, growing notes, and reset. Use for small-space gardening."
+    },
+    "BikeRepair": {
+      "signature": "BikeRepair(title: string)",
+      "description": "Youth bicycle assembly checklist with six guided steps, highlighted parts, assembled/exploded illustration, progress and safety checks. Refer to the manufacturer’s manual for specifications."
     }
   },
   "componentGroups": [
@@ -560,6 +624,34 @@
       ],
       "notes": [
         "- For itineraries, day trips or sightseeing routes: CardHeader, then RouteMap([s1, s2, ...]), then RouteStops([s1, s2, ...]) using the same stop refs, then RouteSuggestions('Add to your day', [x1, x2]) with 2 extra stops not in the route, then an optional Callout with tips."
+      ]
+    },
+    {
+      "name": "Intelligent UI",
+      "components": [
+        "BicycleExplorer",
+        "DistributionExplorer",
+        "EconomyExplorer",
+        "DroneExplorer",
+        "DroneMarket",
+        "MontyHall",
+        "RetroGame",
+        "BillSplitter",
+        "SavingsCalculator",
+        "RecipePlanner",
+        "WardrobePlanner",
+        "RoadTripPlanner",
+        "RoomColorPreview",
+        "OrigamiGuide",
+        "GardenPlanner",
+        "BikeRepair"
+      ],
+      "notes": [
+        "Choose the component that directly fits the question. Each interactive component includes its own heading and controls.",
+        "Use RecipePlanner for scalable meal planning, BillSplitter for bills, SavingsCalculator for hypothetical savings, WardrobePlanner for outfits.",
+        "Use RoadTripPlanner for the ten-day Pacific Northwest reference itinerary. For other destinations, compose the Travel components.",
+        "Use BicycleExplorer for mechanics, BikeRepair for assembly steps, DistributionExplorer for statistics, EconomyExplorer for GDP, DroneMarket for drone businesses, MontyHall for probability and RetroGame for a playable arcade.",
+        "Use RoomColorPreview for paint palettes, OrigamiGuide for paper folding, GardenPlanner for planting layouts. Do not invent live data or imply generated suggestions are verified facts."
       ]
     }
   ],
@@ -830,6 +922,54 @@
       },
       "RouteStop": {
         "$ref": "#/$defs/RouteStop"
+      },
+      "BicycleExplorer": {
+        "$ref": "#/$defs/BicycleExplorer"
+      },
+      "DistributionExplorer": {
+        "$ref": "#/$defs/DistributionExplorer"
+      },
+      "EconomyExplorer": {
+        "$ref": "#/$defs/EconomyExplorer"
+      },
+      "DroneExplorer": {
+        "$ref": "#/$defs/DroneExplorer"
+      },
+      "DroneMarket": {
+        "$ref": "#/$defs/DroneMarket"
+      },
+      "MontyHall": {
+        "$ref": "#/$defs/MontyHall"
+      },
+      "RetroGame": {
+        "$ref": "#/$defs/RetroGame"
+      },
+      "BillSplitter": {
+        "$ref": "#/$defs/BillSplitter"
+      },
+      "SavingsCalculator": {
+        "$ref": "#/$defs/SavingsCalculator"
+      },
+      "RecipePlanner": {
+        "$ref": "#/$defs/RecipePlanner"
+      },
+      "WardrobePlanner": {
+        "$ref": "#/$defs/WardrobePlanner"
+      },
+      "RoadTripPlanner": {
+        "$ref": "#/$defs/RoadTripPlanner"
+      },
+      "RoomColorPreview": {
+        "$ref": "#/$defs/RoomColorPreview"
+      },
+      "OrigamiGuide": {
+        "$ref": "#/$defs/OrigamiGuide"
+      },
+      "GardenPlanner": {
+        "$ref": "#/$defs/GardenPlanner"
+      },
+      "BikeRepair": {
+        "$ref": "#/$defs/BikeRepair"
       }
     },
     "required": [
@@ -920,7 +1060,23 @@
       "RouteMap",
       "RouteStops",
       "RouteSuggestions",
-      "RouteStop"
+      "RouteStop",
+      "BicycleExplorer",
+      "DistributionExplorer",
+      "EconomyExplorer",
+      "DroneExplorer",
+      "DroneMarket",
+      "MontyHall",
+      "RetroGame",
+      "BillSplitter",
+      "SavingsCalculator",
+      "RecipePlanner",
+      "WardrobePlanner",
+      "RoadTripPlanner",
+      "RoomColorPreview",
+      "OrigamiGuide",
+      "GardenPlanner",
+      "BikeRepair"
     ],
     "additionalProperties": false,
     "$defs": {
@@ -1053,8 +1209,78 @@
                 },
                 {
                   "$ref": "#/$defs/RouteSuggestions"
+                },
+                {
+                  "$ref": "#/$defs/BicycleExplorer"
+                },
+                {
+                  "$ref": "#/$defs/DistributionExplorer"
+                },
+                {
+                  "$ref": "#/$defs/EconomyExplorer"
+                },
+                {
+                  "$ref": "#/$defs/DroneExplorer"
+                },
+                {
+                  "$ref": "#/$defs/DroneMarket"
+                },
+                {
+                  "$ref": "#/$defs/MontyHall"
+                },
+                {
+                  "$ref": "#/$defs/RetroGame"
+                },
+                {
+                  "$ref": "#/$defs/BillSplitter"
+                },
+                {
+                  "$ref": "#/$defs/SavingsCalculator"
+                },
+                {
+                  "$ref": "#/$defs/RecipePlanner"
+                },
+                {
+                  "$ref": "#/$defs/WardrobePlanner"
+                },
+                {
+                  "$ref": "#/$defs/RoadTripPlanner"
+                },
+                {
+                  "$ref": "#/$defs/RoomColorPreview"
+                },
+                {
+                  "$ref": "#/$defs/OrigamiGuide"
+                },
+                {
+                  "$ref": "#/$defs/GardenPlanner"
+                },
+                {
+                  "$ref": "#/$defs/BikeRepair"
                 }
               ]
+            }
+          },
+          "sources": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "url": {
+                  "type": "string"
+                },
+                "title": {
+                  "type": "string"
+                },
+                "sourceName": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "title",
+                "sourceName"
+              ],
+              "additionalProperties": false
             }
           }
         },
@@ -1063,7 +1289,7 @@
         ],
         "additionalProperties": false,
         "id": "Card",
-        "description": "Vertical container for all content in a chat response. Children stack top to bottom automatically. Optional sources ([{ title, sourceName, url }]) render as a Sources strip at the bottom and back inline [n] citations in TextContent."
+        "description": "Root response container. Compose clear text, visualizations, interactive tools and everyday planning components. Avoid redundant headings when an interactive component already has a title."
       },
       "TextContent": {
         "type": "object",
@@ -4815,6 +5041,9 @@
           },
           "beforeYouGo": {
             "type": "string"
+          },
+          "category": {
+            "type": "string"
           }
         },
         "required": [
@@ -4828,7 +5057,7 @@
         ],
         "additionalProperties": false,
         "id": "RouteStop",
-        "description": "One stop on a route. wikiTitle is the exact English Wikipedia article title (used to load real photos). lat/lng are decimal coordinates. time e.g. '9:00 · 1 hr'. story: 1-2 sentences of history. beforeYouGo: one practical tip."
+        "description": "One stop on a route. wikiTitle is the exact English Wikipedia article title (used to load real photos). lat/lng are decimal coordinates. time e.g. '9:00 · 1 hr'. story: 1-2 sentences of history. beforeYouGo: one practical tip. Optional category groups the map, e.g. 'Landmarks', 'Museums' or 'Neighborhoods'."
       },
       "RouteStops": {
         "type": "object",
@@ -4867,6 +5096,459 @@
         "additionalProperties": false,
         "id": "RouteSuggestions",
         "description": "Optional extra stops the user can add to the route with one tap (adds a pin to RouteMap and a card to RouteStops). Use 2 stops that are NOT already in the route."
+      },
+      "BicycleExplorer": {
+        "id": "BicycleExplorer",
+        "type": "object",
+        "properties": {
+          "title": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "title"
+        ],
+        "additionalProperties": false,
+        "description": "Interactive side-view seven-speed bicycle with selectable Frame, Wheels, Drivetrain, Brakes and Cockpit systems, explanations and moving pedals. Use for explaining bicycle mechanics."
+      },
+      "DistributionExplorer": {
+        "id": "DistributionExplorer",
+        "type": "object",
+        "properties": {
+          "title": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "title"
+        ],
+        "additionalProperties": false,
+        "description": "Interactive central limit theorem simulation with sample size, population distributions, live histograms and sampling controls. Use for explaining statistics and the CLT."
+      },
+      "EconomyExplorer": {
+        "id": "EconomyExplorer",
+        "type": "object",
+        "properties": {
+          "title": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "title"
+        ],
+        "additionalProperties": false,
+        "description": "Interactive GDP explainer with adjustable consumer spending, investment, government spending and net exports. Values are illustrative, not current economic data."
+      },
+      "DroneExplorer": {
+        "id": "DroneExplorer",
+        "type": "object",
+        "properties": {
+          "title": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "title"
+        ],
+        "additionalProperties": false,
+        "description": "Interactive drone photography composition explainer: camera tilt, altitude, illustrated landscape and thirds grid."
+      },
+      "DroneMarket": {
+        "id": "DroneMarket",
+        "type": "object",
+        "properties": {
+          "title": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "title"
+        ],
+        "additionalProperties": false,
+        "description": "Interactive drone photography market overview with photo categories, illustrative growth chart, comparison KPIs, revenue sliders and business table. Example figures are not live market data."
+      },
+      "MontyHall": {
+        "id": "MontyHall",
+        "type": "object",
+        "properties": {
+          "title": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "title"
+        ],
+        "additionalProperties": false,
+        "description": "Playable Monty Hall probability demonstration. Pick one of three doors, switch or stay, and simulate 1000 games."
+      },
+      "RetroGame": {
+        "type": "object",
+        "properties": {
+          "title": {
+            "type": "string"
+          },
+          "game": {
+            "type": "string",
+            "enum": [
+              "snake",
+              "breakout",
+              "pong"
+            ]
+          }
+        },
+        "required": [
+          "title",
+          "game"
+        ],
+        "additionalProperties": false,
+        "id": "RetroGame",
+        "description": "Playable retro handheld console with Snake, Breakout and Pong, real collision physics, scoring, keyboard and touch directional controls, pause and restart. game selects the initial game. Retro beige handheld housing and green pixel screen."
+      },
+      "BillSplitter": {
+        "type": "object",
+        "properties": {
+          "title": {
+            "type": "string"
+          },
+          "currency": {
+            "type": "string"
+          },
+          "people": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "items": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "name": {
+                  "type": "string"
+                },
+                "amount": {
+                  "type": "number"
+                },
+                "people": {
+                  "type": "array",
+                  "items": {
+                    "type": "number"
+                  }
+                }
+              },
+              "required": [
+                "name",
+                "amount",
+                "people"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "taxPercent": {
+            "type": "number"
+          },
+          "tipPercent": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "title",
+          "currency",
+          "people",
+          "items",
+          "taxPercent",
+          "tipPercent"
+        ],
+        "additionalProperties": false,
+        "id": "BillSplitter",
+        "description": "Interactive dinner bill splitter with editable people, items, shared-item assignments, equal splitting, tax and tip. Amounts are in currency units, people arrays contain zero-based person indexes. Shows cent-exact totals and copyable shares."
+      },
+      "SavingsCalculator": {
+        "type": "object",
+        "properties": {
+          "title": {
+            "type": "string"
+          },
+          "currency": {
+            "type": "string"
+          },
+          "initialSavings": {
+            "type": "number"
+          },
+          "monthlyContribution": {
+            "type": "number"
+          },
+          "years": {
+            "type": "number"
+          },
+          "annualReturn": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "title",
+          "currency",
+          "initialSavings",
+          "monthlyContribution",
+          "years",
+          "annualReturn"
+        ],
+        "additionalProperties": false,
+        "id": "SavingsCalculator",
+        "description": "Interactive compound savings or retirement calculator with editable sliders, a live growth chart, contributions and growth totals. Calculates monthly compounding and end-of-month contributions. years 1–50, annualReturn as a percentage 0–15. State assumptions; do not present hypothetical growth as guaranteed."
+      },
+      "RecipePlanner": {
+        "type": "object",
+        "properties": {
+          "title": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "baseGuests": {
+            "type": "number"
+          },
+          "ingredients": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "name": {
+                  "type": "string"
+                },
+                "quantity": {
+                  "type": "number"
+                },
+                "unit": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "name",
+                "quantity",
+                "unit"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "steps": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "time": {
+                  "type": "string"
+                },
+                "title": {
+                  "type": "string"
+                },
+                "description": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "time",
+                "title",
+                "description"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "dishes": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "name": {
+                  "type": "string"
+                },
+                "description": {
+                  "type": "string"
+                },
+                "imageUrl": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "name",
+                "description",
+                "imageUrl"
+              ],
+              "additionalProperties": false
+            }
+          }
+        },
+        "required": [
+          "title",
+          "description",
+          "baseGuests",
+          "ingredients",
+          "steps",
+          "dishes"
+        ],
+        "additionalProperties": false,
+        "id": "RecipePlanner",
+        "description": "Scalable meal planner with illustrated dish cards, a guest stepper, calculated shopping quantities, a copyable shopping list and interactive timed cooking checklist. Ingredient quantities are for baseGuests; use unit empty for whole items, kg or g for weight. Use real image URLs when available, otherwise an empty imageUrl for an illustrated dish."
+      },
+      "WardrobePlanner": {
+        "type": "object",
+        "properties": {
+          "title": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "items": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string"
+                },
+                "name": {
+                  "type": "string"
+                },
+                "category": {
+                  "type": "string"
+                },
+                "color": {
+                  "type": "string"
+                },
+                "kind": {
+                  "type": "string",
+                  "enum": [
+                    "shirt",
+                    "tee",
+                    "jacket",
+                    "trousers",
+                    "shoes",
+                    "bag"
+                  ]
+                },
+                "imageUrl": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "id",
+                "name",
+                "category",
+                "color",
+                "kind"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "outfits": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "name": {
+                  "type": "string"
+                },
+                "occasion": {
+                  "type": "string"
+                },
+                "itemIds": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              },
+              "required": [
+                "name",
+                "occasion",
+                "itemIds"
+              ],
+              "additionalProperties": false
+            }
+          }
+        },
+        "required": [
+          "title",
+          "description",
+          "items",
+          "outfits"
+        ],
+        "additionalProperties": false,
+        "id": "WardrobePlanner",
+        "description": "Interactive capsule wardrobe with clothing illustrations or supplied real photos, category filters, selectable coordinated outfits, saved favorites and a copyable shortlist. kind determines the illustration. color is a hex color. Outfit itemIds must match item id values. Never invent product prices or shopping links."
+      },
+      "RoadTripPlanner": {
+        "type": "object",
+        "properties": {
+          "title": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "title"
+        ],
+        "additionalProperties": false,
+        "id": "RoadTripPlanner",
+        "description": "A specific ten-day Pacific Northwest road-trip experience from Seattle through Olympic Peninsula and Oregon coast to Portland, the Columbia Gorge and Mount Hood. Includes real map filters, destination photos, ten editable day stops, party-size and travel-style budget assumptions, seasonal preferences and copyable itinerary. Use ONLY for this Pacific Northwest example. For arbitrary destinations use RouteMap, RouteStops and RouteSuggestions instead."
+      },
+      "RoomColorPreview": {
+        "id": "RoomColorPreview",
+        "type": "object",
+        "properties": {
+          "title": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "title"
+        ],
+        "additionalProperties": false,
+        "description": "Interactive room wall-color preview with six muted paint swatches, original comparison, and a recolorable illustrated living room. Use for paint choices and interior color exploration."
+      },
+      "OrigamiGuide": {
+        "id": "OrigamiGuide",
+        "type": "object",
+        "properties": {
+          "title": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "title"
+        ],
+        "additionalProperties": false,
+        "description": "Twelve-step interactive origami fox guide with a distinct paper-fold illustration per step, orange progress segments, folding tips, and previous/next navigation."
+      },
+      "GardenPlanner": {
+        "id": "GardenPlanner",
+        "type": "object",
+        "properties": {
+          "title": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "title"
+        ],
+        "additionalProperties": false,
+        "description": "Editable 4-by-4-foot kitchen garden plan with four planters or sixteen squares, plant selection, growing notes, and reset. Use for small-space gardening."
+      },
+      "BikeRepair": {
+        "id": "BikeRepair",
+        "type": "object",
+        "properties": {
+          "title": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "title"
+        ],
+        "additionalProperties": false,
+        "description": "Youth bicycle assembly checklist with six guided steps, highlighted parts, assembled/exploded illustration, progress and safety checks. Refer to the manufacturer’s manual for specifications."
       },
       "Slice": {
         "type": "object",

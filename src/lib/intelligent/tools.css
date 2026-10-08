@@ -1,0 +1,1133 @@
+.iui-tools {
+  color: var(--iui-ink, #171717);
+  font-family: var(--iui-font, inherit);
+  line-height: 1.5;
+  min-width: 0;
+  padding: 24px;
+  background: var(--iui-canvas, #fff);
+  border: 1px solid var(--iui-border, #e5e5e5);
+  border-radius: 20px;
+}
+.iui-tools * {
+  box-sizing: border-box;
+}
+.iui-tools h2,
+.iui-tools h3,
+.iui-tools p {
+  margin: 0;
+}
+.iui-tools h2 {
+  font-size: 21px;
+  font-weight: 600;
+  line-height: 1.3;
+  letter-spacing: -0.55px;
+}
+.iui-tools h3 {
+  font-size: 15px;
+  line-height: 1.5;
+  font-weight: 600;
+}
+.iui-tools .iui-muted {
+  color: var(--iui-muted, #707070);
+  font-size: 14px;
+  line-height: 1.65;
+}
+.iui-tools-header {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  margin-bottom: 24px;
+}
+.iui-tools-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+.iui-tools-wrap {
+  flex-wrap: wrap;
+}
+.iui-tools-caption {
+  font-size: 12px;
+  line-height: 1.6;
+  color: var(--iui-muted, #707070);
+}
+.iui-tools-section {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  margin-top: 24px;
+}
+.iui-tools button,
+.iui-tools input,
+.iui-tools textarea {
+  font: inherit;
+}
+.iui-tools button {
+  cursor: pointer;
+  touch-action: manipulation;
+  transition:
+    background 0.15s,
+    color 0.15s,
+    border-color 0.15s;
+}
+.iui-tools button:disabled {
+  cursor: default;
+  opacity: 0.35;
+}
+.iui-tools button:focus-visible,
+.iui-tools input:focus-visible,
+.iui-tools textarea:focus-visible {
+  outline: 2px solid var(--iui-ink, #171717);
+  outline-offset: 3px;
+}
+.iui-tools input[type="text"],
+.iui-tools input[type="number"],
+.iui-tools textarea,
+.iui-tools-order-fields > input,
+.iui-tools-person-input > input {
+  min-width: 0;
+  width: 100%;
+  border: 1px solid var(--iui-border, #e5e5e5);
+  border-radius: 10px;
+  padding: 10px 12px;
+  background: var(--iui-canvas, #fff);
+  color: var(--iui-ink, #171717);
+  font-size: 14px;
+  line-height: 20px;
+  outline-offset: 2px;
+}
+.iui-tools input[type="number"] {
+  font-variant-numeric: tabular-nums;
+}
+.iui-tools input[type="checkbox"] {
+  accent-color: var(--iui-ink, #171717);
+  width: 17px;
+  height: 17px;
+  flex-shrink: 0;
+  cursor: pointer;
+}
+.iui-tools-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  min-height: 36px;
+  padding: 7px 14px;
+  border: 1px solid var(--iui-border, #e5e5e5);
+  border-radius: 99px;
+  background: var(--iui-canvas, #fff);
+  color: var(--iui-ink, #171717);
+  font-size: 13px !important;
+  line-height: 20px;
+  white-space: nowrap;
+}
+.iui-tools-button:hover {
+  background: var(--iui-surface, #f7f7f7);
+}
+.iui-tools-button[aria-pressed="true"] {
+  background: var(--iui-ink, #171717);
+  border-color: var(--iui-ink, #171717);
+  color: var(--iui-canvas, #fff);
+}
+.iui-tools-icon-button {
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  border: 0;
+  border-radius: 99px;
+  background: transparent;
+  color: var(--iui-muted, #707070);
+  font-size: 21px !important;
+  font-weight: 300;
+  line-height: 1;
+}
+.iui-tools-icon-button:hover {
+  background: var(--iui-surface-hover, #eee);
+}
+.iui-tools-text-button {
+  align-self: flex-start;
+  background: transparent;
+  border: 0;
+  padding: 3px 0;
+  font-size: 13px !important;
+  color: var(--iui-ink, #171717);
+}
+.iui-tools-text-button:hover {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+.iui-tools-copy {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.iui-tools-copy textarea {
+  width: 100%;
+  min-height: 100px;
+}
+.iui-tools-field {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  font-size: 13px;
+}
+.iui-tools-people {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+.iui-tools-person-input {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 7px 9px;
+  background: var(--iui-surface, #f7f7f7);
+  border-radius: 12px;
+  min-width: 0;
+}
+.iui-tools-person-input > input {
+  padding: 0;
+  background: transparent;
+  border: 0;
+  line-height: 28px;
+}
+.iui-tools-avatar {
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  background: var(--iui-canvas, #fff);
+  border: 1px solid var(--iui-border, #e5e5e5);
+  width: 29px;
+  height: 29px;
+  border-radius: 50%;
+  font-size: 12px;
+  font-weight: 500;
+  text-transform: uppercase;
+}
+.iui-tools-add-person {
+  justify-self: start;
+  grid-column: 1/-1;
+}
+.iui-tools-segment {
+  display: flex;
+  gap: 2px;
+  padding: 3px;
+  border-radius: 99px;
+  background: var(--iui-surface, #f7f7f7);
+}
+.iui-tools-segment button {
+  border: 0;
+  background: transparent;
+  padding: 5px 12px;
+  border-radius: 99px;
+  color: var(--iui-muted, #707070);
+  font-size: 12px !important;
+}
+.iui-tools-segment button[aria-pressed="true"] {
+  background: var(--iui-canvas, #fff);
+  color: var(--iui-ink, #171717);
+  box-shadow: 0 1px 3px #0000000d;
+}
+.iui-tools-orders {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.iui-tools-order {
+  border: 1px solid var(--iui-border, #e5e5e5);
+  border-radius: 14px;
+  padding: 12px;
+}
+.iui-tools-order-fields {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 118px 25px;
+  align-items: center;
+  gap: 8px;
+}
+.iui-tools-order-fields > input {
+  border: 0;
+  padding-left: 0;
+  background: transparent;
+}
+.iui-tools-price-field {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  border: 1px solid var(--iui-border, #e5e5e5);
+  border-radius: 9px;
+  padding-left: 9px;
+  font-size: 10px;
+  color: var(--iui-muted, #707070);
+}
+.iui-tools-price-field input[type="number"] {
+  border: 0;
+  padding: 6px 8px 6px 0;
+  background: transparent;
+  min-width: 0;
+  text-align: right;
+}
+.iui-tools-diners {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 8px;
+}
+.iui-tools-diners label {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  border: 1px solid var(--iui-border, #e5e5e5);
+  padding: 4px 9px 4px 6px;
+  border-radius: 99px;
+  font-size: 11px;
+  cursor: pointer;
+}
+.iui-tools-diners input {
+  margin: 0;
+  width: 13px !important;
+  height: 13px !important;
+}
+.iui-tools-diners label:has(input:checked) {
+  background: var(--iui-surface, #f7f7f7);
+}
+.iui-tools-tax-tip {
+  display: grid;
+  grid-template-columns: 90px minmax(0, 1fr);
+  gap: 20px;
+}
+.iui-tools-number-affix {
+  display: flex;
+  align-items: center;
+  border: 1px solid var(--iui-border, #e5e5e5);
+  border-radius: 10px;
+  min-width: 0;
+}
+.iui-tools-number-affix input[type="number"] {
+  border: 0;
+  padding: 8px 4px 8px 10px;
+  background: transparent;
+  min-width: 0;
+}
+.iui-tools-number-affix > span {
+  padding-right: 10px;
+  color: var(--iui-muted, #707070);
+}
+.iui-tools-tip-presets {
+  display: flex;
+  gap: 5px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+.iui-tools-tip-presets .iui-tools-button {
+  padding: 6px 11px;
+}
+.iui-tools-tip-presets .iui-tools-number-affix {
+  width: 73px;
+}
+.iui-tools-summary {
+  margin-top: 24px;
+  background: var(--iui-surface, #f7f7f7);
+  border-radius: 16px;
+  padding: 18px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+  font-size: 14px;
+  font-variant-numeric: tabular-nums;
+}
+.iui-tools-summary .iui-tools-caption {
+  font-size: 13px;
+}
+.iui-tools-total {
+  padding-top: 12px;
+  margin-top: 3px;
+  border-top: 1px solid var(--iui-border, #e5e5e5);
+}
+.iui-tools-total strong {
+  font-weight: 500;
+  font-size: 24px;
+  letter-spacing: -0.4px;
+}
+.iui-tools-shares {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px 16px;
+}
+.iui-tools-shares > div {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+  font-size: 13px;
+}
+.iui-tools-shares > div > span:nth-child(2) {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.iui-tools-shares strong {
+  font-weight: 500;
+  margin-left: auto;
+  font-variant-numeric: tabular-nums;
+}
+.iui-tools-notice {
+  font-size: 13px;
+  margin-top: 18px !important;
+  padding: 12px;
+  background: var(--iui-surface, #f7f7f7);
+  border-radius: 12px;
+}
+.iui-tools-projection {
+  display: flex;
+  align-items: center;
+  flex-direction: column;
+  gap: 3px;
+  margin-top: 30px;
+}
+.iui-tools-projection > .iui-tools-caption:first-child {
+  font-size: 13px;
+}
+.iui-tools-projection > strong {
+  font-size: 42px;
+  font-weight: 500;
+  letter-spacing: -1.7px;
+  line-height: 1.3;
+  font-variant-numeric: tabular-nums;
+}
+.iui-tools-chart {
+  margin: 12px -8px 25px;
+}
+.iui-tools-chart svg {
+  display: block;
+  width: 100%;
+  height: auto;
+  overflow: visible;
+}
+.iui-tools-chart svg text {
+  font-size: 10px;
+  fill: var(--iui-muted, #707070);
+  font-family: inherit;
+}
+.iui-tools-chart-legend {
+  display: flex;
+  justify-content: center;
+  gap: 24px;
+  font-size: 11px;
+  color: var(--iui-muted, #707070);
+}
+.iui-tools-chart-legend > span {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.iui-tools-chart-legend i {
+  display: inline-block;
+  width: 12px;
+  height: 3px;
+  border-radius: 3px;
+  background: #298369;
+}
+.iui-tools-chart-legend > span:nth-child(2) i {
+  background: #a8aaa8;
+}
+.iui-tools-sliders {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 23px 28px;
+  border-top: 1px solid var(--iui-border, #e5e5e5);
+  padding-top: 24px;
+}
+.iui-tools-slider {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  font-size: 12px;
+  min-width: 0;
+}
+.iui-tools-slider strong {
+  font-weight: 500;
+  font-size: 13px;
+  font-variant-numeric: tabular-nums;
+}
+.iui-tools-slider .iui-tools-caption {
+  font-size: 10px;
+}
+.iui-tools-footnote {
+  padding-top: 24px;
+}
+.iui-tools-dishes {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+  margin: 3px 0 24px;
+}
+.iui-tools-dishes h3 {
+  font-size: 13px;
+  margin: 10px 0 5px;
+  line-height: 1.4;
+}
+.iui-tools-dishes .iui-tools-caption {
+  font-size: 11px;
+}
+.iui-tools-food-image {
+  aspect-ratio: 1.18;
+  overflow: hidden;
+  border-radius: 13px;
+  background: #e7ded0;
+}
+.iui-tools-food-image img,
+.iui-tools-food-image svg {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+.iui-tools-guest-count {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  padding: 18px 20px;
+  background: var(--iui-surface, #f7f7f7);
+  border-radius: 16px;
+}
+.iui-tools-guest-count h3 {
+  font-size: 14px;
+}
+.iui-tools-guest-count p {
+  font-size: 11px;
+  margin-top: 4px;
+}
+.iui-tools-stepper {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-shrink: 0;
+  padding-bottom: 18px;
+}
+.iui-tools-stepper button {
+  border: 1px solid var(--iui-border, #e5e5e5);
+  background: var(--iui-canvas, #fff);
+  color: var(--iui-ink, #171717);
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  font-size: 22px;
+  line-height: 1;
+}
+.iui-tools-stepper output {
+  position: relative;
+  display: block;
+  text-align: center;
+  width: 44px;
+  height: 36px;
+  font-size: 24px;
+  line-height: 36px;
+  font-variant-numeric: tabular-nums;
+}
+.iui-tools-stepper output span {
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 11px;
+  line-height: 16px;
+  color: var(--iui-muted);
+  white-space: nowrap;
+  margin-top: 2px;
+}
+.iui-tools-tablist {
+  display: flex;
+  gap: 24px;
+  border-bottom: 1px solid var(--iui-border, #e5e5e5);
+  margin-top: 23px;
+}
+.iui-tools-tablist button {
+  border: 0;
+  border-bottom: 2px solid transparent;
+  padding: 9px 0 13px;
+  background: transparent;
+  color: var(--iui-muted, #707070);
+  font-size: 13px !important;
+  white-space: nowrap;
+}
+.iui-tools-tablist button[aria-selected="true"] {
+  border-bottom-color: var(--iui-ink, #171717);
+  color: var(--iui-ink, #171717);
+}
+.iui-tools-tablist button > span {
+  background: var(--iui-surface, #f7f7f7);
+  padding: 2px 5px;
+  border-radius: 5px;
+  font-size: 10px;
+  margin-left: 5px;
+}
+.iui-tools-shopping dl {
+  margin: 5px 0 14px;
+}
+.iui-tools-shopping dl > div {
+  display: flex;
+  justify-content: space-between;
+  gap: 15px;
+  padding: 11px 0;
+  border-bottom: 1px solid var(--iui-border, #e5e5e5);
+  font-size: 13px;
+}
+.iui-tools-shopping dd {
+  margin: 0;
+  font-weight: 500;
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+}
+.iui-tools-timeline {
+  padding-top: 19px;
+}
+.iui-tools-timeline > label {
+  display: grid;
+  grid-template-columns: 18px 72px minmax(0, 1fr);
+  gap: 12px;
+  align-items: start;
+  padding-bottom: 20px;
+  position: relative;
+  cursor: pointer;
+}
+.iui-tools-timeline input {
+  margin: 3px 0 0;
+}
+.iui-tools-timeline time {
+  font-size: 11px;
+  padding-top: 3px;
+  color: var(--iui-muted, #707070);
+  font-variant-numeric: tabular-nums;
+}
+.iui-tools-timeline label > span {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+.iui-tools-timeline strong {
+  font-size: 13px;
+  font-weight: 500;
+}
+.iui-tools-timeline label > span > span {
+  font-size: 12px;
+  line-height: 1.55;
+  color: var(--iui-muted, #707070);
+}
+.iui-tools-timeline .is-done strong {
+  text-decoration: line-through;
+  color: var(--iui-muted, #707070);
+}
+.iui-tools-filters {
+  display: flex;
+  gap: 7px;
+  flex-wrap: wrap;
+  margin-bottom: 18px;
+}
+.iui-tools-filters .iui-tools-button {
+  min-height: 33px;
+  padding: 5px 12px;
+  font-size: 12px !important;
+}
+.iui-tools-wardrobe-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 22px 13px;
+}
+.iui-tools-wardrobe-image {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  aspect-ratio: 1.06;
+  border-radius: 14px;
+  background: var(--iui-surface, #f7f7f7);
+  overflow: hidden;
+  margin-bottom: 10px;
+}
+.iui-tools-wardrobe-image > img,
+.iui-tools-garment {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.iui-tools-save {
+  position: absolute;
+  right: 7px;
+  top: 7px;
+  width: 29px;
+  height: 29px;
+  border: 0;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  background: var(--iui-canvas, #fff);
+  color: var(--iui-ink, #171717);
+}
+.iui-tools-wardrobe-grid .iui-tools-row {
+  align-items: start;
+  gap: 6px;
+}
+.iui-tools-wardrobe-grid h3 {
+  font-size: 12px;
+  font-weight: 500;
+  line-height: 1.5;
+}
+.iui-tools-wardrobe-grid .iui-tools-caption {
+  font-size: 10px;
+  margin-top: 3px;
+}
+.iui-tools-swatch {
+  border: 1px solid #00000012;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  margin-top: 4px;
+}
+.iui-tools-outfits {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.iui-tools-outfits > button {
+  display: flex;
+  align-items: center;
+  text-align: left;
+  gap: 13px;
+  padding: 13px;
+  border: 1px solid var(--iui-border, #e5e5e5);
+  border-radius: 13px;
+  background: var(--iui-canvas, #fff);
+  color: var(--iui-ink, #171717);
+}
+.iui-tools-outfits > button:hover,
+.iui-tools-outfits > button[aria-pressed="true"] {
+  background: var(--iui-surface, #f7f7f7);
+}
+.iui-tools-outfits > button[aria-pressed="true"] {
+  border-color: var(--iui-ink, #171717);
+}
+.iui-tools-outfit-swatches {
+  display: flex;
+  align-items: center;
+  padding-left: 3px;
+}
+.iui-tools-outfit-swatches > span {
+  width: 21px;
+  height: 21px;
+  border: 2px solid var(--iui-canvas, #fff);
+  border-radius: 50%;
+  margin-left: -3px;
+  box-shadow: 0 0 0 1px #00000008;
+}
+.iui-tools-outfits > button > span:nth-child(2) {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.iui-tools-outfits strong {
+  font-size: 13px;
+  font-weight: 500;
+}
+.iui-tools-outfits .iui-tools-caption {
+  font-size: 11px;
+}
+.iui-tools-outfits > button > span:last-child {
+  margin-left: auto;
+  font-size: 18px;
+  color: var(--iui-muted, #707070);
+}
+@media (max-width: 600px) {
+  .iui-tools {
+    padding: 18px;
+    border-radius: 16px;
+  }
+  .iui-tools h2 {
+    font-size: 19px;
+  }
+  .iui-tools-tax-tip {
+    grid-template-columns: 74px minmax(0, 1fr);
+    gap: 14px;
+  }
+  .iui-tools-tip-presets .iui-tools-button {
+    padding: 6px 9px;
+  }
+  .iui-tools-dishes {
+    gap: 9px;
+  }
+  .iui-tools-guest-count {
+    padding: 15px;
+    gap: 12px;
+  }
+  .iui-tools-stepper {
+    gap: 8px;
+  }
+  .iui-tools-guest-count h3 {
+    font-size: 13px;
+  }
+  .iui-tools-sliders {
+    gap: 22px 19px;
+  }
+  .iui-tools-wardrobe-grid {
+    gap: 18px 11px;
+  }
+  .iui-tools-projection > strong {
+    font-size: 36px;
+  }
+  .iui-tools-chart {
+    margin-left: -16px;
+    margin-right: -3px;
+  }
+  .iui-tools-timeline > label {
+    grid-template-columns: 17px 64px minmax(0, 1fr);
+    gap: 10px;
+  }
+}
+@media (max-width: 400px) {
+  .iui-tools {
+    padding: 16px;
+  }
+  .iui-tools-people,
+  .iui-tools-shares {
+    grid-template-columns: 1fr;
+  }
+  .iui-tools-order-fields {
+    grid-template-columns: minmax(0, 1fr) 98px 19px;
+    gap: 4px;
+  }
+  .iui-tools-tax-tip {
+    grid-template-columns: 1fr;
+  }
+  .iui-tools-tax-tip > .iui-tools-field:first-child {
+    max-width: 100px;
+  }
+  .iui-tools-sliders {
+    grid-template-columns: 1fr;
+  }
+  .iui-tools-dishes {
+    grid-template-columns: 1fr;
+  }
+  .iui-tools-dishes article {
+    display: grid;
+    grid-template-columns: 92px minmax(0, 1fr);
+    gap: 0 13px;
+    align-content: start;
+  }
+  .iui-tools-food-image {
+    grid-row: 1/3;
+    aspect-ratio: 1.2;
+  }
+  .iui-tools-dishes h3 {
+    margin-top: 4px;
+  }
+  .iui-tools-dishes article p {
+    align-self: start;
+  }
+  .iui-tools-wardrobe-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .iui-tools-guest-count {
+    align-items: start;
+  }
+  .iui-tools-guest-count p {
+    max-width: 145px;
+  }
+  .iui-tools-tablist {
+    gap: 18px;
+  }
+  .iui-tools-tablist button {
+    font-size: 12px !important;
+  }
+}
+/* The published savings example uses a quiet contribution bar and wide slider tracks. */
+.iui-tools-savings .iui-tools-projection {
+  align-items: flex-start;
+  margin-top: 0;
+  gap: 4px;
+}
+.iui-tools-savings .iui-tools-projection > strong {
+  color: #00a240;
+  font-size: 32px;
+  letter-spacing: -0.6px;
+}
+.iui-tools-savings-breakdown {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin: 20px 0 24px;
+}
+.iui-tools-balance-bar {
+  display: flex;
+  height: 22px;
+  gap: 6px;
+  border-radius: 6px;
+  background: var(--iui-surface, #f7f7f7);
+  overflow: hidden;
+}
+.iui-tools-balance-bar > span:first-child {
+  background: #4f91ca;
+}
+.iui-tools-balance-bar > span:last-child {
+  background: #3a9b74;
+  flex: 1;
+}
+.iui-tools-savings-breakdown > .iui-tools-row > div {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+.iui-tools-savings-breakdown > .iui-tools-row > div:last-child {
+  text-align: right;
+  align-items: flex-end;
+}
+.iui-tools-savings-breakdown .iui-tools-caption {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 13px;
+}
+.iui-tools-savings-breakdown i {
+  width: 10px;
+  height: 10px;
+  border-radius: 2px;
+  background: #4f91ca;
+  display: inline-block;
+}
+.iui-tools-savings-breakdown > .iui-tools-row > div:last-child i {
+  background: #3a9b74;
+}
+.iui-tools-savings-breakdown strong {
+  font-size: 18px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+.iui-tools-sliders {
+  grid-template-columns: 1fr;
+  gap: 22px;
+}
+.iui-tools-slider {
+  font-size: 14px;
+  gap: 8px;
+}
+.iui-tools-slider strong {
+  font-size: 16px;
+}
+.iui-tools-slider .iui-tools-caption {
+  font-size: 11px;
+}
+.iui-tools-savings .iui-tools-header {
+  margin-bottom: 20px;
+}
+.iui-tools-packing {
+  padding: 18px;
+  background: var(--iui-surface, #f7f7f7);
+  border-radius: 15px;
+  margin-top: 24px;
+}
+.iui-tools-packing progress {
+  appearance: none;
+  width: 100%;
+  height: 4px;
+  display: block;
+  margin: 12px 0 16px;
+  accent-color: var(--iui-ink, #171717);
+}
+.iui-tools-packing progress::-webkit-progress-bar {
+  background: var(--iui-border, #e5e5e5);
+  border-radius: 9px;
+}
+.iui-tools-packing progress::-webkit-progress-value {
+  background: var(--iui-ink, #171717);
+  border-radius: 9px;
+}
+.iui-tools-packing-list {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 11px 15px;
+}
+.iui-tools-packing-list label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  cursor: pointer;
+}
+.iui-tools-packing-list input {
+  margin: 0;
+}
+.iui-tools-packing-list label:has(input:checked) > span {
+  text-decoration: line-through;
+  color: var(--iui-muted, #707070);
+}
+.iui-tools-personalize {
+  margin-top: 22px;
+  border-top: 1px solid var(--iui-border, #e5e5e5);
+  padding-top: 18px;
+  font-size: 13px;
+}
+.iui-tools-personalize summary {
+  cursor: pointer;
+  font-weight: 500;
+}
+.iui-tools-personalize form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--iui-field-gap);
+  padding-top: var(--iui-field-gap);
+}
+.iui-tools-personalize fieldset {
+  display: flex;
+  gap: 6px;
+  border: 0;
+  margin: 0;
+  padding: 0;
+  flex-wrap: wrap;
+}
+.iui-tools-personalize legend {
+  padding: 0;
+  margin-bottom: var(--iui-label-gap);
+  font-size: 12px;
+  color: var(--iui-muted, #707070);
+}
+.iui-tools-personalize fieldset label {
+  position: relative;
+}
+.iui-tools-personalize fieldset input {
+  position: absolute;
+  opacity: 0;
+}
+.iui-tools-personalize fieldset label > span {
+  display: block;
+  border: 1px solid var(--iui-border, #e5e5e5);
+  padding: 6px 11px;
+  border-radius: 99px;
+  font-size: 12px;
+  cursor: pointer;
+}
+.iui-tools-personalize fieldset input:checked + span {
+  background: var(--iui-ink, #171717);
+  border-color: var(--iui-ink, #171717);
+  color: var(--iui-canvas, #fff);
+}
+.iui-tools-personalize fieldset input:focus-visible + span {
+  outline: 2px solid var(--iui-ink, #171717);
+  outline-offset: 3px;
+}
+.iui-tools-personalize button[type="submit"] {
+  align-self: flex-start;
+  margin-top: calc(var(--iui-action-gap) - var(--iui-field-gap));
+  background: var(--iui-ink, #171717);
+  color: var(--iui-canvas, #fff);
+}
+@media (max-width: 400px) {
+  .iui-tools-packing-list {
+    grid-template-columns: 1fr;
+  }
+  .iui-tools-savings-breakdown .iui-tools-caption {
+    font-size: 11px;
+  }
+}
+/* The bill-splitting launch example is a custom clipboard on warm paper. */
+.iui-tools-bill {
+  --iui-canvas: #fffef7;
+  --iui-surface: #f3f0e8;
+  --iui-surface-hover: #eeeadf;
+  --iui-ink: #303b33;
+  --iui-muted: #7a756a;
+  --iui-border: #ded5c6;
+  position: relative;
+  background: #fffef7;
+  border: 13px solid #d9cdba;
+  border-top-width: 35px;
+  border-bottom-width: 20px;
+  border-radius: 17px;
+  padding: 28px 22px 22px;
+  box-shadow: inset 0 0 0 1px #c9bfae;
+}
+.iui-tools-bill::before {
+  content: "";
+  position: absolute;
+  top: -27px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 128px;
+  height: 24px;
+  border: 1px solid #777d7a;
+  border-radius: 8px;
+  background: #a7a9a5;
+  box-shadow: 0 2px 2px #0000000c;
+}
+.iui-tools-bill::after {
+  content: "";
+  position: absolute;
+  top: -19px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 70px;
+  height: 7px;
+  border-radius: 99px;
+  background: #d9dcda;
+}
+.iui-tools-bill .iui-tools-header {
+  text-align: center;
+  align-items: center;
+  padding-bottom: 19px;
+  border-bottom: 1px solid #cfc6b6;
+  margin-bottom: 22px;
+}
+.iui-tools-bill .iui-tools-header h2 {
+  font-size: 27px;
+  letter-spacing: -0.6px;
+}
+.iui-tools-bill .iui-tools-header p {
+  font-size: 13px;
+  color: #867d6f;
+}
+.iui-tools-bill .iui-tools-summary {
+  background: #f1eee7;
+  border-radius: 10px;
+}
+.iui-tools-bill .iui-tools-shares {
+  border: 1px dashed #9ea293;
+  border-radius: 10px;
+  padding: 14px;
+}
+.iui-tools-bill .iui-tools-avatar {
+  background: #fffef7;
+}
+.iui-tools-bill .iui-tools-person-input {
+  background: #f3f0e8;
+}
+@media (max-width: 600px) {
+  .iui-tools-bill {
+    border-inline-width: 10px;
+    border-top-width: 33px;
+    border-bottom-width: 14px;
+    padding: 23px 17px 18px;
+  }
+  .iui-tools-bill .iui-tools-header h2 {
+    font-size: 24px;
+  }
+  .iui-tools-bill .iui-tools-shares {
+    grid-template-columns: 1fr;
+    gap: 13px;
+  }
+}
+@media (max-width: 400px) {
+  .iui-tools-bill {
+    padding-inline: 13px;
+  }
+  .iui-tools-bill .iui-tools-people {
+    grid-template-columns: 1fr;
+  }
+  .iui-tools-bill .iui-tools-tax-tip {
+    grid-template-columns: 1fr;
+  }
+}

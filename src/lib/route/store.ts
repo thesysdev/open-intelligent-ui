@@ -8,6 +8,7 @@ export type StopData = {
   time?: string;
   story?: string;
   beforeYouGo?: string;
+  category?: string;
 };
 
 const removed = new Set<string>();
@@ -47,6 +48,8 @@ export function useRouteVersion() {
 }
 
 export type WikiInfo = { lat?: number; lng?: number; photos: string[] };
+type WikiSummary = { thumbnail?: { source?: string }; coordinates?: { lat?: number; lon?: number } };
+type WikiMedia = { items?: { type?: string; srcset?: { src: string }[] }[] };
 const wikiCache = new Map<string, Promise<WikiInfo>>();
 
 export function fetchWiki(title: string): Promise<WikiInfo> {
@@ -56,7 +59,7 @@ export function fetchWiki(title: string): Promise<WikiInfo> {
       fetch(`https://en.wikipedia.org/api/rest_v1/page/summary/${t}`).then((r) => (r.ok ? r.json() : {})),
       fetch(`https://en.wikipedia.org/api/rest_v1/page/media-list/${t}`).then((r) => (r.ok ? r.json() : {})),
     ])
-      .then(([s, m]: any[]) => {
+      .then(([s, m]: [WikiSummary, WikiMedia]) => {
         const photos: string[] = [];
         const key = (u: string) => decodeURIComponent(u.split("?")[0].split("/").slice(-1)[0]).replace(/^\d+px-/, "");
         if (s?.thumbnail?.source) photos.push(s.thumbnail.source);

@@ -1,9 +1,9 @@
 import librarySpec from "@/generated/spec.json";
 import { promptOptions } from "@/lib/prompt-options";
-import { getWeather, WEATHER_TOOL_DESCRIPTION } from "@/lib/tools/get-weather";
 import { generateSystemPrompt } from "@openuidev/lang-core";
 import OpenAI from "openai";
 import type { ChatCompletionMessageParam } from "openai/resources/chat/completions";
+import type { ReasoningEffort } from "openai/resources/shared";
 
 const client = new OpenAI();
 
@@ -49,7 +49,7 @@ export async function POST(req: Request) {
           ...question,
         ],
         tools: [],
-        ...(process.env.REASONING_EFFORT ? { reasoning_effort: process.env.REASONING_EFFORT as any } : {}),
+        ...(process.env.REASONING_EFFORT ? { reasoning_effort: process.env.REASONING_EFFORT as ReasoningEffort } : {}),
         stream: true,
       },
       { signal: req.signal, maxChatCompletions: 5 }, // propagate browser aborts

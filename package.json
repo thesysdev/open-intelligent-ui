@@ -11,7 +11,7 @@
     ]
   },
   "scripts": {
-    "generate": "openui generate src/lib/library.ts --spec --out src/generated/spec.json",
+    "generate": "openui generate src/lib/library.tsx --spec --out src/generated/spec.json",
     "dev": "next dev",
     "build": "next build",
     "start": "next start",

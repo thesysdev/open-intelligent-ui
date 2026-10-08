@@ -1,0 +1,570 @@
+.iui-trip {
+  color: var(--iui-ink, #171717);
+  font-family: var(--iui-font, inherit);
+  font-size: 14px;
+  line-height: 1.6;
+  min-width: 0;
+}
+.iui-trip * {
+  box-sizing: border-box;
+}
+.iui-trip h2,
+.iui-trip h3,
+.iui-trip h4,
+.iui-trip p {
+  margin: 0;
+}
+.iui-trip > header h2 {
+  font-size: 24px;
+  line-height: 1.35;
+  letter-spacing: -0.6px;
+  font-weight: 600;
+}
+.iui-trip > header p {
+  margin-top: 10px;
+  font-size: 15px;
+  line-height: 1.7;
+  max-width: 680px;
+}
+.iui-trip button,
+.iui-trip input,
+.iui-trip textarea {
+  font: inherit;
+}
+.iui-trip button {
+  cursor: pointer;
+  touch-action: manipulation;
+}
+.iui-trip button:focus-visible,
+.iui-trip a:focus-visible,
+.iui-trip input:focus-visible,
+.iui-trip textarea:focus-visible {
+  outline: 2px solid var(--iui-ink, #171717);
+  outline-offset: 3px;
+}
+.iui-trip-photo-strip {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+  margin: 22px 0 16px;
+  border-radius: 14px;
+  overflow: hidden;
+}
+.iui-trip-photo {
+  position: relative;
+  background: #dfe7e5;
+  overflow: hidden;
+  aspect-ratio: 1.35;
+  min-width: 0;
+}
+.iui-trip-photo > img,
+.iui-trip-photo > svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.iui-trip-photo > a {
+  position: absolute;
+  bottom: 6px;
+  right: 6px;
+  display: grid;
+  place-items: center;
+  width: 23px;
+  height: 23px;
+  border-radius: 50%;
+  background: #ffffffdd;
+  color: #333;
+  text-decoration: none;
+  font-size: 15px;
+}
+.iui-trip-meta {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-bottom: 25px;
+}
+.iui-trip-meta > span {
+  display: inline-block;
+  background: var(--iui-surface, #f7f7f7);
+  border-radius: 99px;
+  padding: 6px 11px;
+  font-size: 12px;
+  color: var(--iui-muted, #707070);
+}
+.iui-trip-section-heading {
+  display: flex;
+  justify-content: space-between;
+  align-items: start;
+  gap: 16px;
+  margin-bottom: 18px;
+}
+.iui-trip-section-heading h3,
+.iui-trip-preferences > h3 {
+  font-size: 17px;
+  font-weight: 600;
+  letter-spacing: -0.25px;
+}
+.iui-trip-section-heading p,
+.iui-trip-preferences > p {
+  font-size: 13px;
+  color: var(--iui-muted, #707070);
+  margin-top: 4px;
+}
+.iui-trip-caption {
+  font-size: 11px;
+  line-height: 1.6;
+  color: var(--iui-muted, #707070);
+}
+.iui-trip-section-heading > .iui-trip-caption {
+  padding-top: 3px;
+  white-space: nowrap;
+}
+.iui-trip-filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+  margin-bottom: 15px;
+}
+.iui-trip-filters button {
+  padding: 6px 12px;
+  border: 1px solid var(--iui-border, #e5e5e5);
+  border-radius: 99px;
+  background: var(--iui-canvas, #fff);
+  color: var(--iui-ink, #171717);
+  font-size: 12px;
+}
+.iui-trip-filters button[aria-pressed="true"] {
+  background: var(--iui-ink, #171717);
+  color: var(--iui-canvas, #fff);
+  border-color: var(--iui-ink, #171717);
+}
+.iui-trip-map-wrap {
+  position: relative;
+  isolation: isolate;
+  height: 345px;
+  border-radius: 13px;
+  overflow: hidden;
+  border: 1px solid var(--iui-border, #e5e5e5);
+  background: #e4e9e1;
+}
+.iui-trip-map {
+  height: 100%;
+  width: 100%;
+  background: #e4e9e1;
+}
+.iui-trip-map-chip {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  z-index: 500;
+  padding: 5px 10px;
+  border-radius: 99px;
+  background: #ffffffed;
+  box-shadow: 0 1px 5px #00000014;
+  color: #333;
+  font-size: 11px;
+}
+.iui-trip-pin {
+  display: grid;
+  place-items: center;
+  width: 29px;
+  height: 29px;
+  border: 2px solid #fff;
+  border-radius: 50%;
+  background: #171717;
+  color: #fff;
+  font: 500 12px/1 inherit;
+  box-shadow: 0 1px 7px #0005;
+}
+.iui-trip-pin.is-selected {
+  background: #2f7a57;
+  transform: scale(1.16);
+}
+.iui-trip-map .leaflet-control-zoom {
+  border: 1px solid #d7d7d7;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 2px 6px #0001;
+}
+.iui-trip-map .leaflet-control-attribution {
+  font-size: 9px;
+  background: #ffffffca;
+}
+.iui-trip-map-error {
+  position: absolute;
+  bottom: 27px;
+  left: 12px;
+  right: 12px;
+  z-index: 500;
+  font-size: 11px;
+  background: #ffffffed;
+  padding: 6px 9px;
+  border-radius: 7px;
+}
+.iui-trip-selected {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding-top: 16px;
+}
+.iui-trip-day-number {
+  display: grid;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  background: var(--iui-surface, #f7f7f7);
+  font-size: 12px;
+  flex-shrink: 0;
+}
+.iui-trip-selected strong {
+  font-size: 13px;
+  font-weight: 500;
+}
+.iui-trip-selected p {
+  font-size: 11px;
+  color: var(--iui-muted, #707070);
+  margin-top: 1px;
+}
+.iui-trip-selected .iui-button {
+  margin-left: auto;
+  font-size: 11px;
+  padding: 6px 12px;
+  min-height: 33px;
+}
+.iui-trip-days {
+  margin-top: 32px;
+}
+.iui-trip-days > article {
+  display: grid;
+  grid-template-columns: 124px minmax(0, 1fr);
+  gap: 20px;
+  padding: 22px 0;
+  border-bottom: 1px solid var(--iui-border, #e5e5e5);
+  scroll-margin: 24px;
+}
+.iui-trip-days > article:first-of-type {
+  padding-top: 3px;
+}
+.iui-trip-days .iui-trip-photo {
+  aspect-ratio: 1.15;
+  border-radius: 12px;
+  align-self: start;
+  margin-top: 3px;
+}
+.iui-trip-day-kicker {
+  font-size: 11px;
+  color: var(--iui-muted, #707070);
+  margin-bottom: 3px;
+}
+.iui-trip-day-kicker > span {
+  color: var(--iui-muted, #707070);
+}
+.iui-trip-days h4 {
+  font-size: 16px;
+  letter-spacing: -0.2px;
+  font-weight: 600;
+  line-height: 1.45;
+}
+.iui-trip-days article p {
+  font-size: 13px;
+  color: var(--iui-muted, #707070);
+  margin-top: 5px;
+  line-height: 1.65;
+}
+.iui-trip-stay {
+  display: block;
+  font-size: 11px;
+  margin-top: 8px;
+}
+.iui-trip-remove {
+  display: block;
+  padding: 3px 0;
+  margin-top: 5px;
+  border: 0;
+  background: transparent;
+  color: var(--iui-muted, #707070);
+  font-size: 11px !important;
+  text-align: left;
+}
+.iui-trip-remove:hover {
+  color: var(--iui-ink, #171717);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+.iui-trip-days > article.is-removed .iui-trip-photo {
+  filter: grayscale(1);
+  opacity: 0.5;
+}
+.iui-trip-days > article.is-removed h4 {
+  text-decoration: line-through;
+  color: var(--iui-muted, #707070);
+}
+.iui-trip-budget {
+  margin-top: 28px;
+}
+.iui-trip-budget table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 12px;
+}
+.iui-trip-budget th,
+.iui-trip-budget td {
+  text-align: left;
+  padding: 12px 8px;
+  border-bottom: 1px solid var(--iui-border, #e5e5e5);
+  font-weight: 400;
+  vertical-align: top;
+}
+.iui-trip-budget th:first-child {
+  padding-left: 0;
+}
+.iui-trip-budget td:last-child,
+.iui-trip-budget th:last-child {
+  text-align: right;
+  padding-right: 0;
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+}
+.iui-trip-budget thead th {
+  font-size: 11px;
+  color: var(--iui-muted, #707070);
+}
+.iui-trip-budget tbody td:nth-child(2) {
+  font-size: 11px;
+  color: var(--iui-muted, #707070);
+}
+.iui-trip-budget tfoot th,
+.iui-trip-budget tfoot td {
+  font-weight: 600;
+  border: 0;
+  padding-top: 16px;
+}
+.iui-trip-budget tfoot td:nth-child(2) {
+  font-size: 11px;
+  color: var(--iui-muted, #707070);
+  font-weight: 400;
+}
+.iui-trip-budget > .iui-trip-caption {
+  margin-top: 15px;
+}
+.iui-trip-preferences {
+  margin-top: 24px;
+}
+.iui-trip-preferences form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--iui-field-gap);
+  margin-top: var(--iui-section-gap);
+}
+.iui-trip-preferences fieldset {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  padding: 0;
+  margin: 0;
+  border: 0;
+}
+.iui-trip-preferences legend {
+  padding: 0;
+  margin-bottom: var(--iui-label-gap);
+  font-size: 13px;
+  font-weight: 500;
+}
+.iui-trip-preferences label {
+  position: relative;
+}
+.iui-trip-preferences label input {
+  position: absolute;
+  opacity: 0;
+}
+.iui-trip-preferences label span {
+  display: block;
+  border: 1px solid var(--iui-border, #e5e5e5);
+  padding: 6px 13px;
+  border-radius: 99px;
+  font-size: 12px;
+  cursor: pointer;
+}
+.iui-trip-preferences label input:checked + span {
+  background: var(--iui-ink, #171717);
+  border-color: var(--iui-ink, #171717);
+  color: var(--iui-canvas, #fff);
+}
+.iui-trip-preferences label input:focus-visible + span {
+  outline: 2px solid var(--iui-ink, #171717);
+  outline-offset: 3px;
+}
+.iui-trip-preferences button[type="submit"] {
+  align-self: flex-start;
+  margin-top: calc(var(--iui-action-gap) - var(--iui-field-gap));
+}
+.iui-trip-season-note {
+  padding: 16px;
+  background: var(--iui-surface, #f7f7f7);
+  border-radius: 12px;
+  margin-top: var(--iui-section-gap);
+}
+.iui-trip-season-note strong {
+  font-size: 12px;
+  font-weight: 500;
+}
+.iui-trip-season-note p {
+  font-size: 12px;
+  line-height: 1.65;
+  color: var(--iui-muted, #707070);
+  margin-top: 5px;
+}
+.iui-trip-footer {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 18px;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 22px;
+}
+.iui-trip-footer > p {
+  font-size: 11px;
+  color: var(--iui-muted, #707070);
+  line-height: 1.7;
+  max-width: 440px;
+}
+.iui-trip-footer a {
+  color: inherit;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+.iui-trip-footer > .iui-button {
+  font-size: 12px;
+}
+.iui-trip-copy-fallback {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  font-size: 12px;
+  width: 100%;
+}
+.iui-trip-copy-fallback textarea {
+  width: 100%;
+  min-height: 150px;
+  border: 1px solid var(--iui-border, #e5e5e5);
+  border-radius: 10px;
+  background: var(--iui-canvas, #fff);
+  color: var(--iui-ink, #171717);
+  padding: 12px;
+}
+@media (max-width: 600px) {
+  .iui-trip > header h2 {
+    font-size: 21px;
+  }
+  .iui-trip > header p {
+    font-size: 14px;
+  }
+  .iui-trip-photo-strip {
+    gap: 5px;
+    margin-top: 18px;
+  }
+  .iui-trip-photo-strip .iui-trip-photo {
+    aspect-ratio: 0.95;
+  }
+  .iui-trip-photo-strip .iui-trip-photo > a {
+    width: 19px;
+    height: 19px;
+    right: 4px;
+    bottom: 4px;
+    font-size: 12px;
+  }
+  .iui-trip-meta {
+    gap: 5px;
+  }
+  .iui-trip-meta > span {
+    font-size: 10px;
+    padding: 5px 8px;
+  }
+  .iui-trip-map-wrap {
+    height: 285px;
+  }
+  .iui-trip-section-heading {
+    gap: 10px;
+  }
+  .iui-trip-section-heading > .iui-trip-caption {
+    white-space: normal;
+    max-width: 80px;
+    text-align: right;
+    font-size: 10px;
+  }
+  .iui-trip-section-heading h3 {
+    font-size: 16px;
+  }
+  .iui-trip-section-heading p {
+    font-size: 12px;
+  }
+  .iui-trip-selected {
+    gap: 8px;
+  }
+  .iui-trip-selected strong {
+    font-size: 12px;
+  }
+  .iui-trip-selected .iui-button {
+    padding: 5px 9px;
+    font-size: 10px;
+  }
+  .iui-trip-selected .iui-trip-day-number {
+    width: 24px;
+    height: 24px;
+  }
+  .iui-trip-days > article {
+    grid-template-columns: 88px minmax(0, 1fr);
+    gap: 13px;
+  }
+  .iui-trip-days .iui-trip-photo {
+    aspect-ratio: 0.9;
+  }
+  .iui-trip-days h4 {
+    font-size: 14px;
+  }
+  .iui-trip-days article p {
+    font-size: 12px;
+  }
+  .iui-trip-budget th,
+  .iui-trip-budget td {
+    font-size: 11px;
+    padding: 10px 5px;
+  }
+  .iui-trip-budget tbody td:nth-child(2),
+  .iui-trip-budget tfoot td:nth-child(2) {
+    font-size: 10px;
+  }
+  .iui-trip-filters {
+    gap: 5px;
+  }
+  .iui-trip-filters button {
+    font-size: 11px;
+    padding: 5px 10px;
+  }
+}
+@media (max-width: 380px) {
+  .iui-trip-days > article {
+    grid-template-columns: 75px minmax(0, 1fr);
+    gap: 11px;
+  }
+  .iui-trip-map-wrap {
+    height: 255px;
+  }
+  .iui-trip-selected {
+    flex-wrap: wrap;
+  }
+  .iui-trip-budget tbody td:nth-child(2) {
+    max-width: 85px;
+  }
+  .iui-trip-preferences label span {
+    padding: 6px 10px;
+    font-size: 11px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .iui-trip * {
+    scroll-behavior: auto !important;
+  }
+}
