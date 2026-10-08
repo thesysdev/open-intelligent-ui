@@ -1,12 +1,12 @@
 # Open Intelligent UI
 
-Fun fact: [openui.com](https://openui.com) isn't owned by OpenAI. It's owned by us :)
+**An open-source implementation of the "Intelligent UI" experience introduced in ChatGPT, built on [OpenUI](https://openui.com).**
 
-[OpenUI](https://github.com/thesysdev/openui) is the open standard for Generative UI, and yes, it's actually open source and MIT licensed. It recently passed 10K GitHub stars, right as the big players started validating what we've been shouting about for almost two years.
+In ChatGPT's Intelligent UI, a request such as "plan a day in San Francisco" returns an interactive answer (a map, photographs and an editable itinerary) rather than text. This repository reproduces that experience with open-source components, so that the same kind of interface can be built, modified and shipped inside any application.
 
-We vibe-coded this demo after watching the launch video for what ChatGPT calls "Intelligent UI": ask it to plan a day in a city and you get an interactive answer (a map, photos, an itinerary you can edit) instead of a wall of text. Everything here is built on OpenUI, so you can build the same kind of experience without the paywall and actually ship it inside your own app. **Try it at [openui.com](https://openui.com).**
+[OpenUI](https://github.com/thesysdev/openui) is the open standard for Generative UI. It is MIT-licensed and developed by [Thesys](https://www.thesys.dev); the domain openui.com belongs to the OpenUI project.
 
-> An independent recreation, not affiliated with OpenAI. "Intelligent UI" is the name of ChatGPT's feature.
+> This project is independent and is not affiliated with or endorsed by OpenAI. "Intelligent UI" refers to the ChatGPT feature that this demo recreates.
 
 ## What's in the demo
 
