@@ -24,6 +24,15 @@ const boundsOf = (points: [number, number][]): LngLatBoundsLike => {
 };
 const reducedMotion = () => window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
+// Pins are round and sized for one emoji. Use the first character only if it
+// is an emoji, so a word or letter from the model can't overflow the pin.
+const graphemes = new Intl.Segmenter(undefined, { granularity: "grapheme" });
+export function pinEmoji(value: unknown): string {
+  if (typeof value !== "string") return "📍";
+  const first = graphemes.segment(value.trim())[Symbol.iterator]().next().value?.segment;
+  return first && /\p{Extended_Pictographic}/u.test(first) ? first : "📍";
+}
+
 const ROUTE = "route";
 const FRAME_PADDING = { top: 70, left: 42, bottom: 50, right: 52 };
 const FLY_MS = 920;
@@ -205,7 +214,7 @@ export function TravelMapView({ stops, path, streaming = false }: { stops: StopD
       entry.element.title = stop.name || "";
       entry.element.setAttribute("aria-label", stop.name || "");
       entry.pin.classList.toggle("is-selected", selected === key);
-      entry.pin.textContent = stop.emoji || "📍";
+      entry.pin.textContent = pinEmoji(stop.emoji);
       entry.label.textContent = stop.name || "";
     });
     const positions = visible.map((stop) => coordinate(stop)!);
