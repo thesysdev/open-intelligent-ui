@@ -116,7 +116,7 @@ export const TravelGallery = defineComponent({
   description: "A row of destination photographs. Usually three images, with consistent crops and working local save toggles.",
   component: ({ props }) => {
     const photos = nodeProps<ImageData>(props.images);
-    return <div className="tv-gallery" style={{ gridTemplateColumns: `repeat(${Math.max(1, Math.min(photos.length, 3))}, minmax(0, 1fr))` }}>
+    return <div className="tv-gallery">
       {photos.map((photo, i) => <Photo key={`${photo.src || "pending"}-${i}`} photo={photo} bookmark />)}
     </div>;
   },
