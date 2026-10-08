@@ -1,6 +1,9 @@
-import { useSyncExternalStore } from "react";
+"use client";
+
+import { createContext, createElement, useContext, useId, useState, useSyncExternalStore, type ReactNode } from "react";
 
 export type StopData = {
+  id?: string;
   name?: string;
   wikiTitle?: string;
   lat?: number;
@@ -11,40 +14,58 @@ export type StopData = {
   category?: string;
 };
 
-const removed = new Set<string>();
-const added: StopData[] = [];
-const listeners = new Set<() => void>();
-let version = 0;
-const bump = () => {
-  version++;
-  listeners.forEach((l) => l());
-};
+export const getStopKey = (stop: StopData) => stop.id || stop.name || "";
 
-export function toggleStop(name: string) {
-  if (removed.has(name)) removed.delete(name);
-  else removed.add(name);
-  bump();
-}
-
-export function addStop(stop: StopData) {
-  if (!stop.name || added.some((a) => a.name === stop.name)) return;
-  added.push(stop);
-  bump();
-}
-
-export const isRemoved = (name: string) => removed.has(name);
-export const isAdded = (name: string) => added.some((a) => a.name === name);
-export const getAdded = () => added;
-
-export function useRouteVersion() {
-  return useSyncExternalStore(
-    (l) => {
-      listeners.add(l);
-      return () => listeners.delete(l);
+/** Each response owns its edits; shared photo caching below remains read-only. */
+export function createRouteStore(namespace: string) {
+  const removed = new Set<string>();
+  let added: StopData[] = [];
+  const listeners = new Set<() => void>();
+  let version = 0;
+  const bump = () => { version++; listeners.forEach((listener) => listener()); };
+  return {
+    namespace,
+    mapId: `${namespace}-map`,
+    stopId: (key: string) => `${namespace}-stop-${encodeURIComponent(key)}`,
+    subscribe: (listener: () => void) => { listeners.add(listener); return () => { listeners.delete(listener); }; },
+    getSnapshot: () => version,
+    getServerSnapshot: () => 0,
+    toggleStop(key: string) {
+      if (!key) return;
+      if (removed.has(key)) removed.delete(key);
+      else removed.add(key);
+      bump();
     },
-    () => version,
-    () => version,
-  );
+    addStop(stop: StopData) {
+      const key = getStopKey(stop);
+      if (!key || added.some((candidate) => getStopKey(candidate) === key)) return;
+      added = [...added, { ...stop }];
+      removed.delete(key);
+      bump();
+    },
+    isRemoved: (key: string) => removed.has(key),
+    isAdded: (key: string) => added.some((stop) => getStopKey(stop) === key),
+    getAdded: (): readonly StopData[] => added,
+  };
+}
+
+type RouteStore = ReturnType<typeof createRouteStore>;
+const RouteStoreContext = createContext<RouteStore | null>(null);
+
+export function RouteStoreProvider({ children }: { children: ReactNode }) {
+  const id = useId();
+  const [store] = useState(() => createRouteStore(`route-${id}`));
+  return createElement(RouteStoreContext.Provider, { value: store }, children);
+}
+
+export function useRouteStore() {
+  const context = useContext(RouteStoreContext);
+  const id = useId();
+  // Standalone route components also stay isolated when no response provider exists.
+  const [local] = useState(() => createRouteStore(`route-${id}`));
+  const store = context ?? local;
+  useSyncExternalStore(store.subscribe, store.getSnapshot, store.getServerSnapshot);
+  return store;
 }
 
 export type WikiInfo = { lat?: number; lng?: number; photos: string[] };

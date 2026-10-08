@@ -13,6 +13,9 @@
 .iui-room-scene{overflow:hidden;border-radius:14px;margin-top:20px;background:#eae8df}
 .iui-room-scene svg{width:100%;display:block}
 .iui-room-walls{transition:fill .35s ease}
+.iui-scene-empty{min-height:220px;display:grid;place-items:center;padding:24px;text-align:center;font-size:13px;color:var(--iui-muted,#777)}
+.iui-region-picker{display:flex;flex-wrap:wrap;gap:8px;margin-top:16px}
+.iui-region-picker button[aria-pressed=true]{background:var(--iui-text,#171717);color:var(--iui-surface,#fff)}
 .iui-room-toolbar,.iui-garden-toolbar{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:16px 0}
 .iui-room-toolbar>.iui-muted,.iui-garden-toolbar>.iui-muted{font-size:12px}
 .iui-paint-swatches{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
@@ -44,12 +47,18 @@
 .iui-fold-nav{display:flex;justify-content:space-between;gap:10px;margin-top:20px}
 .iui-fold-nav button{background:none;border:0;padding:0;color:var(--iui-text,#171717);font-size:12px}
 .iui-garden-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}
+.iui-editable-grid-scroll{overflow:auto;padding:2px;margin:-2px}
+.iui-editable-grid-scroll .iui-garden-grid{min-width:calc(var(--iui-grid-columns,2) * 58px)}
+.iui-grid-initial{min-width:34px;height:34px;display:grid;place-items:center;font-size:22px;font-weight:500;margin-bottom:8px}
+.iui-garden-sixteen .iui-grid-initial{min-width:26px;height:26px;margin-bottom:6px;font-size:18px}
+.iui-plant-options .iui-grid-initial{min-width:24px;height:24px;margin:0;font-size:18px}
+.iui-garden-toolbar .iui-segments{max-width:100%;flex-wrap:wrap;border-radius:16px}
 .iui-garden-grid>button{position:relative;padding:22px 10px 18px;min-height:132px;border:2px solid transparent;border-radius:10px;display:flex;flex-direction:column;align-items:center;justify-content:center}
 .iui-garden-grid>button:hover{filter:brightness(.98)}
 .iui-garden-grid>button[aria-pressed=true]{border-color:currentColor}
 .iui-garden-grid>button svg{width:34px;height:34px;margin-bottom:8px}
-.iui-garden-grid strong{font-size:14px;font-weight:500;color:#172315}
-.iui-garden-grid small{font-size:12px;color:#344231;margin-top:3px}
+.iui-garden-grid strong{font-size:14px;font-weight:500;color:var(--iui-grid-label,#172315);overflow-wrap:anywhere}
+.iui-garden-grid small{font-size:12px;color:var(--iui-grid-label,#344231);margin-top:3px}
 .iui-garden-selected{position:absolute;top:6px;right:8px;font-size:12px}
 .iui-garden-sixteen{grid-template-columns:repeat(4,minmax(0,1fr));gap:6px}
 .iui-garden-sixteen>button{padding:13px 3px 10px;min-height:92px}
@@ -65,7 +74,7 @@
 .iui-plant-options svg{width:24px;height:24px;display:block}
 .iui-plant-editor p{font-size:11px;line-height:1.55;color:var(--iui-muted,#777);margin-top:12px;min-height:34px}
 .iui-garden-footer{display:flex;gap:12px;justify-content:space-between;align-items:center;border-top:1px solid var(--iui-border,#e8e8e8);margin-top:17px;padding-top:13px;font-size:11px;color:var(--iui-muted,#777)}
-.iui-garden-footer button{border:0;padding:0;background:none;color:inherit;font-size:11px}
+.iui-garden-footer button{border:0;padding:0;background:none;color:inherit;font-size:11px;white-space:nowrap;flex-shrink:0}
 .iui-repair .iui-panel-heading h2{font-size:18px}
 .iui-repair .iui-panel-heading p{font-size:12px}
 .iui-repair .iui-panel-heading .iui-segments button{font-size:10px;padding:6px 9px}
@@ -81,7 +90,7 @@
 .iui-repair-check input{accent-color:var(--iui-text,#171717);width:14px;height:14px;margin:0}
 .iui-repair-footer{display:flex;justify-content:space-between;gap:12px;align-items:center;border-top:1px solid var(--iui-border,#e8e8e8);padding-top:14px;margin-top:20px}
 .iui-repair-footer>div{display:flex;gap:6px;align-items:center}
-.iui-repair-footer>div:first-child{gap:7px}
+.iui-repair-footer>div:first-child{gap:7px;flex-wrap:wrap;max-width:52%}
 .iui-repair-footer>div:first-child button{height:6px;width:6px;padding:0;border:0;border-radius:50%;background:var(--iui-border,#ddd);position:relative}
 .iui-repair-footer>div:first-child button:after{content:"";position:absolute;inset:-7px}
 .iui-repair-footer>div:first-child button.is-checked{background:#83aaa0}

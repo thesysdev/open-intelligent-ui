@@ -6,3 +6,4 @@
 
 @container gdp-segment (max-width:54px){.iui-gdp-bar b{display:none}}
 .iui-gdp-controls + .iui-text-button{margin-top:var(--iui-label-gap)}
+.iui-composed-body,.iui-composed-group{display:grid;gap:var(--iui-field-gap,24px);min-width:0}.iui-composed-group>*{min-width:0}.iui-columns-two{grid-template-columns:repeat(2,minmax(0,1fr))}.iui-columns-three{grid-template-columns:repeat(3,minmax(0,1fr))}.iui-composed-body .iui-gdp-total,.iui-composed-body .iui-gdp-bar{margin:0}.iui-composed-body .iui-note{margin:0}.iui-composed-body .iui-learning-quiz{margin-top:8px}.iui-composed-body .iui-panel{border:0;padding:0}.iui-composed-choices>span{display:block;font-size:13px;margin-bottom:12px}.iui-composed-choices .iui-segments{margin-bottom:0}.iui-composed-body .iui-gdp-total strong{font-variant-numeric:tabular-nums}.iui-composed-body .iui-equation{margin:0}@media(max-width:640px){.iui-columns-two,.iui-columns-three{grid-template-columns:1fr}}

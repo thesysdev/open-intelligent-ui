@@ -1,9 +1,12 @@
 "use client";
 
-import { defineComponent } from "@openuidev/react-lang";
+import { defineComponent, reactive, useStateField } from "@openuidev/react-lang";
 import { useId, useState } from "react";
 import { z } from "zod/v4";
 import { RangeInput } from "./controls";
+import { allocateCents, buildPackingList, currencyPrecision, projectSavings, readToolRecords, scaleIngredient, toolConfigurationKey, type PackingRuleData, type ScalableIngredient } from "./tools-models";
+
+export { allocateCents, projectSavings } from "./tools-models";
 
 const clamp = (value: number, min: number, max: number) =>
   Math.min(max, Math.max(min, Number.isFinite(value) ? value : min));
@@ -11,7 +14,7 @@ const amount = (value: number | undefined, fallback = 0) =>
   Number.isFinite(value) ? Math.max(0, value!) : fallback;
 const currencyCode = (value = "USD") =>
   /^[A-Z]{3}$/.test(value) ? value : "USD";
-function money(value: number, currency = "USD", digits = 2) {
+function money(value: number, currency = "USD", digits = currencyPrecision(currency)) {
   try {
     return new Intl.NumberFormat("en-US", {
       style: "currency",
@@ -22,24 +25,6 @@ function money(value: number, currency = "USD", digits = 2) {
   } catch {
     return `$${value.toFixed(digits)}`;
   }
-}
-
-/** Allocate integer cents by largest remainder, so displayed shares always sum exactly. */
-export function allocateCents(total: number, weights: number[]): number[] {
-  const sum = weights.reduce((a, b) => a + b, 0);
-  if (!sum) return weights.map(() => 0);
-  const exact = weights.map((weight) => (total * weight) / sum);
-  const result = exact.map(Math.floor);
-  const order = exact
-    .map((value, i) => ({ i, remainder: value - result[i] }))
-    .sort((a, b) => b.remainder - a.remainder || a.i - b.i);
-  for (
-    let i = 0, remaining = total - result.reduce((a, b) => a + b, 0);
-    i < remaining;
-    i++
-  )
-    result[order[i % order.length].i]++;
-  return result;
 }
 
 function CopyButton({
@@ -93,7 +78,7 @@ function CopyButton({
   );
 }
 
-type BillItem = { name: string; amount: number; people: number[] };
+export type BillItem = { name: string; amount: number; people: number[] };
 export type BillSplitterProps = {
   title: string;
   currency: string;
@@ -101,6 +86,12 @@ export type BillSplitterProps = {
   items: BillItem[];
   taxPercent: number;
   tipPercent: number;
+  description?: string;
+  splitMethod?: "items" | "equal";
+  tipBasis?: "subtotal" | "after-tax";
+  peopleLabel?: string;
+  itemsLabel?: string;
+  subtotalLabel?: string;
 };
 const billSample: BillSplitterProps = {
   title: "The Check, Please.",
@@ -116,8 +107,13 @@ const billSample: BillSplitterProps = {
 };
 
 export function BillSplitterView(props: Partial<BillSplitterProps> = {}) {
+  return <BillSplitterSession key={JSON.stringify(props)} {...props} />;
+}
+
+function BillSplitterSession(props: Partial<BillSplitterProps> & { taxBinding?: NumberBinding; tipBinding?: NumberBinding }) {
   const id = useId();
-  const currency = props.currency || billSample.currency;
+  const currency = currencyCode(props.currency || billSample.currency);
+  const unit = 10 ** currencyPrecision(currency);
   const initialPeople = props.people
     ?.filter((name) => typeof name === "string")
     .slice(0, 12);
@@ -125,23 +121,27 @@ export function BillSplitterView(props: Partial<BillSplitterProps> = {}) {
     initialPeople?.length ? initialPeople : billSample.people,
   );
   const [items, setItems] = useState<BillItem[]>(() =>
-    (props.items ?? billSample.items).filter(Boolean).map((item) => ({
+    (props.items ?? (props.people ? [] : billSample.items)).filter(Boolean).slice(0, 100).map((item) => ({
       name: item.name || "",
-      amount: amount(item.amount),
-      people: Array.isArray(item.people) ? item.people : [],
+      amount: clamp(amount(item.amount), 0, 100000),
+      people: Array.isArray(item.people) ? [...new Set(item.people.filter(Number.isInteger))] : [],
     })),
   );
-  const [tax, setTax] = useState(
-    amount(props.taxPercent, billSample.taxPercent),
+  const [localTax, setLocalTax] = useState(
+    clamp(amount(props.taxPercent, billSample.taxPercent), 0, 100),
   );
-  const [tip, setTip] = useState(
-    amount(props.tipPercent, billSample.tipPercent),
+  const [localTip, setLocalTip] = useState(
+    clamp(amount(props.tipPercent, billSample.tipPercent), 0, 100),
   );
-  const [mode, setMode] = useState<"items" | "equal">("items");
-  const cents = items.map((item) => Math.round(item.amount * 100));
+  const tax = clamp(props.taxBinding?.value ?? localTax, 0, 100);
+  const tip = clamp(props.tipBinding?.value ?? localTip, 0, 100);
+  const setTax = props.taxBinding?.setValue ?? setLocalTax;
+  const setTip = props.tipBinding?.setValue ?? setLocalTip;
+  const [mode, setMode] = useState<"items" | "equal">(props.splitMethod ?? "items");
+  const cents = items.map((item) => Math.round(item.amount * unit));
   const subtotal = cents.reduce((a, b) => a + b, 0);
   const taxCents = Math.round((subtotal * tax) / 100);
-  const tipCents = Math.round((subtotal * tip) / 100);
+  const tipCents = Math.round(((subtotal + (props.tipBasis === "after-tax" ? taxCents : 0)) * tip) / 100);
   const total = subtotal + taxCents + tipCents;
   const food = Array<number>(people.length).fill(0);
   items.forEach((item, index) =>
@@ -173,7 +173,7 @@ export function BillSplitterView(props: Partial<BillSplitterProps> = {}) {
     setItems((current) =>
       current.map((item, i) => (i === index ? { ...item, ...update } : item)),
     );
-  const copy = `${props.title || billSample.title}\n${people.map((person, i) => `${person || `Person ${i + 1}`}: ${money(shares[i] / 100, currency)}`).join("\n")}\nTotal: ${money(total / 100, currency)} (tax ${tax}%, tip ${tip}%)`;
+  const copy = `${props.title || billSample.title}\n${people.map((person, i) => `${person || `Person ${i + 1}`}: ${money(shares[i] / unit, currency)}`).join("\n")}\nTotal: ${money(total / unit, currency)} (tax ${tax}%, tip ${tip}%)`;
   return (
     <section
       className="iui iui-panel iui-tools iui-tools-bill"
@@ -181,11 +181,11 @@ export function BillSplitterView(props: Partial<BillSplitterProps> = {}) {
     >
       <header className="iui-tools-header">
         <h2 className="iui-heading">{props.title || billSample.title}</h2>
-        <p className="iui-muted">A fair share for everyone at the table.</p>
+        <p className="iui-muted">{props.description ?? "A fair share for everyone."}</p>
       </header>
       <div className="iui-tools-section">
         <div className="iui-tools-row">
-          <h3>Who’s at the table?</h3>
+          <h3>{props.peopleLabel ?? "Who’s sharing?"}</h3>
           <span className="iui-tools-caption">{people.length} people</span>
         </div>
         <div className="iui-tools-people">
@@ -248,7 +248,7 @@ export function BillSplitterView(props: Partial<BillSplitterProps> = {}) {
       </div>
       <div className="iui-tools-section">
         <div className="iui-tools-row iui-tools-wrap">
-          <h3>What did you order?</h3>
+          <h3>{props.itemsLabel ?? "What are you splitting?"}</h3>
           <div className="iui-tools-segment" aria-label="Split method">
             {(["items", "equal"] as const).map((value) => (
               <button
@@ -269,7 +269,8 @@ export function BillSplitterView(props: Partial<BillSplitterProps> = {}) {
                 <input
                   aria-label={`Item ${index + 1} name`}
                   value={item.name}
-                  placeholder="Dish or drink"
+                  placeholder="Item or expense"
+                  maxLength={120}
                   onChange={(event) =>
                     changeItem(index, { name: event.target.value })
                   }
@@ -280,7 +281,7 @@ export function BillSplitterView(props: Partial<BillSplitterProps> = {}) {
                     type="number"
                     min="0"
                     max="100000"
-                    step="0.01"
+                    step={1 / unit}
                     aria-label={`Item ${index + 1} amount`}
                     value={item.amount}
                     onChange={(event) =>
@@ -330,6 +331,7 @@ export function BillSplitterView(props: Partial<BillSplitterProps> = {}) {
         <button
           type="button"
           className="iui-tools-text-button"
+          disabled={items.length >= 100}
           onClick={() =>
             setItems((current) => [
               ...current,
@@ -359,7 +361,7 @@ export function BillSplitterView(props: Partial<BillSplitterProps> = {}) {
           </span>
         </label>
         <div className="iui-tools-field">
-          <label htmlFor={`${id}-tip`}>Tip on food & drinks</label>
+          <label htmlFor={`${id}-tip`}>{props.tipBasis === "after-tax" ? "Tip after tax" : "Tip on subtotal"}</label>
           <div className="iui-tools-tip-presets">
             {[15, 18, 20, 25].map((value) => (
               <button
@@ -390,20 +392,20 @@ export function BillSplitterView(props: Partial<BillSplitterProps> = {}) {
       </div>
       <div className="iui-tools-summary">
         <div className="iui-tools-row">
-          <span>Food & drinks</span>
-          <span>{money(subtotal / 100, currency)}</span>
+          <span>{props.subtotalLabel ?? "Subtotal"}</span>
+          <span>{money(subtotal / unit, currency)}</span>
         </div>
         <div className="iui-tools-row iui-tools-caption">
           <span>Tax · {tax}%</span>
-          <span>{money(taxCents / 100, currency)}</span>
+          <span>{money(taxCents / unit, currency)}</span>
         </div>
         <div className="iui-tools-row iui-tools-caption">
           <span>Tip · {tip}%</span>
-          <span>{money(tipCents / 100, currency)}</span>
+          <span>{money(tipCents / unit, currency)}</span>
         </div>
         <div className="iui-tools-row iui-tools-total">
           <span>Total</span>
-          <strong>{money(total / 100, currency)}</strong>
+          <strong>{money(total / unit, currency)}</strong>
         </div>
       </div>
       {unassigned ? (
@@ -424,13 +426,12 @@ export function BillSplitterView(props: Partial<BillSplitterProps> = {}) {
                   {(person || "?").slice(0, 1)}
                 </span>
                 <span>{person || `Person ${index + 1}`}</span>
-                <strong>{money(shares[index] / 100, currency)}</strong>
+                <strong>{money(shares[index] / unit, currency)}</strong>
               </div>
             ))}
           </div>
           <p className="iui-tools-caption">
-            Tax and tip follow each person’s share. Rounded to the cent, with
-            everything accounted for.
+            Tax and tip follow each person’s share. Rounded to {currency}’s smallest unit, with everything accounted for.
           </p>
         </div>
       )}
@@ -445,6 +446,9 @@ export type SavingsCalculatorProps = {
   monthlyContribution: number;
   years: number;
   annualReturn: number;
+  description?: string;
+  contributionTiming?: "start" | "end";
+  annualContributionGrowth?: number;
 };
 const savingsSample: SavingsCalculatorProps = {
   title: "Retirement savings calculator",
@@ -454,46 +458,39 @@ const savingsSample: SavingsCalculatorProps = {
   years: 30,
   annualReturn: 5,
 };
-export function projectSavings(
-  initial: number,
-  monthly: number,
-  years: number,
-  annualRate: number,
-) {
-  const points = [{ year: 0, balance: initial, contributed: initial }];
-  let balance = initial;
-  for (let month = 1; month <= years * 12; month++) {
-    balance = balance * (1 + annualRate / 1200) + monthly;
-    if (month % 12 === 0)
-      points.push({
-        year: month / 12,
-        balance,
-        contributed: initial + monthly * month,
-      });
-  }
-  return points;
-}
 export function SavingsCalculatorView(
   props: Partial<SavingsCalculatorProps> = {},
 ) {
+  return <SavingsCalculatorSession key={JSON.stringify(props)} {...props} />;
+}
+type NumberBinding = { value: number; setValue: (value: number) => void };
+function SavingsCalculatorSession(
+  props: Partial<SavingsCalculatorProps> & { bindings?: Partial<Record<"initial" | "monthly" | "years" | "rate", NumberBinding>> },
+) {
   const id = useId();
-  const [initial, setInitial] = useState(
-    amount(props.initialSavings, savingsSample.initialSavings),
+  const [localInitial, setInitial] = useState(
+    clamp(amount(props.initialSavings, savingsSample.initialSavings), 0, 100000000),
   );
-  const [monthly, setMonthly] = useState(
-    amount(props.monthlyContribution, savingsSample.monthlyContribution),
+  const [localMonthly, setMonthly] = useState(
+    clamp(amount(props.monthlyContribution, savingsSample.monthlyContribution), 0, 1000000),
   );
-  const [years, setYears] = useState(
-    clamp(props.years ?? savingsSample.years, 1, 50),
+  const [localYears, setYears] = useState(
+    clamp(Math.round(props.years ?? savingsSample.years), 1, 80),
   );
-  const [rate, setRate] = useState(
-    clamp(props.annualReturn ?? savingsSample.annualReturn, 0, 15),
+  const [localRate, setRate] = useState(
+    clamp(props.annualReturn ?? savingsSample.annualReturn, -20, 30),
   );
+  const initial = clamp(props.bindings?.initial?.value ?? localInitial, 0, 100000000);
+  const monthly = clamp(props.bindings?.monthly?.value ?? localMonthly, 0, 1000000);
+  const years = clamp(Math.round(props.bindings?.years?.value ?? localYears), 1, 80);
+  const rate = clamp(props.bindings?.rate?.value ?? localRate, -20, 30);
   const currency = props.currency || "USD";
   const [chart, setChart] = useState(false);
-  const points = projectSavings(initial, monthly, years, rate);
+  const contributionGrowth = clamp(props.annualContributionGrowth ?? 0, 0, 25);
+  const contributionTiming = props.contributionTiming === "start" ? "start" : "end";
+  const points = projectSavings(initial, monthly, years, rate, contributionTiming, contributionGrowth);
   const final = points[points.length - 1];
-  const max = Math.max(final.balance * 1.12, 1);
+  const max = Math.max(...points.flatMap((point) => [point.balance, point.contributed]), 1) * 1.12;
   const x = (year: number) => 60 + (year / years) * 500;
   const y = (value: number) => 214 - (value / max) * 185;
   const line = points
@@ -509,7 +506,7 @@ export function SavingsCalculatorView(
       key: "initial",
       label: "Starting savings",
       value: initial,
-      set: setInitial,
+      set: props.bindings?.initial?.setValue ?? setInitial,
       max: 100000,
       step: 1000,
       format: (value: number) => money(value, currency, 0),
@@ -518,7 +515,7 @@ export function SavingsCalculatorView(
       key: "monthly",
       label: "Monthly contribution",
       value: monthly,
-      set: setMonthly,
+      set: props.bindings?.monthly?.setValue ?? setMonthly,
       max: 3000,
       step: 50,
       format: (value: number) => money(value, currency, 0),
@@ -527,9 +524,9 @@ export function SavingsCalculatorView(
       key: "years",
       label: "Time to grow",
       value: years,
-      set: setYears,
+      set: props.bindings?.years?.setValue ?? setYears,
       min: 1,
-      max: 50,
+      max: 80,
       step: 1,
       format: (value: number) => `${value} ${value === 1 ? "year" : "years"}`,
     },
@@ -537,8 +534,9 @@ export function SavingsCalculatorView(
       key: "return",
       label: "Annual return",
       value: rate,
-      set: setRate,
-      max: 15,
+      set: props.bindings?.rate?.setValue ?? setRate,
+      min: -20,
+      max: 30,
       step: 0.5,
       format: (value: number) => `${value}%`,
     },
@@ -551,7 +549,7 @@ export function SavingsCalculatorView(
       <header className="iui-tools-header">
         <h2 className="iui-heading">{props.title || savingsSample.title}</h2>
         <p className="iui-muted">
-          See how consistency and compound growth add up.
+          {props.description ?? "See how consistency and compound growth add up."}
         </p>
       </header>
       <div className="iui-tools-projection" aria-live="polite">
@@ -560,8 +558,7 @@ export function SavingsCalculatorView(
         </span>
         <strong>{money(final.balance, currency, 0)}</strong>
         <span className="iui-tools-caption">
-          {money(final.balance - final.contributed, currency, 0)} in potential
-          growth
+          {money(Math.abs(final.balance - final.contributed), currency, 0)} in potential {final.balance >= final.contributed ? "growth" : "losses"}
         </span>
       </div>
       <div className="iui-tools-savings-breakdown">
@@ -572,7 +569,7 @@ export function SavingsCalculatorView(
         >
           <span
             style={{
-              width: `${final.balance ? (final.contributed / final.balance) * 100 : 0}%`,
+              width: `${Math.min(100, final.balance ? (final.contributed / final.balance) * 100 : 0)}%`,
             }}
           />
           <span />
@@ -718,24 +715,26 @@ export function SavingsCalculatorView(
         ))}
       </div>
       <p className="iui-tools-caption iui-tools-footnote">
-        An illustration, not a guaranteed return. Assumes monthly compounding
-        and contributions at the end of each month; excludes fees, taxes and
-        inflation.
+        An illustration, not a guaranteed return. Assumes monthly compounding and contributions at the {props.contributionTiming === "start" ? "start" : "end"} of each month{contributionGrowth ? `, increasing ${contributionGrowth}% each year` : ""}; excludes fees, taxes and inflation.
       </p>
     </section>
   );
 }
 
-type Ingredient = { name: string; quantity: number; unit: string };
-type CookingStep = { time: string; title: string; description: string };
-type Dish = { name: string; description: string; imageUrl: string };
+export type Ingredient = ScalableIngredient;
+export type CookingStepData = { time: string; title: string; description: string };
+export type Dish = { name: string; description: string; imageUrl: string };
 export type RecipePlannerProps = {
   title: string;
   description: string;
   baseGuests: number;
   ingredients: Ingredient[];
-  steps: CookingStep[];
+  steps: CookingStepData[];
   dishes: Dish[];
+  guests?: number;
+  maxGuests?: number;
+  portionNote?: string;
+  cookingNote?: string;
 };
 const recipeSample: RecipePlannerProps = {
   title: "Sunday roast with friends",
@@ -824,7 +823,7 @@ function FoodIllustration({ index }: { index: number }) {
       viewBox="0 0 240 160"
       role="img"
       aria-label={
-        index === 0
+        index < 0 ? "A place setting" : index === 0
           ? "Roast served on a platter"
           : "Roasted vegetables on a plate"
       }
@@ -838,7 +837,12 @@ function FoodIllustration({ index }: { index: number }) {
         fill="#f6f2e9"
         stroke="#d9d1c5"
       />
-      {index === 0 ? (
+      {index < 0 ? (
+        <>
+          <ellipse cx="122" cy="87" rx="70" ry="40" fill="none" stroke="#d9d1c5" />
+          <path d="M27 50v28m7-28v28m7-28v28m-14-7q7 14 14 0m-7 12v42m174-75v75m0-75c-16 10-16 39 0 39" stroke="#948879" strokeWidth="3" fill="none" strokeLinecap="round" />
+        </>
+      ) : index === 0 ? (
         <>
           <path
             d="M67 99c-15-32 9-63 50-54 16-10 55 8 50 30l24 24-17 17-27-18c-18 20-59 24-80 1Z"
@@ -893,35 +897,42 @@ function DishImage({ dish, index }: { dish: Dish; index: number }) {
   );
 }
 export function RecipePlannerView(props: Partial<RecipePlannerProps> = {}) {
-  const baseGuests = clamp(props.baseGuests ?? 6, 1, 30);
-  const [guests, setGuests] = useState(baseGuests);
+  return <RecipePlannerSession key={JSON.stringify(props)} {...props} />;
+}
+
+function RecipePlannerSession(props: Partial<RecipePlannerProps> & { guestBinding?: NumberBinding }) {
+  const baseGuests = clamp(Math.round(props.baseGuests ?? 6), 1, 100);
+  const maxGuests = clamp(Math.max(props.maxGuests ?? 30, baseGuests, props.guests ?? 1), 1, 100);
+  const [localGuests, setLocalGuests] = useState(clamp(Math.round(props.guests ?? baseGuests), 1, maxGuests));
+  const guests = clamp(Math.round(props.guestBinding?.value ?? localGuests), 1, maxGuests);
+  const setGuests = props.guestBinding?.setValue ?? setLocalGuests;
   const [checked, setChecked] = useState<number[]>([]);
   const [tab, setTab] = useState<"shopping" | "timeline">("shopping");
-  const ingredients = (props.ingredients ?? recipeSample.ingredients).filter(
-    Boolean,
-  );
-  const steps = (props.steps ?? recipeSample.steps).filter(Boolean);
-  const dishes = (props.dishes ?? recipeSample.dishes).filter(Boolean);
+  const customMenu = props.ingredients !== undefined || props.dishes !== undefined || props.steps !== undefined;
+  const ingredients = (props.ingredients ?? (customMenu ? [] : recipeSample.ingredients)).filter(Boolean).slice(0, 100);
+  const steps = (props.steps ?? (customMenu ? [] : recipeSample.steps)).filter(Boolean).slice(0, 60);
+  const dishes = (props.dishes ?? (customMenu ? [] : recipeSample.dishes)).filter(Boolean).slice(0, 12);
+  const title = props.title || (customMenu ? "Your meal plan" : recipeSample.title);
   const quantity = (ingredient: Ingredient) => {
-    const scaled = (amount(ingredient.quantity) * guests) / baseGuests;
-    return `${ingredient.unit ? new Intl.NumberFormat("en-US", { maximumFractionDigits: ingredient.unit === "kg" ? 2 : 1 }).format(scaled) : Math.ceil(scaled)}${ingredient.unit ? ` ${ingredient.unit}` : ""}`;
+    const scaled = scaleIngredient(ingredient, guests, baseGuests);
+    return `${new Intl.NumberFormat("en-US", { maximumFractionDigits: 2 }).format(scaled)}${ingredient.unit ? ` ${ingredient.unit}` : ""}`;
   };
-  const shoppingText = `${props.title || recipeSample.title} — ${guests} people\n${ingredients.map((ingredient) => `${quantity(ingredient)} ${ingredient.name}`).join("\n")}`;
+  const shoppingText = `${title} — ${guests} people\n${ingredients.map((ingredient) => `${quantity(ingredient)} ${ingredient.name}`).join("\n")}`;
   return (
     <section
       className="iui iui-panel iui-tools iui-tools-recipe"
       aria-label="Recipe planner"
     >
       <header className="iui-tools-header">
-        <h2 className="iui-heading">{props.title || recipeSample.title}</h2>
+        <h2 className="iui-heading">{title}</h2>
         <p className="iui-muted">
-          {props.description || recipeSample.description}
+          {props.description ?? (customMenu ? "A menu and shopping list that adapt to your guest count." : recipeSample.description)}
         </p>
       </header>
       <div className="iui-tools-dishes">
         {dishes.map((dish, index) => (
           <article key={`${dish.name}-${index}`}>
-            <DishImage dish={dish} index={index} />
+            <DishImage dish={dish} index={customMenu && props.title !== recipeSample.title ? -1 : index} />
             <h3>{dish.name}</h3>
             <p className="iui-tools-caption">{dish.description}</p>
           </article>
@@ -939,7 +950,7 @@ export function RecipePlannerView(props: Partial<RecipePlannerProps> = {}) {
             type="button"
             aria-label="Remove a guest"
             disabled={guests <= 1}
-            onClick={() => setGuests((value) => value - 1)}
+            onClick={() => setGuests(guests - 1)}
           >
             −
           </button>
@@ -950,8 +961,8 @@ export function RecipePlannerView(props: Partial<RecipePlannerProps> = {}) {
           <button
             type="button"
             aria-label="Add a guest"
-            disabled={guests >= 30}
-            onClick={() => setGuests((value) => value + 1)}
+            disabled={guests >= maxGuests}
+            onClick={() => setGuests(guests + 1)}
           >
             +
           </button>
@@ -960,7 +971,7 @@ export function RecipePlannerView(props: Partial<RecipePlannerProps> = {}) {
       <div
         className="iui-tools-tablist"
         role="tablist"
-        aria-label="Dinner plan"
+        aria-label="Meal plan"
       >
         <button
           type="button"
@@ -998,7 +1009,7 @@ export function RecipePlannerView(props: Partial<RecipePlannerProps> = {}) {
           </dl>
           <div className="iui-tools-row iui-tools-wrap">
             <span className="iui-tools-caption">
-              Generous portions, with a little extra.
+              {props.portionNote ?? `Quantities scaled from the recipe for ${baseGuests} people.`}
             </span>
             <CopyButton text={shoppingText} label="Copy shopping list" />
           </div>
@@ -1033,9 +1044,9 @@ export function RecipePlannerView(props: Partial<RecipePlannerProps> = {}) {
             </label>
           ))}
           <p className="iui-tools-caption">
-            {dishes.some((dish) => /lamb/i.test(dish.name || ""))
+            {props.cookingNote ?? (dishes.some((dish) => /lamb/i.test(dish.name || ""))
               ? "Timing is a guide; adjust for your joint and oven. Cook whole cuts of lamb to 145°F / 63°C and rest at least 3 minutes."
-              : "Timing is a guide; adjust for your ingredients and equipment. Check doneness before serving."}
+              : "Timing is a guide; adjust for your ingredients and equipment. Check doneness before serving.")}
           </p>
         </div>
       )}
@@ -1043,8 +1054,8 @@ export function RecipePlannerView(props: Partial<RecipePlannerProps> = {}) {
   );
 }
 
-type GarmentKind = "shirt" | "tee" | "jacket" | "trousers" | "shoes" | "bag";
-type WardrobeItem = {
+type GarmentKind = "shirt" | "tee" | "jacket" | "trousers" | "shoes" | "bag" | "dress" | "skirt" | "shorts" | "hat" | "accessory";
+export type WardrobeItem = {
   id: string;
   name: string;
   category: string;
@@ -1052,17 +1063,32 @@ type WardrobeItem = {
   kind: GarmentKind;
   imageUrl?: string;
 };
-type Outfit = { name: string; occasion: string; itemIds: string[] };
+export type Outfit = { name: string; occasion: string; itemIds: string[] };
 export type WardrobePlannerProps = {
   title: string;
   description: string;
   items: WardrobeItem[];
   outfits: Outfit[];
+  weatherOptions?: string[];
+  tripLengthOptions?: number[];
+  defaultWeather?: string;
+  defaultTripDays?: number;
+  packingRules?: PackingRuleData[];
 };
 const wardrobeSample: WardrobePlannerProps = {
   title: "Your capsule wardrobe",
   description:
     "A considered everyday wardrobe. Neutral tones, easy layers, and pieces that work together.",
+  weatherOptions: ["Cool", "Mild", "Warm"],
+  tripLengthOptions: [3, 5, 7],
+  defaultWeather: "Mild",
+  defaultTripDays: 5,
+  packingRules: [
+    { weather: "*", includeItemIds: ["bag"], excludeItemIds: [], note: "" },
+    { weather: "Cool", includeItemIds: ["jacket"], excludeItemIds: [], note: "An extra layer is included." },
+    { weather: "Warm", includeItemIds: [], excludeItemIds: ["jacket"], note: "Keep it light; the jacket stays home." },
+    { weather: "Mild", includeItemIds: [], excludeItemIds: [], note: "Easy layers for changing temperatures." },
+  ],
   items: [
     {
       id: "tee",
@@ -1144,7 +1170,17 @@ function Garment({ item }: { item: WardrobeItem }) {
         strokeWidth="1.5"
         strokeLinejoin="round"
       >
-        {item.kind === "trousers" ? (
+        {item.kind === "dress" ? (
+          <><path d="m87 27 13-5h20l13 5 12 45-17 8 36 89H56l36-89-17-8Z" /><path d="M91 80h38m-29-55q10 18 20 0" fill="none" /></>
+        ) : item.kind === "skirt" ? (
+          <><path d="M79 45h62l29 120H49Z" /><path d="M78 54h65m-42 1-10 105m31-105 10 105" fill="none" /></>
+        ) : item.kind === "shorts" ? (
+          <><path d="M75 40h70l10 104h-36l-10-52-10 52H62Z" /><path d="M76 51h68M109 42v50" fill="none" /></>
+        ) : item.kind === "hat" ? (
+          <><path d="M64 110V81a46 40 0 0 1 92 0v29Z" /><ellipse cx="110" cy="112" rx="83" ry="19" /><path d="M68 101h86" fill="none" /></>
+        ) : item.kind === "accessory" ? (
+          <><rect x="74" y="49" width="73" height="110" rx="17" /><path d="M89 64h43m-43 79h43" fill="none" /></>
+        ) : item.kind === "trousers" ? (
           <>
             <path d="m76 27 67 0 9 143-36 2-9-97-9 97-35-2Z" />
             <path
@@ -1242,17 +1278,25 @@ function WardrobeImage({ item }: { item: WardrobeItem }) {
   );
 }
 export function WardrobePlannerView(props: Partial<WardrobePlannerProps> = {}) {
+  return <WardrobePlannerSession key={JSON.stringify(props)} {...props} />;
+}
+
+function WardrobePlannerSession(props: Partial<WardrobePlannerProps>) {
   const id = useId();
+  const customWardrobe = props.items !== undefined;
   const items = (props.items ?? wardrobeSample.items).filter(
     (item) => item?.id && item?.name,
-  );
-  const outfits = (props.outfits ?? wardrobeSample.outfits).filter(Boolean);
+  ).filter((item, index, all) => all.findIndex((candidate) => candidate.id === item.id) === index).slice(0, 60);
+  const outfits = (props.outfits ?? (customWardrobe ? [] : wardrobeSample.outfits)).filter(Boolean).slice(0, 30).map((look) => ({ ...look, itemIds: [...new Set(look.itemIds ?? [])].filter((itemId) => items.some((item) => item.id === itemId)) }));
+  const weatherOptions = props.weatherOptions?.length ? [...new Set(props.weatherOptions)].slice(0, 8) : wardrobeSample.weatherOptions!;
+  const tripLengthOptions = props.tripLengthOptions?.length ? [...new Set(props.tripLengthOptions.map((days) => clamp(Math.round(days), 1, 90)))].slice(0, 8) : wardrobeSample.tripLengthOptions!;
+  const packingRules = props.packingRules ?? (customWardrobe ? [] : wardrobeSample.packingRules!);
   const [category, setCategory] = useState("All pieces");
   const [outfit, setOutfit] = useState<number | null>(null);
   const [saved, setSaved] = useState<string[]>([]);
   const [packed, setPacked] = useState<string[]>([]);
-  const [weather, setWeather] = useState("Mild");
-  const [tripDays, setTripDays] = useState("5 days");
+  const [weather, setWeather] = useState(weatherOptions.includes(props.defaultWeather ?? "Mild") ? props.defaultWeather ?? "Mild" : weatherOptions[0]);
+  const [tripDays, setTripDays] = useState(tripLengthOptions.includes(props.defaultTripDays ?? 5) ? props.defaultTripDays ?? 5 : tripLengthOptions[0]);
   const [occasion, setOccasion] = useState(outfits[0]?.occasion || "Every day");
   const [packingIds, setPackingIds] = useState<string[] | null>(null);
   const [packingNote, setPackingNote] = useState("");
@@ -1280,7 +1324,7 @@ export function WardrobePlannerView(props: Partial<WardrobePlannerProps> = {}) {
       <header className="iui-tools-header">
         <h2 className="iui-heading">{props.title || wardrobeSample.title}</h2>
         <p className="iui-muted">
-          {props.description || wardrobeSample.description}
+          {props.description ?? (customWardrobe ? "Explore your pieces, combine outfits and build a packing list." : wardrobeSample.description)}
         </p>
       </header>
       <div className="iui-tools-filters" aria-label="Filter wardrobe">
@@ -1466,24 +1510,11 @@ export function WardrobePlannerView(props: Partial<WardrobePlannerProps> = {}) {
               (look) => look.occasion === occasion,
             );
             const look = outfits[lookIndex];
-            const chosen = new Set(
-              look?.itemIds || items.map((item) => item.id),
-            );
-            if (weather === "Cool")
-              items
-                .filter((item) => item.kind === "jacket")
-                .forEach((item) => chosen.add(item.id));
-            if (weather === "Warm")
-              items
-                .filter((item) => item.kind === "jacket")
-                .forEach((item) => chosen.delete(item.id));
-            items
-              .filter((item) => item.kind === "bag")
-              .forEach((item) => chosen.add(item.id));
-            setPackingIds([...chosen]);
-            setSaved([...chosen]);
+            const packing = buildPackingList(items.map((item) => item.id), look?.itemIds || items.map((item) => item.id), packingRules, weather);
+            setPackingIds(packing.ids);
+            setSaved(packing.ids);
             setPackingNote(
-              `${tripDays} · ${weather.toLowerCase()} weather · ${occasion.toLowerCase()}. ${weather === "Cool" ? "An extra layer is included." : weather === "Warm" ? "Keep it light; the jacket stays home." : "Easy layers for changing temperatures."} Rewear your trousers and shoes; pack ${Math.ceil(parseInt(tripDays) / 2)} changes of tops.`,
+              `${tripDays} ${tripDays === 1 ? "day" : "days"} · ${weather.toLowerCase()} · ${occasion.toLowerCase()}. ${packing.note}`,
             );
           }}
         >
@@ -1491,14 +1522,14 @@ export function WardrobePlannerView(props: Partial<WardrobePlannerProps> = {}) {
             {
               name: "days",
               label: "How long?",
-              options: ["3 days", "5 days", "7 days"],
-              value: tripDays,
-              set: setTripDays,
+              options: tripLengthOptions.map((days) => `${days} ${days === 1 ? "day" : "days"}`),
+              value: `${tripDays} ${tripDays === 1 ? "day" : "days"}`,
+              set: (value: string) => setTripDays(parseInt(value, 10)),
             },
             {
               name: "weather",
               label: "What is the weather like?",
-              options: ["Cool", "Mild", "Warm"],
+              options: weatherOptions,
               value: weather,
               set: setWeather,
             },
@@ -1548,100 +1579,149 @@ export const toolSamples = {
   wardrobe: wardrobeSample,
 };
 
+// Child records are real OpenUI components, so the model can assemble and reuse
+// data references across tools instead of embedding opaque JSON payloads.
+export const BillLineItem = defineComponent({
+  name: "BillLineItem",
+  description: "An expense for BillSplitter. amount is in the selected currency's main unit. people contains zero-based indexes into the splitter's people array; assign at least one person when splitting by item.",
+  props: z.object({ name: z.string().max(120), amount: z.number().min(0).max(100000), people: z.array(z.number().int().min(0).max(11)).max(12) }),
+  component: ({ props }) => <div className="iui-tools-row"><span>{props.name}</span><span>{props.amount}</span></div>,
+});
+
+export const RecipeIngredient = defineComponent({
+  name: "RecipeIngredient",
+  description: "An ingredient measured for RecipePlanner's baseGuests. scaling: proportional preserves fractions, whole rounds up whole items, fixed keeps quantity unchanged. Empty unit defaults to whole-item rounding; set proportional for fractions such as half an egg.",
+  props: z.object({ name: z.string().min(1).max(120), quantity: z.number().min(0).max(100000), unit: z.string().max(24), scaling: z.enum(["proportional", "whole", "fixed"]).optional() }),
+  component: ({ props }) => <div className="iui-tools-row"><span>{props.name}</span><span>{props.quantity} {props.unit}</span></div>,
+});
+
+export const RecipeStep = defineComponent({
+  name: "RecipeStep",
+  description: "A cooking checklist step. time is a relative or clock label such as '20 minutes before serving' or '6:30 PM'; title and description explain the action.",
+  props: z.object({ time: z.string().max(60), title: z.string().min(1).max(120), description: z.string().max(800) }),
+  component: ({ props }) => <div><span className="iui-tools-caption">{props.time}</span><h3>{props.title}</h3><p>{props.description}</p></div>,
+});
+
+export const MenuDish = defineComponent({
+  name: "MenuDish",
+  description: "A dish card for RecipePlanner. imageUrl must be a real provided image URL or empty for a neutral illustrated plate. Do not invent images or reuse roast photos for unrelated recipes.",
+  props: z.object({ name: z.string().min(1).max(120), description: z.string().max(400), imageUrl: z.string().max(2000) }),
+  component: ({ props }) => <article><DishImage dish={props} index={-1} /><h3>{props.name}</h3><p className="iui-tools-caption">{props.description}</p></article>,
+});
+
+export const WardrobePiece = defineComponent({
+  name: "WardrobePiece",
+  description: "A garment or accessory. id is unique in its wardrobe; category is a free-form filter. kind selects a silhouette, and a real imageUrl can represent any item beyond those silhouettes. color is a hex color.",
+  props: z.object({ id: z.string().min(1).max(60), name: z.string().min(1).max(120), category: z.string().min(1).max(60), color: z.string().regex(/^#(?:[a-fA-F0-9]{3}|[a-fA-F0-9]{6})$/), kind: z.enum(["shirt", "tee", "jacket", "trousers", "shoes", "bag", "dress", "skirt", "shorts", "hat", "accessory"]), imageUrl: z.string().max(2000).optional() }),
+  component: ({ props }) => <article className="iui-tools-wardrobe-piece"><WardrobeImage item={props} /><h3>{props.name}</h3><p className="iui-tools-caption">{props.category}</p></article>,
+});
+
+export const WardrobeOutfit = defineComponent({
+  name: "WardrobeOutfit",
+  description: "A named combination of WardrobePiece ids for any occasion. itemIds must match items in the same WardrobePlanner; categories, occasions and item counts are unrestricted within the bounds.",
+  props: z.object({ name: z.string().min(1).max(120), occasion: z.string().min(1).max(60), itemIds: z.array(z.string().min(1).max(60)).min(1).max(30) }),
+  component: ({ props }) => <div><h3>{props.name}</h3><p className="iui-tools-caption">{props.occasion} · {props.itemIds.length} pieces</p></div>,
+});
+
+export const PackingRule = defineComponent({
+  name: "PackingRule",
+  description: "A declarative wardrobe packing rule. weather matches one of the planner's weatherOptions, or '*' applies always. Include or exclude existing item ids. Rules run in order; exclusions win within a rule. note explains the adjustment.",
+  props: z.object({ weather: z.string().min(1).max(60), includeItemIds: z.array(z.string().max(60)).max(60), excludeItemIds: z.array(z.string().max(60)).max(60), note: z.string().max(400) }),
+  component: ({ props }) => props.note ? <p className="iui-tools-caption">{props.note}</p> : null,
+});
+
 export const BillSplitter = defineComponent({
   name: "BillSplitter",
-  description:
-    "Interactive dinner bill splitter with editable people, items, shared-item assignments, equal splitting, tax and tip. Amounts are in currency units, people arrays contain zero-based person indexes. Shows cent-exact totals and copyable shares.",
+  description: "Compose editable bills, trips or shared expenses from BillLineItem refs and named people. Currency-aware exact splitting, per-item or equal allocation, editable tax/tip and copyable shares. taxPercent and tipPercent accept $state bindings so controls can share state with the response. Optional labels adapt the copy to the expense type.",
   props: z.object({
-    title: z.string(),
-    currency: z.string(),
-    people: z.array(z.string()),
-    items: z.array(
-      z.object({
-        name: z.string(),
-        amount: z.number(),
-        people: z.array(z.number()),
-      }),
-    ),
-    taxPercent: z.number(),
-    tipPercent: z.number(),
+    title: z.string().min(1).max(160),
+    currency: z.string().regex(/^[A-Z]{3}$/),
+    people: z.array(z.string().min(1).max(40)).min(1).max(12),
+    items: z.array(BillLineItem.ref).max(100),
+    taxPercent: reactive(z.number().min(0).max(100)),
+    tipPercent: reactive(z.number().min(0).max(100)),
+    description: z.string().max(500).optional(),
+    splitMethod: z.enum(["items", "equal"]).optional(),
+    tipBasis: z.enum(["subtotal", "after-tax"]).optional(),
+    peopleLabel: z.string().max(120).optional(),
+    itemsLabel: z.string().max(120).optional(),
+    subtotalLabel: z.string().max(60).optional(),
   }),
-  component: ({ props }) => (
-    <BillSplitterView key={JSON.stringify(props)} {...props} />
-  ),
+  component: function BillSplitterRenderer({ props }) {
+    const id = useId();
+    const tax = useStateField(`${id}-tax`, props.taxPercent);
+    const tip = useStateField(`${id}-tip`, props.tipPercent);
+    const configKey = toolConfigurationKey(props, [...(tax.isReactive ? ["taxPercent"] : []), ...(tip.isReactive ? ["tipPercent"] : [])]);
+    return <BillSplitterSession key={configKey} {...props} items={readToolRecords<BillItem>(props.items)} taxPercent={tax.value} tipPercent={tip.value} taxBinding={tax.isReactive ? tax : undefined} tipBinding={tip.isReactive ? tip : undefined} />;
+  },
 });
+
 export const SavingsCalculator = defineComponent({
   name: "SavingsCalculator",
-  description:
-    "Interactive compound savings or retirement calculator with editable sliders, a live growth chart, contributions and growth totals. Calculates monthly compounding and end-of-month contributions. years 1–50, annualReturn as a percentage 0–15. State assumptions; do not present hypothetical growth as guaranteed.",
+  description: "A configurable projection for any savings goal, currency, balance, monthly deposit and horizon. Numeric inputs accept $state bindings. Calculates monthly compounding with optional start/end-of-month deposits and an annual contribution increase. Includes zero and negative return scenarios; hypothetical projections are not guaranteed.",
   props: z.object({
-    title: z.string(),
-    currency: z.string(),
-    initialSavings: z.number(),
-    monthlyContribution: z.number(),
-    years: z.number(),
-    annualReturn: z.number(),
+    title: z.string().min(1).max(160),
+    currency: z.string().regex(/^[A-Z]{3}$/),
+    initialSavings: reactive(z.number().min(0).max(100000000)),
+    monthlyContribution: reactive(z.number().min(0).max(1000000)),
+    years: reactive(z.number().int().min(1).max(80)),
+    annualReturn: reactive(z.number().min(-20).max(30)),
+    description: z.string().max(500).optional(),
+    contributionTiming: z.enum(["start", "end"]).optional(),
+    annualContributionGrowth: z.number().min(0).max(25).optional(),
   }),
-  component: ({ props }) => (
-    <SavingsCalculatorView key={JSON.stringify(props)} {...props} />
-  ),
+  component: function SavingsCalculatorRenderer({ props }) {
+    const id = useId();
+    const initial = useStateField(`${id}-initial`, props.initialSavings);
+    const monthly = useStateField(`${id}-monthly`, props.monthlyContribution);
+    const years = useStateField(`${id}-years`, props.years);
+    const rate = useStateField(`${id}-rate`, props.annualReturn);
+    const configKey = toolConfigurationKey(props, [...(initial.isReactive ? ["initialSavings"] : []), ...(monthly.isReactive ? ["monthlyContribution"] : []), ...(years.isReactive ? ["years"] : []), ...(rate.isReactive ? ["annualReturn"] : [])]);
+    return <SavingsCalculatorSession key={configKey} {...props} initialSavings={initial.value} monthlyContribution={monthly.value} years={years.value} annualReturn={rate.value} bindings={{ initial: initial.isReactive ? initial : undefined, monthly: monthly.isReactive ? monthly : undefined, years: years.isReactive ? years : undefined, rate: rate.isReactive ? rate : undefined }} />;
+  },
 });
+
 export const RecipePlanner = defineComponent({
   name: "RecipePlanner",
-  description:
-    "Scalable meal planner with illustrated dish cards, a guest stepper, calculated shopping quantities, a copyable shopping list and interactive timed cooking checklist. Ingredient quantities are for baseGuests; use unit empty for whole items, kg or g for weight. Use real image URLs when available, otherwise an empty imageUrl for an illustrated dish.",
+  description: "Compose any meal or menu from RecipeIngredient, RecipeStep and MenuDish refs. Quantities are measured for baseGuests and scale to an editable guest count. guests accepts a $state binding for linked controls. Optional notes explain portion and timing assumptions. Never substitute default roast ingredients for a custom meal.",
   props: z.object({
-    title: z.string(),
-    description: z.string(),
-    baseGuests: z.number(),
-    ingredients: z.array(
-      z.object({ name: z.string(), quantity: z.number(), unit: z.string() }),
-    ),
-    steps: z.array(
-      z.object({
-        time: z.string(),
-        title: z.string(),
-        description: z.string(),
-      }),
-    ),
-    dishes: z.array(
-      z.object({
-        name: z.string(),
-        description: z.string(),
-        imageUrl: z.string(),
-      }),
-    ),
+    title: z.string().min(1).max(160),
+    description: z.string().max(600),
+    baseGuests: z.number().int().min(1).max(100),
+    ingredients: z.array(RecipeIngredient.ref).max(100),
+    steps: z.array(RecipeStep.ref).max(60),
+    dishes: z.array(MenuDish.ref).max(12),
+    guests: reactive(z.number().int().min(1).max(100).optional()),
+    maxGuests: z.number().int().min(1).max(100).optional(),
+    portionNote: z.string().max(400).optional(),
+    cookingNote: z.string().max(600).optional(),
   }),
-  component: ({ props }) => (
-    <RecipePlannerView key={JSON.stringify(props)} {...props} />
-  ),
+  component: function RecipePlannerRenderer({ props }) {
+    const id = useId();
+    const guests = useStateField(`${id}-guests`, props.guests ?? props.baseGuests);
+    const configKey = toolConfigurationKey(props, guests.isReactive ? ["guests"] : []);
+    return <RecipePlannerSession key={configKey} {...props} ingredients={readToolRecords<Ingredient>(props.ingredients)} steps={readToolRecords<CookingStepData>(props.steps)} dishes={readToolRecords<Dish>(props.dishes)} guests={guests.value} guestBinding={guests.isReactive ? { value: guests.value ?? props.baseGuests, setValue: guests.setValue } : undefined} />;
+  },
 });
+
 export const WardrobePlanner = defineComponent({
   name: "WardrobePlanner",
-  description:
-    "Interactive capsule wardrobe with clothing illustrations or supplied real photos, category filters, selectable coordinated outfits, saved favorites and a copyable shortlist. kind determines the illustration. color is a hex color. Outfit itemIds must match item id values. Never invent product prices or shopping links.",
+  description: "Compose wardrobes from WardrobePiece and WardrobeOutfit refs. Category filters, favorites, outfit combinations and packing work for arbitrary supplied items. Optional weatherOptions, tripLengthOptions and PackingRule refs customize personalization; no clothing types or weather decisions are assumed for a custom wardrobe. Never invent prices or purchase links.",
   props: z.object({
-    title: z.string(),
-    description: z.string(),
-    items: z.array(
-      z.object({
-        id: z.string(),
-        name: z.string(),
-        category: z.string(),
-        color: z.string(),
-        kind: z.enum(["shirt", "tee", "jacket", "trousers", "shoes", "bag"]),
-        imageUrl: z.string().optional(),
-      }),
-    ),
-    outfits: z.array(
-      z.object({
-        name: z.string(),
-        occasion: z.string(),
-        itemIds: z.array(z.string()),
-      }),
-    ),
+    title: z.string().min(1).max(160),
+    description: z.string().max(600),
+    items: z.array(WardrobePiece.ref).min(1).max(60),
+    outfits: z.array(WardrobeOutfit.ref).max(30),
+    weatherOptions: z.array(z.string().min(1).max(60)).min(1).max(8).optional(),
+    tripLengthOptions: z.array(z.number().int().min(1).max(90)).min(1).max(8).optional(),
+    defaultWeather: z.string().max(60).optional(),
+    defaultTripDays: z.number().int().min(1).max(90).optional(),
+    packingRules: z.array(PackingRule.ref).max(30).optional(),
   }),
-  component: ({ props }) => (
-    <WardrobePlannerView key={JSON.stringify(props)} {...props} />
-  ),
+  component: ({ props }) => <WardrobePlannerView {...props} items={readToolRecords<WardrobeItem>(props.items)} outfits={readToolRecords<Outfit>(props.outfits)} packingRules={props.packingRules ? readToolRecords<PackingRuleData>(props.packingRules) : undefined} />,
 });
+
+export const toolComponents = {
+  BillLineItem, BillSplitter, SavingsCalculator, RecipeIngredient, RecipeStep, MenuDish,
+  RecipePlanner, WardrobePiece, WardrobeOutfit, PackingRule, WardrobePlanner,
+};

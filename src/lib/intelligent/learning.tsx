@@ -5,42 +5,11 @@ import { useEffect, useState } from "react";
 import { z } from "zod/v4";
 import { RetroConsole } from "./retro";
 import { RangeInput } from "./controls";
-
-const parts = ["All", "Frame", "Wheels", "Drivetrain", "Brakes", "Cockpit"];
-const explanations = [
-  ["Five connected systems", "The frame carries the rider; the drivetrain turns effort into motion. Select a system to explore its role."],
-  ["A strong foundation", "Two triangles connect the saddle, steering and pedals. The fork holds the front wheel and turns with the handlebars."],
-  ["Made to keep rolling", "Spokes connect each hub to its rim and support the rider. Tires provide grip and soften the ride."],
-  ["Seven ways to move", "The pedals turn the chain, driving the rear wheel. Seven gears let you adjust your effort for climbs, flats and descents."],
-  ["Control at the rim", "Hand levers pull cables that bring the brake pads against the rims, turning a squeeze into controlled slowing."],
-  ["Steering and support", "The handlebars and stem steer the front wheel. The saddle and seatpost support you and set your riding position."],
-];
+import { ExplodedDiagramView } from "./diagram";
+import { bicycleDiagram } from "./diagram-presets";
 
 export function BicycleExplorerView({ title = "7-speed bicycle" }: { title?: string }) {
-  const [part, setPart] = useState(0);
-  const [rotation, setRotation] = useState(0);
-  const [expanded, setExpanded] = useState(false);
-  const [explode,setExplode] = useState(0);
-  const spread = Math.pow(explode / 100, .72);
-  const opacity = (n: number) => part === 0 || part === n ? 1 : .13;
-  return <section className={`iui-panel iui-bike ${expanded ? "iui-expanded" : ""}`} aria-label={title}>
-    <div className="iui-panel-heading"><h2>{title}</h2><button className="iui-icon-button" aria-label={expanded ? "Collapse bicycle" : "Expand bicycle"} onClick={() => setExpanded(!expanded)}>{expanded ? "↙" : "↗"}</button></div>
-    <div className="iui-bike-canvas">
-      <svg viewBox="-35 -75 830 470" role="img" aria-label={`Side view of a seven-speed bicycle. ${parts[part]} highlighted.`}>
-        <defs><linearGradient id="bike-metal"><stop stopColor="#bec8bf"/><stop offset=".5" stopColor="#e0e6da"/><stop offset="1" stopColor="#a5b2a6"/></linearGradient></defs>
-        <ellipse cx="385" cy="331" rx="291" ry="12" fill="#000" opacity={.035*(1-spread)}/>
-        <g style={{opacity:opacity(2)}}>{[183,570].map(cx => <g key={cx} data-bike-part={cx===183?"rear-wheel":"front-wheel"} transform={`translate(${(cx===183?-75:75)*spread} ${40*spread})`}><g transform={`rotate(${rotation} ${cx} 233)`}><circle cx={cx} cy="233" r="98" fill="none" stroke="#292c2b" strokeWidth="13"/><circle cx={cx} cy="233" r="87" fill="none" stroke="#b7bbb7" strokeWidth="3"/>{Array.from({length:24},(_,i)=> {const a=i*Math.PI/12;return <line key={i} x1={cx} y1="233" x2={(cx+86*Math.cos(a)).toFixed(3)} y2={(233+86*Math.sin(a)).toFixed(3)} stroke="#aeb2ae" strokeWidth="1"/>})}<circle cx={cx} cy="233" r="8" fill="#666c67"/></g></g>)}</g>
-        <g style={{opacity:opacity(1)}} fill="none" stroke="url(#bike-metal)" strokeWidth="13" strokeLinejoin="round"><path d="M183 233 315 112 370 242 183 233 277 137 479 137 370 242"/><path d="m315 112 169-8 86 129"/><path d="m479 137 5-33"/></g>
-        <g data-bike-part="brakes" style={{opacity:opacity(4)}} transform={`translate(${40*spread} ${-60*spread})`} fill="none" stroke="#323937" strokeWidth="3"><path d="M523 75 C456 93 542 88 532 162 M512 80 C483 149 271 63 250 165"/><path d="m519 145 20 8m-282-5-18 11" strokeWidth="7"/></g>
-        <g data-bike-part="drivetrain" style={{opacity:opacity(3)}} transform={`translate(${100*spread} ${80*spread})`}><path d="M183 219 369 221 Q396 242 369 263 L183 245 Z" fill="none" stroke="#59615b" strokeWidth="4"/><circle cx="370" cy="242" r="25" fill="#cbd0c9" stroke="#777f77" strokeWidth="6"/><circle cx="183" cy="233" r="14" fill="#747b74"/>
-          <g transform={`rotate(${rotation} 370 242)`}><path d="m347 218 45 49" stroke="#4d554d" strokeWidth="8"/><path d="m331 219 29-1m19 48 28-1" stroke="#222" strokeWidth="9"/></g></g>
-        <g data-bike-part="cockpit" style={{opacity:opacity(5)}} transform={`translate(0 ${-105*spread})`} fill="none" stroke="#404640" strokeWidth="8" strokeLinecap="round"><path d="m304 129-14-49m195 23 1-48 30 1 17 21"/><path d="m267 79 53-1" strokeWidth="16"/><path d="m514 54 11 24" strokeWidth="11"/></g>
-      </svg>
-    </div>
-    <label className="iui-slider-label iui-bike-assembly">Explore the assembly<strong>{explode ? `${explode}% exploded` : "Assembled"}</strong><RangeInput aria-label="Explode bicycle parts" aria-valuetext={`${explode}% exploded`} min="0" max="100" value={explode} onChange={e=>setExplode(+e.target.value)}/></label>
-    <div className="iui-segments" aria-label="Bicycle systems">{parts.map((p, i) => <button key={p} aria-pressed={part === i} onClick={() => setPart(i)}>{p}</button>)}</div>
-    <div className="iui-bike-caption"><div><h3>{explanations[part][0]}</h3><p>{explanations[part][1]}</p></div><button className="iui-button" onClick={()=>setRotation(r=>r+90)}>Turn the pedals <span>↻</span></button></div>
-  </section>;
+  return <ExplodedDiagramView {...bicycleDiagram} title={title}/>;
 }
 
 // Exact bin probabilities for the populations used by the sampler below.

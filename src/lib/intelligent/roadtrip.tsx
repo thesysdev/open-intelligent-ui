@@ -1,16 +1,17 @@
 "use client";
 
-import { defineComponent } from "@openuidev/react-lang";
+import { defineComponent, useIsStreaming } from "@openuidev/react-lang";
 import { useEffect, useId, useRef, useState } from "react";
 import type { LayerGroup, Map as LeafletMap } from "leaflet";
 import { z } from "zod/v4";
 import { fetchWiki } from "../route/store";
+import { recordProps } from "./scene";
 
-type TripDay = {
+export type TripDay = {
   day: number;
   name: string;
   region: string;
-  category: "City" | "Mountains" | "Forest" | "Coast";
+  category: string;
   wiki: string;
   lat: number;
   lng: number;
@@ -150,33 +151,38 @@ export const pacificNorthwestDays: TripDay[] = [
     highlight: "A flexible finish",
   },
 ];
-const dollars = (number: number) =>
-  new Intl.NumberFormat("en-US", {
-    style: "currency",
-    currency: "USD",
-    maximumFractionDigits: 0,
-  }).format(number);
+export type RoadTripData = {
+  title?: string; days?: TripDay[]; description?: string; region?: string; currency?: string;
+  lodgingPerNight?: number; foodPerPersonDay?: number; transportPerDay?: number;
+  transportFixed?: number; activitiesPerPerson?: number;
+  seasonalAdvice?: Record<string, string>; travelNote?: string;
+  initialPartySize?: number; initialSeason?: string;
+  initialStyle?: "Budget-minded" | "Balanced" | "Comfort first";
+  partySizes?: number[]; seasonOptions?: string[];
+};
 
 function PlacePhoto({ day }: { day: TripDay }) {
-  const [src, setSrc] = useState("");
-  const [failed, setFailed] = useState(false);
+  const [photo, setPhoto] = useState<{wiki:string;src:string}|null>(null);
+  const [failedSrc, setFailedSrc] = useState("");
   useEffect(() => {
+    if (!day.wiki) return;
     let live = true;
     fetchWiki(day.wiki).then((info) => {
-      if (live && info.photos[0]) setSrc(info.photos[0]);
+      if (live && info.photos[0]) setPhoto({wiki:day.wiki,src:info.photos[0]});
     });
     return () => {
       live = false;
     };
   }, [day.wiki]);
+  const src = photo?.wiki === day.wiki ? photo.src : "";
   return (
     <div className="iui-trip-photo">
-      {src && !failed ? (
+      {src && src !== failedSrc ? (
         <img
           src={src}
           alt={day.region}
           loading="lazy"
-          onError={() => setFailed(true)}
+          onError={() => setFailedSrc(src)}
         />
       ) : (
         <svg
@@ -197,14 +203,14 @@ function PlacePhoto({ day }: { day: TripDay }) {
           />
         </svg>
       )}
-      <a
+      {day.wiki && <a
         href={`https://en.wikipedia.org/wiki/${encodeURIComponent(day.wiki.replace(/ /g, "_"))}`}
         target="_blank"
         rel="noreferrer"
         aria-label={`Photo and information about ${day.region}`}
       >
         ↗
-      </a>
+      </a>}
     </div>
   );
 }
@@ -237,7 +243,7 @@ function TripMap({
     const instance = L.map(element.current, {
       scrollWheelZoom: false,
       zoomControl: true,
-    }).setView([46.8, -123], 6);
+    }).setView([20, 0], 2);
     map.current = instance;
     instance.attributionControl.setPrefix(false);
     const tiles = L.tileLayer(
@@ -258,7 +264,8 @@ function TripMap({
   useEffect(() => {
     if (!L || !map.current || !markers.current) return;
     markers.current.clearLayers();
-    const points: [number, number][] = days.map((day) => [day.lat, day.lng]);
+    const validDays = days.filter(day => Number.isFinite(day.lat) && Number.isFinite(day.lng) && Math.abs(day.lat) <= 90 && Math.abs(day.lng) <= 180);
+    const points: [number, number][] = validDays.map((day) => [day.lat, day.lng]);
     if (points.length > 1)
       L.polyline(points, {
         color: "#39765c",
@@ -266,10 +273,13 @@ function TripMap({
         dashArray: "5 7",
         opacity: 0.7,
       }).addTo(markers.current);
-    days.forEach((day) => {
+    validDays.forEach((day) => {
+      const pin = document.createElement("span");
+      pin.className = `iui-trip-pin${selected === day.day ? " is-selected" : ""}`;
+      pin.textContent = String(day.day);
       const icon = L.divIcon({
         className: "",
-        html: `<span class="iui-trip-pin${selected === day.day ? " is-selected" : ""}">${day.day}</span>`,
+        html: pin,
         iconSize: [29, 29],
         iconAnchor: [14, 14],
       });
@@ -293,7 +303,7 @@ function TripMap({
         ref={element}
         className="iui-trip-map"
         role="img"
-        aria-label={`Pacific Northwest route map with ${days.length} day stops`}
+        aria-label={`Route map with ${days.length} day stops${days[0]?.region ? `, starting in ${days[0].region}` : ""}`}
       />
       <span className="iui-trip-map-chip">{days.length} stops</span>
       {tileError && (
@@ -307,21 +317,33 @@ function TripMap({
 
 export function PacificNorthwestRoadTripView({
   title = "10 days in the Pacific Northwest",
-}: { title?: string } = {}) {
+  ...data
+}: RoadTripData = {}) {
+  const sourceDays = data.days ?? pacificNorthwestDays;
+  return <RoadTripView key={JSON.stringify([sourceDays, data.currency, data.initialPartySize, data.initialSeason, data.initialStyle, data.partySizes, data.seasonOptions])} {...data} title={title} days={sourceDays}/>;
+}
+
+export function RoadTripView({title = "Your road trip", days = [], description, region, currency = "USD", lodgingPerNight = 190, foodPerPersonDay = 60, transportPerDay = 85, transportFixed = 180, activitiesPerPerson = 100, seasonalAdvice, travelNote, initialPartySize = 2, initialSeason = "Summer", initialStyle = "Balanced", partySizes = [1,2,4], seasonOptions = ["Spring","Summer","Autumn","Winter"]}: RoadTripData) {
+  const isReference = days === pacificNorthwestDays;
+  const startingParty = Math.max(1, Math.min(30, Math.round(Number.isFinite(initialPartySize) ? initialPartySize : 2)));
+  const partyOptions = [...new Set([...partySizes.filter(value => Number.isFinite(value) && value >= 1 && value <= 30).map(Math.round), startingParty])].sort((a,b)=>a-b);
+  const seasons = [...new Set([...seasonOptions.filter(Boolean), initialSeason])];
+  const partyLabel = (value:number) => `${value} ${value === 1 ? "person" : "people"}`;
+  const dollars = (value:number) => {try{return new Intl.NumberFormat("en-US",{style:"currency",currency,maximumFractionDigits:0}).format(value);}catch{return `${currency} ${Math.round(value).toLocaleString()}`;}};
   const id = useId();
   const [filter, setFilter] = useState("All stops");
-  const [selected, setSelected] = useState(1);
+  const [selected, setSelected] = useState(days[0]?.day ?? 1);
   const [removed, setRemoved] = useState<number[]>([]);
-  const [season, setSeason] = useState("Summer");
-  const [style, setStyle] = useState("Balanced");
-  const [party, setParty] = useState("2 people");
+  const [season, setSeason] = useState(initialSeason);
+  const [style, setStyle] = useState<string>(initialStyle);
+  const [party, setParty] = useState(partyLabel(startingParty));
   const [applied, setApplied] = useState({
-    season: "Summer",
-    style: "Balanced",
-    party: "2 people",
+    season: initialSeason,
+    style: initialStyle as string,
+    party: partyLabel(startingParty),
   });
   const [copyStatus, setCopyStatus] = useState("");
-  const active = pacificNorthwestDays.filter(
+  const active = days.filter(
     (day) => !removed.includes(day.day),
   );
   const visible = active.filter(
@@ -331,10 +353,10 @@ export function PacificNorthwestRoadTripView({
   const count = Number.parseInt(applied.party);
   const lodgingNight =
     applied.style === "Budget-minded"
-      ? 130
+      ? lodgingPerNight * 130 / 190
       : applied.style === "Comfort first"
-        ? 280
-        : 190;
+        ? lodgingPerNight * 280 / 190
+        : lodgingPerNight;
   const rooms = Math.ceil(count / 2);
   const nights = Math.max(0, active.length - 1);
   const budget = [
@@ -344,30 +366,30 @@ export function PacificNorthwestRoadTripView({
       total: nights * lodgingNight * rooms,
     },
     {
-      category: "Rental car & fuel",
-      calculation: `${active.length} days · one vehicle`,
-      total: active.length ? active.length * 85 + 180 : 0,
+      category: isReference ? "Rental car & fuel" : "Transport",
+      calculation: isReference ? `${active.length} days · one vehicle` : `${active.length} days × ${dollars(transportPerDay)}${transportFixed ? ` + ${dollars(transportFixed)} fixed` : ""}`,
+      total: active.length ? active.length * transportPerDay + transportFixed : 0,
     },
     {
       category: "Food & coffee",
-      calculation: `${active.length} days × ${dollars(applied.style === "Budget-minded" ? 40 : applied.style === "Comfort first" ? 85 : 60)} × ${count} people`,
+      calculation: `${active.length} days × ${dollars(foodPerPersonDay * (applied.style === "Budget-minded" ? 2/3 : applied.style === "Comfort first" ? 85/60 : 1))} × ${count} people`,
       total:
         active.length *
         count *
         (applied.style === "Budget-minded"
-          ? 40
+          ? foodPerPersonDay * 2/3
           : applied.style === "Comfort first"
-            ? 85
-            : 60),
+            ? foodPerPersonDay * 85/60
+            : foodPerPersonDay),
     },
     {
-      category: "Activities & parking",
+      category: isReference ? "Activities & parking" : "Activities",
       calculation: "A little room for the extras",
-      total: active.length ? count * 100 : 0,
+      total: active.length ? count * activitiesPerPerson : 0,
     },
   ];
   const total = budget.reduce((sum, item) => sum + item.total, 0);
-  const seasonNote =
+  const referenceSeasonNote =
     applied.season === "Summer"
       ? "Build in time for busy park entrances and reserve your stays ahead. Keep a rain layer in the car, even in summer."
       : applied.season === "Spring"
@@ -375,22 +397,22 @@ export function PacificNorthwestRoadTripView({
         : applied.season === "Autumn"
           ? "Leave room for changing weather and shorter days. Swap a mountain stop for a city or coastal day if conditions turn."
           : "Use the city and coast stops as your base. Mountain roads and trails can require winter equipment or be inaccessible; check official conditions before committing.";
+  const seasonNote = seasonalAdvice?.[applied.season] ?? (isReference ? referenceSeasonNote : "Check opening times, local conditions and availability for your dates. Leave room for changes to the plan.");
   const copyText = `${title}\n${applied.party} · ${applied.season} · ${applied.style}\n\n${active.map((day) => `Day ${day.day}: ${day.region}\n${day.description}\nStay: ${day.stay}`).join("\n\n")}\n\nIllustrative trip budget: ${dollars(total)} total / ${dollars(total / count)} per person. Excludes flights.\n${seasonNote}`;
   return (
-    <section className="iui iui-trip" aria-label="Pacific Northwest road trip">
+    <section className="iui iui-trip" aria-label={title}>
       <header>
-        <h2>{title || "10 days in the Pacific Northwest"}</h2>
+        <h2>{title}</h2>
         <p>
-          City mornings, old-growth forests and the kind of coastline that makes
-          you pull over. Here’s a route with room to take it all in.
+          {description ?? (isReference ? "City mornings, old-growth forests and the kind of coastline that makes you pull over. Here’s a route with room to take it all in." : "A route with room to explore. Adjust the stops and make the plan your own.")}
         </p>
       </header>
       <div className="iui-trip-photo-strip">
         {[
-          pacificNorthwestDays[0],
-          pacificNorthwestDays[3],
-          pacificNorthwestDays[6],
-        ].map((day) => (
+          days[0],
+          days[Math.floor(days.length / 3)],
+          days[Math.floor(days.length * 2 / 3)],
+        ].filter((day, index, all): day is TripDay => Boolean(day) && all.indexOf(day) === index).map((day) => (
           <PlacePhoto day={day} key={day.day} />
         ))}
       </div>
@@ -398,8 +420,8 @@ export function PacificNorthwestRoadTripView({
         <span>
           {active.length} days · {nights} nights
         </span>
-        <span>Seattle → Portland</span>
-        <span>Road trip</span>
+        <span>{isReference ? "Seattle → Portland" : `${days[0]?.region ?? "Start"} → ${days[days.length-1]?.region ?? "Finish"}`}</span>
+        <span>{isReference ? "Road trip" : "Travel plan"}</span>
       </div>
       <section className="iui-panel iui-trip-route">
         <div className="iui-trip-section-heading">
@@ -407,10 +429,10 @@ export function PacificNorthwestRoadTripView({
             <h3>Your route at a glance</h3>
             <p>Choose a stop to see what’s waiting there.</p>
           </div>
-          <span className="iui-trip-caption">Washington & Oregon</span>
+          <span className="iui-trip-caption">{region ?? (isReference ? "Washington & Oregon" : "Your destinations")}</span>
         </div>
         <div className="iui-trip-filters" aria-label="Filter route stops">
-          {["All stops", "City", "Mountains", "Forest", "Coast"].map(
+          {["All stops", ...Array.from(new Set(days.map(day=>day.category)))].map(
             (value) => (
               <button
                 type="button"
@@ -457,14 +479,14 @@ export function PacificNorthwestRoadTripView({
       <section className="iui-trip-days">
         <div className="iui-trip-section-heading">
           <div>
-            <h3>Ten days, one good adventure</h3>
+            <h3>{isReference ? "Ten days, one good adventure" : `${days.length} days, one good adventure`}</h3>
             <p>A suggested pace. Make room for the stops you love.</p>
           </div>
           <span className="iui-trip-caption">
             {active.length} days in your plan
           </span>
         </div>
-        {pacificNorthwestDays.map((day) => (
+        {days.map((day) => (
           <article
             className={removed.includes(day.day) ? "is-removed" : ""}
             key={day.day}
@@ -534,8 +556,7 @@ export function PacificNorthwestRoadTripView({
           </tfoot>
         </table>
         <p className="iui-trip-caption">
-          Planning assumptions, not live quotes. Excludes flights, insurance and
-          any one-way rental fee. Prices vary by dates and availability.
+          Planning assumptions, not live quotes. Excludes flights and insurance{isReference ? ", plus any one-way rental fee" : ""}. Prices vary by dates and availability.
         </p>
       </section>
       <section className="iui-panel iui-trip-preferences">
@@ -552,7 +573,7 @@ export function PacificNorthwestRoadTripView({
             {
               name: "season",
               label: "When are you going?",
-              options: ["Spring", "Summer", "Autumn", "Winter"],
+              options: seasons,
               value: season,
               set: setSeason,
             },
@@ -566,7 +587,7 @@ export function PacificNorthwestRoadTripView({
             {
               name: "party",
               label: "Who’s coming along?",
-              options: ["1 person", "2 people", "4 people"],
+              options: partyOptions.map(partyLabel),
               value: party,
               set: setParty,
             },
@@ -600,7 +621,7 @@ export function PacificNorthwestRoadTripView({
       </section>
       <footer className="iui-trip-footer">
         <p>
-          Before you go, check{" "}
+          {isReference ? <>Before you go, check{" "}
           <a
             href="https://www.nps.gov/olym/planyourvisit/conditions.htm"
             target="_blank"
@@ -612,7 +633,7 @@ export function PacificNorthwestRoadTripView({
           <a href="https://www.tripcheck.com/" target="_blank" rel="noreferrer">
             Oregon road conditions
           </a>
-          . Photos and destination information via Wikipedia.
+          .</> : travelNote ?? "Check local travel information before you go."} Photos and destination information via Wikipedia.
         </p>
         <button
           type="button"
@@ -645,12 +666,22 @@ export function PacificNorthwestRoadTripView({
   );
 }
 
+export const TripStop = defineComponent({name: "TripStop", props: z.object({day:z.number().int().min(1).max(60), name:z.string(), region:z.string(), category:z.string(), wiki:z.string(), lat:z.number().min(-90).max(90), lng:z.number().min(-180).max(180), description:z.string(), stay:z.string(), highlight:z.string()}), description:"One day of a road trip in ANY region. Supply real coordinates and exact Wikipedia title for photos. Days should have unique numbers.", component:()=>null});
 export const RoadTripPlanner = defineComponent({
   name: "RoadTripPlanner",
-  description:
-    "A specific ten-day Pacific Northwest road-trip experience from Seattle through Olympic Peninsula and Oregon coast to Portland, the Columbia Gorge and Mount Hood. Includes real map filters, destination photos, ten editable day stops, party-size and travel-style budget assumptions, seasonal preferences and copyable itinerary. Use ONLY for this Pacific Northwest example. For arbitrary destinations use RouteMap, RouteStops and RouteSuggestions instead.",
-  props: z.object({ title: z.string() }),
-  component: ({ props }) => (
-    <PacificNorthwestRoadTripView title={props.title} />
-  ),
+  description: "Interactive itinerary for ANY destination and duration. Compose TripStop children, local currency, cost assumptions, seasonal advice and initialPartySize/initialSeason/initialStyle. partySizes and seasonOptions customize preference choices. Supply days for custom destinations; omitting days selects the reference only when title is exactly '10 days in the Pacific Northwest'.",
+  props: z.object({ title:z.string(), days:z.array(TripStop.ref).min(1).max(60).optional(), description:z.string().optional(), region:z.string().optional(), currency:z.string().optional(), lodgingPerNight:z.number().nonnegative().optional(), foodPerPersonDay:z.number().nonnegative().optional(), transportPerDay:z.number().nonnegative().optional(), transportFixed:z.number().nonnegative().optional(), activitiesPerPerson:z.number().nonnegative().optional(), seasonalAdvice:z.record(z.string(),z.string()).optional(), travelNote:z.string().optional(), initialPartySize:z.number().int().min(1).max(30).optional(), initialSeason:z.string().max(60).optional(), initialStyle:z.enum(["Budget-minded","Balanced","Comfort first"]).optional(), partySizes:z.array(z.number().int().min(1).max(30)).min(1).max(10).optional(), seasonOptions:z.array(z.string().min(1).max(60)).min(1).max(8).optional() }),
+  component: function RoadTripPlannerRenderer({props}) {
+    const streaming = useIsStreaming();
+    // Positional OpenUI calls use null to skip optional arguments. React defaults
+    // only apply to undefined, so normalize the configuration at this boundary.
+    const config = Object.fromEntries(Object.entries(props).filter(([key,value]) => key !== "days" && value != null)) as Omit<RoadTripData,"days">;
+    const useReference = !streaming && props.days == null && props.title === "10 days in the Pacific Northwest";
+    const days = useReference ? pacificNorthwestDays : (props.days ?? []).flatMap(day => {
+      const parsed = TripStop.props.safeParse(recordProps(day));
+      return parsed.success ? [parsed.data] : [];
+    }).filter((day,index,all) => all.findIndex(candidate => candidate.day === day.day) === index);
+    return <PacificNorthwestRoadTripView {...config} title={props.title || "Your road trip"} days={days}/>;
+  },
 });
+export const roadTripComponents={TripStop,RoadTripPlanner};

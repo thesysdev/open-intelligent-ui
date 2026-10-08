@@ -15,6 +15,7 @@
 .iui-tools h3,
 .iui-tools p {
   margin: 0;
+  overflow-wrap: anywhere;
 }
 .iui-tools h2 {
   font-size: 21px;
@@ -465,6 +466,15 @@
   gap: 12px;
   margin: 3px 0 24px;
 }
+.iui-tools-dishes:empty {
+  display: none;
+}
+.iui-tools-dishes:has(> article:only-child) {
+  grid-template-columns: minmax(0, 320px);
+}
+.iui-tools-dishes:has(> article:nth-child(2):last-child) {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
 .iui-tools-dishes h3 {
   font-size: 13px;
   margin: 10px 0 5px;
@@ -640,6 +650,9 @@
   grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 22px 13px;
 }
+.iui-tools-wardrobe-piece {
+  max-width: 280px;
+}
 .iui-tools-wardrobe-image {
   display: flex;
   align-items: center;
@@ -812,6 +825,10 @@
     grid-template-columns: 1fr;
   }
   .iui-tools-dishes {
+    grid-template-columns: 1fr;
+  }
+  .iui-tools-dishes:has(> article:only-child),
+  .iui-tools-dishes:has(> article:nth-child(2):last-child) {
     grid-template-columns: 1fr;
   }
   .iui-tools-dishes article {

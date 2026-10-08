@@ -5,48 +5,44 @@ import { useEffect, useRef, useState } from "react";
 import type { LayerGroup, Map as LeafletMap } from "leaflet";
 import { z } from "zod/v4";
 import {
-  addStop,
   fetchWiki,
-  getAdded,
-  isAdded,
-  isRemoved,
-  toggleStop,
-  useRouteVersion,
+  getStopKey,
+  useRouteStore,
   type StopData,
   type WikiInfo,
 } from "./store";
 
 const RouteStopSchema = z.object({
-  name: z.string(),
-  wikiTitle: z.string(),
-  lat: z.number(),
-  lng: z.number(),
-  time: z.string(),
-  story: z.string(),
-  beforeYouGo: z.string(),
-  category: z.string().optional(),
+  name: z.string().min(1).max(160),
+  wikiTitle: z.string().max(200),
+  lat: z.number().min(-90).max(90),
+  lng: z.number().min(-180).max(180),
+  time: z.string().max(120),
+  story: z.string().max(1200),
+  beforeYouGo: z.string().max(600),
+  category: z.string().max(60).optional(),
+  id: z.string().max(120).optional(),
 });
 
 function useWiki(title?: string) {
-  const [info, setInfo] = useState<WikiInfo | null>(null);
+  const [result, setResult] = useState<{ title: string; info: WikiInfo } | null>(null);
   useEffect(() => {
     if (!title) return;
     let live = true;
-    fetchWiki(title).then((i) => live && setInfo(i));
+    fetchWiki(title).then((info) => live && setResult({ title, info }));
     return () => {
       live = false;
     };
   }, [title]);
-  return info;
+  return result && result.title === title ? result.info : null;
 }
 
-const slug = (s: string) => `stop-${s.toLowerCase().replace(/[^a-z0-9]+/g, "-")}`;
 const toStops = (items: unknown[] | undefined): StopData[] =>
   (items ?? []).map((s) => s && typeof s === "object" && "props" in s ? s.props as StopData : {});
 
-function withAdded(stops: StopData[]) {
-  const names = new Set(stops.map((s) => s.name));
-  return [...stops, ...getAdded().filter((a) => !names.has(a.name))];
+function withAdded(stops: StopData[], added: readonly StopData[]) {
+  const keys = new Set(stops.map(getStopKey));
+  return [...stops, ...added.filter((stop) => !keys.has(getStopKey(stop)))];
 }
 
 function Photos({ title, count = 3 }: { title?: string; count?: number }) {
@@ -68,10 +64,11 @@ function Photos({ title, count = 3 }: { title?: string; count?: number }) {
 }
 
 function StopCard({ stop, index, isNew }: { stop: StopData; index: number; isNew?: boolean }) {
-  useRouteVersion();
-  const off = !!stop.name && isRemoved(stop.name);
+  const route = useRouteStore();
+  const key = getStopKey(stop);
+  const off = !!key && route.isRemoved(key);
   return (
-    <div id={stop.name ? slug(stop.name) : undefined} className={`rt-card ${off ? "rt-removed" : ""} ${isNew ? "rt-card-new" : ""}`}>
+    <div id={key ? route.stopId(key) : undefined} className={`rt-card ${off ? "rt-removed" : ""} ${isNew ? "rt-card-new" : ""}`}>
       <Photos title={stop.wikiTitle} />
       <div className="rt-title">
         <span className="rt-num" aria-label={`Stop ${index + 1}`}>{index + 1}</span>
@@ -92,7 +89,7 @@ function StopCard({ stop, index, isNew }: { stop: StopData; index: number; isNew
         </>
       )}
       {stop.name && (
-        <button className="rt-btn" type="button" aria-pressed={!off} aria-label={`${off ? "Add" : "Remove"} ${stop.name} ${off ? "to" : "from"} my route`} onClick={() => toggleStop(stop.name!)}>
+        <button className="rt-btn" type="button" aria-pressed={!off} aria-label={`${off ? "Add" : "Remove"} ${stop.name} ${off ? "to" : "from"} my route`} onClick={() => route.toggleStop(key)}>
           {off ? "Add back to my itinerary" : "Remove from my itinerary"}
         </button>
       )}
@@ -104,7 +101,7 @@ export const RouteStop = defineComponent({
   name: "RouteStop",
   props: RouteStopSchema,
   description:
-    "One stop on a route. wikiTitle is the exact English Wikipedia article title (used to load real photos). lat/lng are decimal coordinates. time e.g. '9:00 · 1 hr'. story: 1-2 sentences of history. beforeYouGo: one practical tip. Optional category groups the map, e.g. 'Landmarks', 'Museums' or 'Neighborhoods'.",
+    "One stop on a route. wikiTitle is the exact English Wikipedia article title (used to load real photos). lat/lng are decimal coordinates. time e.g. '9:00 · 1 hr'. story: 1-2 sentences of history. beforeYouGo: one practical tip. Optional category groups the map, e.g. 'Landmarks', 'Museums' or 'Neighborhoods'. Optional id distinguishes repeated visits or stops with identical names in a route.",
   component: ({ props }) => <StopCard stop={props} index={0} />,
 });
 
@@ -115,9 +112,10 @@ function MapView({ base }: { base: StopData[] }) {
   const [L, setL] = useState<typeof import("leaflet") | null>(null);
   const [expanded, setExpanded] = useState(false);
   const [group, setGroup] = useState("all");
-  const version = useRouteVersion();
+  const route = useRouteStore();
+  const version = route.getSnapshot();
   const [coords, setCoords] = useState<Record<string, [number, number]>>({});
-  const stops = withAdded(base);
+  const stops = withAdded(base, route.getAdded());
   const baseCount = base.length;
   const categories = [...new Set(stops.map((stop) => stop.category).filter((category): category is string => !!category))];
 
@@ -128,19 +126,22 @@ function MapView({ base }: { base: StopData[] }) {
   }, []);
 
   const titles = stops.map((s) => s.wikiTitle ?? "").join("|");
+  const stopSignature = JSON.stringify(stops.map((stop) => [getStopKey(stop), stop.name, stop.lat, stop.lng, stop.category]));
   useEffect(() => {
+    let live = true;
     stops.forEach((s) => {
       if (!s.wikiTitle || !s.name) return;
       fetchWiki(s.wikiTitle).then((w) => {
-        if (w.lat != null && w.lng != null) setCoords((c) => ({ ...c, [s.name!]: [w.lat!, w.lng!] }));
+        if (live && w.lat != null && w.lng != null) setCoords((c) => ({ ...c, [getStopKey(s)]: [w.lat!, w.lng!] }));
       });
     });
+    return () => { live = false; };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [titles]);
 
   useEffect(() => {
     if (!L || !el.current || map.current) return;
-    map.current = L.map(el.current, { zoomControl: false, attributionControl: true }).setView([37.79, -122.43], 12);
+    map.current = L.map(el.current, { zoomControl: false, attributionControl: true }).setView([20, 0], 2);
     map.current.attributionControl.setPrefix(false);
     L.tileLayer("https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}", {
       maxZoom: 19,
@@ -161,9 +162,10 @@ function MapView({ base }: { base: StopData[] }) {
     const pts: [number, number][] = [];
     stops.forEach((s, i) => {
       if (!s.name) return;
-      const p: [number, number] | null = coords[s.name] ?? (s.lat != null && s.lng != null ? [s.lat, s.lng] : null);
-      if (!p || Number.isNaN(p[0]) || Number.isNaN(p[1])) return;
-      const off = isRemoved(s.name);
+      const key = getStopKey(s);
+      const p: [number, number] | null = s.lat != null && s.lng != null ? [s.lat, s.lng] : coords[key] ?? null;
+      if (!p || !Number.isFinite(p[0]) || !Number.isFinite(p[1]) || Math.abs(p[0]) > 90 || Math.abs(p[1]) > 180) return;
+      const off = route.isRemoved(key);
       const fresh = i >= baseCount;
       if (group === "active" && off) return;
       if (group === "removed" && !off) return;
@@ -187,22 +189,22 @@ function MapView({ base }: { base: StopData[] }) {
         iconAnchor: [14, 14],
       });
       L.marker(p, { icon, zIndexOffset: fresh ? 1000 : 0, title: `${i + 1}. ${s.name}`, alt: s.name })
-        .on("click", () => document.getElementById(slug(s.name!))?.scrollIntoView({ behavior: "smooth", block: "center" }))
+        .on("click", () => document.getElementById(route.stopId(key))?.scrollIntoView({ behavior: "smooth", block: "center" }))
         .addTo(routeLayer);
     });
     if (pts.length > 1) L.polyline(pts, { color: "#0d0d0d", weight: 2.5, dashArray: "5 7", opacity: 0.65 }).addTo(routeLayer);
     if (pts.length) map.current.fitBounds(L.latLngBounds(pts).pad(0.2), { animate: true, maxZoom: 14 });
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [L, titles, coords, version, group]);
+  }, [L, titles, stopSignature, coords, version, group]);
 
   useEffect(() => {
     const timeout = setTimeout(() => map.current?.invalidateSize(), 220);
     return () => clearTimeout(timeout);
   }, [expanded]);
 
-  const active = stops.filter((s) => s.name && !isRemoved(s.name)).length;
+  const active = stops.filter((s) => s.name && !route.isRemoved(getStopKey(s))).length;
   return (
-    <div className="rt-map-wrap" style={{ height: expanded ? 480 : 300 }}>
+    <div id={route.mapId} className="rt-map-wrap" style={{ height: expanded ? 480 : 300 }}>
       <div ref={el} className="rt-map" aria-label="Interactive route map. Select a numbered stop to view its details." />
       <label className="rt-chip rt-group-filter">
         <select aria-label="Filter map groups" value={group} onChange={(event) => setGroup(event.target.value)}>
@@ -223,19 +225,19 @@ function MapView({ base }: { base: StopData[] }) {
 
 export const RouteMap = defineComponent({
   name: "RouteMap",
-  props: z.object({ stops: z.array(RouteStop.ref) }),
+  props: z.object({ stops: z.array(RouteStop.ref).max(50) }),
   description:
     "Interactive map that plots RouteStop items in visiting order with a walking path. Always reuse the SAME RouteStop references in RouteStops below it.",
   component: ({ props }) => <MapView base={toStops(props.stops)} />,
 });
 
 function StopList({ base }: { base: StopData[] }) {
-  useRouteVersion();
-  const stops = withAdded(base);
+  const route = useRouteStore();
+  const stops = withAdded(base, route.getAdded());
   return (
     <div className="rt-list">
       {stops.map((s, i) => (
-        <StopCard key={s.name ?? i} stop={s} index={i} isNew={i >= base.length} />
+        <StopCard key={getStopKey(s) || i} stop={s} index={i} isNew={i >= base.length} />
       ))}
     </div>
   );
@@ -243,14 +245,16 @@ function StopList({ base }: { base: StopData[] }) {
 
 export const RouteStops = defineComponent({
   name: "RouteStops",
-  props: z.object({ stops: z.array(RouteStop.ref) }),
+  props: z.object({ stops: z.array(RouteStop.ref).max(50) }),
   description: "Photo cards for each RouteStop (real photos, story, tips, remove-from-route toggle).",
   component: ({ props }) => <StopList base={toStops(props.stops)} />,
 });
 
 function SuggestionCard({ stop }: { stop: StopData }) {
-  useRouteVersion();
-  const done = !!stop.name && isAdded(stop.name);
+  const route = useRouteStore();
+  const done = !!stop.name && route.isAdded(getStopKey(stop));
+  const scrollTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  useEffect(() => () => { if (scrollTimer.current) clearTimeout(scrollTimer.current); }, []);
   return (
     <div className="rt-sugg">
       <Photos title={stop.wikiTitle} count={1} />
@@ -265,14 +269,15 @@ function SuggestionCard({ stop }: { stop: StopData }) {
           const before = btn.getBoundingClientRect().top;
           let sc: HTMLElement | null = btn.parentElement;
           while (sc && !(sc.scrollHeight > sc.clientHeight && /auto|scroll/.test(getComputedStyle(sc).overflowY))) sc = sc.parentElement;
-          addStop(stop);
+          route.addStop(stop);
           requestAnimationFrame(() =>
             requestAnimationFrame(() => {
               const delta = btn.getBoundingClientRect().top - before;
               if (delta) (sc ?? document.scrollingElement)?.scrollBy({ top: delta, behavior: "instant" as ScrollBehavior });
             }),
           );
-          setTimeout(() => document.querySelector(".rt-map-wrap")?.scrollIntoView({ behavior: "smooth", block: "center" }), 1300);
+          if (scrollTimer.current) clearTimeout(scrollTimer.current);
+          scrollTimer.current = setTimeout(() => document.getElementById(route.mapId)?.scrollIntoView({ behavior: "smooth", block: "center" }), 1300);
         }}
       >
         {done ? "✓ Added to route" : "+ Add to my route"}
@@ -283,7 +288,7 @@ function SuggestionCard({ stop }: { stop: StopData }) {
 
 export const RouteSuggestions = defineComponent({
   name: "RouteSuggestions",
-  props: z.object({ title: z.string(), stops: z.array(RouteStop.ref) }),
+  props: z.object({ title: z.string().max(160), stops: z.array(RouteStop.ref).max(12) }),
   description:
     "Optional extra stops the user can add to the route with one tap (adds a pin to RouteMap and a card to RouteStops). Use 2 stops that are NOT already in the route.",
   component: ({ props }) => (
@@ -291,7 +296,7 @@ export const RouteSuggestions = defineComponent({
       <div className="rt-h rt-sugg-title">{props.title}</div>
       <div className="rt-sugg-row">
         {toStops(props.stops).map((s, i) => (
-          <SuggestionCard key={s.name ?? i} stop={s} />
+          <SuggestionCard key={getStopKey(s) || i} stop={s} />
         ))}
       </div>
     </div>

@@ -1,8 +1,14 @@
 "use client";
 
 import { defineComponent } from "@openuidev/react-lang";
-import { useId, useState } from "react";
+import { useId } from "react";
 import { z } from "zod/v4";
+import { drawingData, SceneDrawing, type SceneData } from "./scene";
+import {
+  AssemblyGuideView, EditableGridView, IllustratedStepGuideView, RecolorableSceneView,
+  ColorSwatch, ColorRegion, GuideStep, GridOption, GridLayout, creativeCompositionComponents, resolveGuideSteps,
+  type SwatchData, type RegionData, type GuideStepData, type GridOptionData, type GridLayoutData,
+} from "./creative-composition";
 import "./creative.css";
 
 const paintColors = [
@@ -45,17 +51,9 @@ function RoomIllustration({ color, id }: { color: string; id: string }) {
   </svg>;
 }
 
-export function RoomColorPreviewView({ title = "Live wall color preview" }: { title?: string }) {
-  const [selected, setSelected] = useState(0);
-  const [original, setOriginal] = useState(false);
+export function RoomColorPreviewView({ title = "Live wall color preview", palette = paintColors, regions = [{ id: "walls", label: "Wall", originalColor: "#e8e5dc" }], scene, description = "A little color changes the whole room." }: { title?: string; palette?: SwatchData[]; regions?: RegionData[]; scene?: SceneData; description?: string }) {
   const id = useId().replaceAll(":", "");
-  return <section className="iui-panel iui-creative iui-room">
-    <div className="iui-panel-heading"><div><h2>{title}</h2><p className="iui-muted">A little color changes the whole room.</p></div></div>
-    <div className="iui-room-scene"><RoomIllustration color={original ? "#e8e5dc" : paintColors[selected].hex} id={id}/></div>
-    <div className="iui-room-toolbar"><div className="iui-segments"><button aria-pressed={!original} onClick={() => setOriginal(false)}>Your color</button><button aria-pressed={original} onClick={() => setOriginal(true)}>Original</button></div><span className="iui-muted" aria-live="polite">{original ? "Warm white" : paintColors[selected].name}</span></div>
-    <div className="iui-paint-swatches" aria-label="Wall colors">{paintColors.map((color, i) => <button key={color.hex} className="iui-paint-swatch" aria-pressed={selected === i && !original} aria-label={`${color.name}, ${color.hex}`} onClick={() => {setSelected(i);setOriginal(false);}}><span style={{ background: color.hex }}/><span><strong>{color.name}</strong><small>{color.hex}</small>{selected === i && !original && <b aria-hidden="true">✓</b>}</span></button>)}</div>
-    <p className="iui-creative-footnote">Illustrated preview. Paint appearance varies with light and finish.</p>
-  </section>;
+  return <RecolorableSceneView title={title} description={description} palette={palette} regions={regions} scene={scene} originalLabel={scene ? "Original colors" : "Warm white"} renderScene={scene ? undefined : colors => <RoomIllustration color={colors[regions[0]?.id] ?? "#e8e5dc"} id={id}/>} footnote="Illustrated preview. Paint appearance varies with light and finish."/>;
 }
 
 const folds = [
@@ -91,14 +89,8 @@ function FoldIllustration({ step }: { step: number }) {
   </svg>;
 }
 
-export function OrigamiGuideView({ title = "Let’s fold an origami baby fox!" }: { title?: string }) {
-  const [step, setStep] = useState(0);
-  return <section className="iui-panel iui-creative iui-origami"><div className="iui-panel-heading"><div><h2>{title}</h2><p className="iui-muted">This beginner-friendly version takes about 5–10 minutes.</p></div></div><div className="iui-fold-card">
-    <div className="iui-fold-meta"><span>Step {step + 1} of 12</span><span>Beginner</span></div>
-    <div className="iui-fold-progress" aria-label={`Step ${step + 1} of 12`}>{folds.map((fold,i) => <button key={fold[0]} className={i <= step ? "is-complete" : ""} aria-label={`Go to step ${i + 1}: ${fold[0]}`} aria-current={i === step ? "step" : undefined} onClick={()=>setStep(i)}/>)}</div>
-    <div className="iui-fold-canvas"><FoldIllustration step={step}/></div><div className="iui-fold-instruction" aria-live="polite"><h3>{folds[step][0]}</h3><p>{folds[step][1]}</p></div><div className="iui-fold-tip">{folds[step][2]}</div>
-    </div><div className="iui-fold-nav"><button disabled={step === 0} onClick={()=>setStep(s=>s-1)}>← Previous step</button><button onClick={()=>setStep(s=>s===11 ? 0 : s+1)}>{step===11 ? "Fold another ↻" : "Next step →"}</button></div>
-  </section>;
+export function OrigamiGuideView({ title = "Let’s fold an origami baby fox!", steps, description, level = "Beginner" }: { title?: string; steps?: GuideStepData[]; description?: string; level?: string }) {
+  return <IllustratedStepGuideView title={title} description={description ?? (steps ? undefined : "This beginner-friendly version takes about 5–10 minutes.")} level={level} steps={steps ?? folds.map(([title, body, tip], index) => ({ id: `fox-${index}`, title, body, tip }))} renderIllustration={steps ? undefined : step => <FoldIllustration step={step}/>} repeatLabel="Fold another ↻"/>;
 }
 
 const plants = [
@@ -121,19 +113,13 @@ function PlantIcon({ kind }: { kind: string }) {
   </svg>;
 }
 
-export function GardenPlannerView({ title = "Your 4 × 4 ft garden plan" }: { title?: string }) {
-  const [layout, setLayout] = useState(4);
-  const [beds, setBeds] = useState([0,1,2,3]);
-  const [squares, setSquares] = useState([0,0,1,1,0,0,1,1,2,2,3,3,2,2,3,3]);
-  const [selected, setSelected] = useState<number | null>(null);
-  const values = layout === 4 ? beds : squares;
-  const setPlant = (plant: number) => {if(selected === null)return; if(layout === 4)setBeds(old=>old.map((v,i)=>i===selected?plant:v));else setSquares(old=>old.map((v,i)=>i===selected?plant:v));};
-  return <section className="iui-panel iui-creative iui-garden"><div className="iui-panel-heading"><div><h2>{title}</h2><p className="iui-muted">A small space with plenty of possibility.</p></div></div>
-    <div className="iui-garden-toolbar"><div className="iui-segments"><button aria-pressed={layout===4} onClick={()=>{setLayout(4);setSelected(null);}}>Four planters</button><button aria-pressed={layout===16} onClick={()=>{setLayout(16);setSelected(null);}}>16-square bed</button></div><span className="iui-muted">4 ft × 4 ft</span></div>
-    <div className={`iui-garden-grid ${layout===16?"iui-garden-sixteen":""}`} aria-label="Editable garden layout">{values.map((plant,i)=><button key={i} style={{background:plants[plant].color,color:plants[plant].ink}} aria-pressed={selected===i} aria-label={`${layout===4?"Planter":"Square"} ${i+1}: ${plants[plant].name}. Choose a plant.`} onClick={()=>setSelected(i)}><PlantIcon kind={plants[plant].icon}/><strong>{layout===4?plants[plant].name:plants[plant].short}</strong>{layout===4&&<small>{plants[plant].note}</small>}{selected===i&&<span className="iui-garden-selected" aria-hidden="true">✓</span>}</button>)}</div>
-    {selected!==null ? <div className="iui-plant-editor"><div><h3>Choose a plant for {layout===4?"planter":"square"} {selected+1}</h3><button aria-label="Close plant selector" onClick={()=>setSelected(null)}>×</button></div><div className="iui-plant-options">{plants.map((plant,i)=><button key={plant.name} aria-pressed={values[selected]===i} onClick={()=>setPlant(i)}><span style={{color:plant.ink}}><PlantIcon kind={plant.icon}/></span>{plant.name}</button>)}</div><p aria-live="polite">{plants[values[selected]].tip}</p></div> : <p className="iui-creative-footnote">Tap any planter to change what grows there. Keep space around the garden to reach and water each plant.</p>}
-    <div className="iui-garden-footer"><span>☀ 6+ hours of sunlight</span><button onClick={()=>{setBeds([0,1,2,3]);setSquares([0,0,1,1,0,0,1,1,2,2,3,3,2,2,3,3]);setSelected(null);}}>Reset plan ↻</button></div>
-  </section>;
+export function GardenPlannerView({ title = "Your 4 × 4 ft garden plan", options, layouts, description = "A small space with plenty of possibility.", footer = "☀ 6+ hours of sunlight" }: { title?: string; options?: GridOptionData[]; layouts?: GridLayoutData[]; description?: string; footer?: string }) {
+  const gardenOptions = options ?? plants.map((plant, index) => ({ ...plant, id: String(index) }));
+  const gardenLayouts = layouts ?? [
+    { id: "planters", label: "Four planters", rows: 2, columns: 2, cells: ["0", "1", "2", "3"], cellLabel: "Planter", summary: "4 ft × 4 ft" },
+    { id: "squares", label: "16-square bed", rows: 4, columns: 4, cells: [0, 0, 1, 1, 0, 0, 1, 1, 2, 2, 3, 3, 2, 2, 3, 3].map(String), cellLabel: "Square", summary: "4 ft × 4 ft" },
+  ];
+  return <EditableGridView title={title} description={description} options={gardenOptions} layouts={gardenLayouts} optionLabel="plant" renderIcon={options ? undefined : option => <PlantIcon kind={option.icon ?? "leaf"}/>} footnote="Tap any planter to change what grows there. Keep space around the garden to reach and water each plant." footer={footer}/>;
 }
 
 const repairSteps = [
@@ -158,14 +144,13 @@ function YouthBike({ active, exploded }: { active: number; exploded: boolean }) 
  </svg>;
 }
 
-export function BikeRepairView({title="Rocket youth bike"}:{title?:string}) {
- const [step,setStep]=useState(0);const [exploded,setExploded]=useState(false);const [checked,setChecked]=useState<boolean[]>(Array(6).fill(false));const current=repairSteps[step];
- return <section className="iui-panel iui-creative iui-repair"><div className="iui-panel-heading"><div><h2>{title}</h2><p className="iui-muted">Assembly guide</p></div><div className="iui-segments"><button aria-pressed={!exploded} onClick={()=>setExploded(false)}>Assembled</button><button aria-pressed={exploded} onClick={()=>setExploded(true)}>Exploded</button></div></div><div className="iui-repair-diagram"><YouthBike active={current.part} exploded={exploded}/></div><p className="iui-creative-footnote">Illustrative schematic. Follow your bike’s manual for assembly specifications.</p><div className="iui-repair-instruction" aria-live="polite"><span>Step {step+1} of 6</span><h3>{current.title}</h3><p className="iui-muted">{current.find}</p><p>{current.body}</p></div><label className="iui-repair-check"><input type="checkbox" checked={checked[step]} onChange={e=>setChecked(old=>old.map((v,i)=>i===step?e.target.checked:v))}/><span>{current.check}</span></label><div className="iui-repair-footer"><div aria-label={`${checked.filter(Boolean).length} of 6 checks completed`}>{repairSteps.map((s,i)=><button key={s.title} aria-label={`Step ${i+1}: ${s.title}`} aria-current={step===i?"step":undefined} className={`${step===i?"is-current":""} ${checked[i]?"is-checked":""}`} onClick={()=>setStep(i)}/>)}</div><div><button className="iui-button" disabled={step===0} onClick={()=>setStep(s=>s-1)}>Back</button><button className="iui-button iui-primary" onClick={()=>setStep(s=>s===5?0:s+1)}>{step===5?"Review ↻":"Next →"}</button></div></div></section>;
+export function BikeRepairView({ title = "Rocket youth bike", steps, description = "Assembly guide", footnote = "Illustrative schematic. Follow your bike’s manual for assembly specifications." }: { title?: string; steps?: GuideStepData[]; description?: string; footnote?: string }) {
+  return <AssemblyGuideView title={title} description={description} steps={steps ?? repairSteps} footnote={footnote} renderIllustration={steps ? undefined : (current, exploded) => <YouthBike active={current.part ?? 0} exploded={exploded}/>}/>;
 }
 
-const titleSchema = z.object({ title: z.string() });
-export const RoomColorPreview = defineComponent({name:"RoomColorPreview",props:titleSchema.clone(),description:"Interactive room wall-color preview with six muted paint swatches, original comparison, and a recolorable illustrated living room. Use for paint choices and interior color exploration.",component:({props})=><RoomColorPreviewView {...props}/>});
-export const OrigamiGuide = defineComponent({name:"OrigamiGuide",props:titleSchema.clone(),description:"Twelve-step interactive origami fox guide with a distinct paper-fold illustration per step, orange progress segments, folding tips, and previous/next navigation.",component:({props})=><OrigamiGuideView {...props}/>});
-export const GardenPlanner = defineComponent({name:"GardenPlanner",props:titleSchema.clone(),description:"Editable 4-by-4-foot kitchen garden plan with four planters or sixteen squares, plant selection, growing notes, and reset. Use for small-space gardening.",component:({props})=><GardenPlannerView {...props}/>});
-export const BikeRepair = defineComponent({name:"BikeRepair",props:titleSchema.clone(),description:"Youth bicycle assembly checklist with six guided steps, highlighted parts, assembled/exploded illustration, progress and safety checks. Refer to the manufacturer’s manual for specifications.",component:({props})=><BikeRepairView {...props}/>});
-export const creativeComponents = {RoomColorPreview,OrigamiGuide,GardenPlanner,BikeRepair};
+const refData = <T,>(value: unknown) => value && typeof value === "object" && "props" in value ? value.props as T : value as T;
+export const RoomColorPreview = defineComponent({ name: "RoomColorPreview", props: z.object({ title: z.string(), palette: z.array(ColorSwatch.ref).optional(), regions: z.array(ColorRegion.ref).optional(), scene: z.optional(SceneDrawing.ref), description: z.string().optional() }), description: "Living-room preset of RecolorableScene. Optional palette, regions and original scene allow custom interiors. For other objects use RecolorableScene.", component: ({ props }) => <RoomColorPreviewView {...props} palette={props.palette?.map(item => refData<SwatchData>(item))} regions={props.regions?.map(item => refData<RegionData>(item))} scene={props.scene ? drawingData(props.scene) : undefined}/> });
+export const OrigamiGuide = defineComponent({ name: "OrigamiGuide", props: z.object({ title: z.string(), steps: z.array(GuideStep.ref).optional(), description: z.string().optional(), level: z.string().optional() }), description: "Origami preset of IllustratedStepGuide. Default is the twelve-step fox; supply GuideSteps and their own illustrations for a different fold. Never change only the title to claim a different model.", component: ({ props }) => <OrigamiGuideView {...props} steps={props.steps ? resolveGuideSteps(props.steps) : undefined}/> });
+export const GardenPlanner = defineComponent({ name: "GardenPlanner", props: z.object({ title: z.string(), options: z.array(GridOption.ref).optional(), layouts: z.array(GridLayout.ref).optional(), description: z.string().optional(), footer: z.string().optional() }), description: "Garden preset of EditableGrid. Supply plant GridOptions and any rectangular GridLayouts for a different garden. Defaults to four planters or sixteen squares.", component: ({ props }) => <GardenPlannerView {...props} options={props.options?.map(item => { const option = refData<GridOptionData>(item); return { ...option, illustration: option.illustration ? drawingData(option.illustration) : undefined }; })} layouts={props.layouts?.map(item => refData<GridLayoutData>(item))}/> });
+export const BikeRepair = defineComponent({ name: "BikeRepair", props: z.object({ title: z.string(), steps: z.array(GuideStep.ref).optional(), description: z.string().optional(), footnote: z.string().optional() }), description: "Youth bicycle preset of AssemblyGuide. Optional GuideSteps replace instructions and artwork together. Use AssemblyGuide for other objects and supply matching scene illustrations.", component: ({ props }) => <BikeRepairView {...props} steps={props.steps ? resolveGuideSteps(props.steps) : undefined}/> });
+export const creativeComponents = { ...creativeCompositionComponents, RoomColorPreview, OrigamiGuide, GardenPlanner, BikeRepair };

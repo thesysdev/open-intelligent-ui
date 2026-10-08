@@ -2,7 +2,7 @@
   "root": "Card",
   "components": {
     "Card": {
-      "signature": "Card(children: (TextContent | MarkDownRenderer | CardHeader | Callout | TextCallout | CodeBlock | Image | ImageBlock | ImageGallery | Separator | HorizontalBarChart | RadarChart | PieChart | RadialChart | SingleStackedBarChart | ScatterChart | AreaChart | BarChart | LineChart | Table | TagBlock | Form | Buttons | IconButton | Steps | InlineHeader | EntityList | EditableTable | SnippetCardBlock | OverviewCardBlock | ContextCardBlock | CompositeCardBlock | VisualCardBlock | ListBlock | FollowUpBlock | SectionBlock | Tabs | Carousel | RouteMap | RouteStops | RouteSuggestions | BicycleExplorer | DistributionExplorer | EconomyExplorer | DroneExplorer | DroneMarket | MontyHall | RetroGame | BillSplitter | SavingsCalculator | RecipePlanner | WardrobePlanner | RoadTripPlanner | RoomColorPreview | OrigamiGuide | GardenPlanner | BikeRepair)[], sources?: {url?: string, title: string, sourceName: string}[])",
+      "signature": "Card(children: (TextContent | MarkDownRenderer | CardHeader | Callout | TextCallout | CodeBlock | Image | ImageBlock | ImageGallery | Separator | HorizontalBarChart | RadarChart | PieChart | RadialChart | SingleStackedBarChart | ScatterChart | AreaChart | BarChart | LineChart | Table | TagBlock | Form | Buttons | IconButton | Steps | InlineHeader | EntityList | EditableTable | SnippetCardBlock | OverviewCardBlock | ContextCardBlock | CompositeCardBlock | VisualCardBlock | ListBlock | FollowUpBlock | SectionBlock | Tabs | Carousel | RouteMap | RouteStops | RouteSuggestions | BicycleExplorer | DistributionExplorer | EconomyExplorer | DroneExplorer | DroneMarket | MontyHall | RetroGame | BillLineItem | BillSplitter | SavingsCalculator | RecipeIngredient | RecipeStep | MenuDish | RecipePlanner | WardrobePiece | WardrobeOutfit | PackingRule | WardrobePlanner | TripStop | RoadTripPlanner | ColorSwatch | ColorRegion | GuideStep | GridOption | GridLayout | RecolorableScene | IllustratedStepGuide | EditableGrid | AssemblyGuide | RoomColorPreview | OrigamiGuide | GardenPlanner | BikeRepair | SceneShape | SceneDrawing | DiagramPart | ExplodedDiagram | RangeControl | ChoiceControl | ValueDisplay | Contribution | ContributionChart | KnowledgeCheck | InteractivePanel | InteractiveGroup)[], sources?: {url?: string, title: string, sourceName: string}[])",
       "description": "Root response container. Compose clear text, visualizations, interactive tools and everyday planning components. Avoid redundant headings when an interactive component already has a title."
     },
     "CardHeader": {
@@ -350,8 +350,8 @@
       "description": "Optional extra stops the user can add to the route with one tap (adds a pin to RouteMap and a card to RouteStops). Use 2 stops that are NOT already in the route."
     },
     "RouteStop": {
-      "signature": "RouteStop(name: string, wikiTitle: string, lat: number, lng: number, time: string, story: string, beforeYouGo: string, category?: string)",
-      "description": "One stop on a route. wikiTitle is the exact English Wikipedia article title (used to load real photos). lat/lng are decimal coordinates. time e.g. '9:00 · 1 hr'. story: 1-2 sentences of history. beforeYouGo: one practical tip. Optional category groups the map, e.g. 'Landmarks', 'Museums' or 'Neighborhoods'."
+      "signature": "RouteStop(name: string, wikiTitle: string, lat: number, lng: number, time: string, story: string, beforeYouGo: string, category?: string, id?: string)",
+      "description": "One stop on a route. wikiTitle is the exact English Wikipedia article title (used to load real photos). lat/lng are decimal coordinates. time e.g. '9:00 · 1 hr'. story: 1-2 sentences of history. beforeYouGo: one practical tip. Optional category groups the map, e.g. 'Landmarks', 'Museums' or 'Neighborhoods'. Optional id distinguishes repeated visits or stops with identical names in a route."
     },
     "BicycleExplorer": {
       "signature": "BicycleExplorer(title: string)",
@@ -381,41 +381,157 @@
       "signature": "RetroGame(title: string, game: \"snake\" | \"breakout\" | \"pong\")",
       "description": "Playable retro handheld console with Snake, Breakout and Pong, real collision physics, scoring, keyboard and touch directional controls, pause and restart. game selects the initial game. Retro beige handheld housing and green pixel screen."
     },
+    "BillLineItem": {
+      "signature": "BillLineItem(name: string, amount: number, people: number[])",
+      "description": "An expense for BillSplitter. amount is in the selected currency's main unit. people contains zero-based indexes into the splitter's people array; assign at least one person when splitting by item."
+    },
     "BillSplitter": {
-      "signature": "BillSplitter(title: string, currency: string, people: string[], items: {name: string, amount: number, people: number[]}[], taxPercent: number, tipPercent: number)",
-      "description": "Interactive dinner bill splitter with editable people, items, shared-item assignments, equal splitting, tax and tip. Amounts are in currency units, people arrays contain zero-based person indexes. Shows cent-exact totals and copyable shares."
+      "signature": "BillSplitter(title: string, currency: string, people: string[], items: BillLineItem[], taxPercent: $binding<number>, tipPercent: $binding<number>, description?: string, splitMethod?: \"items\" | \"equal\", tipBasis?: \"subtotal\" | \"after-tax\", peopleLabel?: string, itemsLabel?: string, subtotalLabel?: string)",
+      "description": "Compose editable bills, trips or shared expenses from BillLineItem refs and named people. Currency-aware exact splitting, per-item or equal allocation, editable tax/tip and copyable shares. taxPercent and tipPercent accept $state bindings so controls can share state with the response. Optional labels adapt the copy to the expense type."
     },
     "SavingsCalculator": {
-      "signature": "SavingsCalculator(title: string, currency: string, initialSavings: number, monthlyContribution: number, years: number, annualReturn: number)",
-      "description": "Interactive compound savings or retirement calculator with editable sliders, a live growth chart, contributions and growth totals. Calculates monthly compounding and end-of-month contributions. years 1–50, annualReturn as a percentage 0–15. State assumptions; do not present hypothetical growth as guaranteed."
+      "signature": "SavingsCalculator(title: string, currency: string, initialSavings: $binding<number>, monthlyContribution: $binding<number>, years: $binding<number>, annualReturn: $binding<number>, description?: string, contributionTiming?: \"start\" | \"end\", annualContributionGrowth?: number)",
+      "description": "A configurable projection for any savings goal, currency, balance, monthly deposit and horizon. Numeric inputs accept $state bindings. Calculates monthly compounding with optional start/end-of-month deposits and an annual contribution increase. Includes zero and negative return scenarios; hypothetical projections are not guaranteed."
+    },
+    "RecipeIngredient": {
+      "signature": "RecipeIngredient(name: string, quantity: number, unit: string, scaling?: \"proportional\" | \"whole\" | \"fixed\")",
+      "description": "An ingredient measured for RecipePlanner's baseGuests. scaling: proportional preserves fractions, whole rounds up whole items, fixed keeps quantity unchanged. Empty unit defaults to whole-item rounding; set proportional for fractions such as half an egg."
+    },
+    "RecipeStep": {
+      "signature": "RecipeStep(time: string, title: string, description: string)",
+      "description": "A cooking checklist step. time is a relative or clock label such as '20 minutes before serving' or '6:30 PM'; title and description explain the action."
+    },
+    "MenuDish": {
+      "signature": "MenuDish(name: string, description: string, imageUrl: string)",
+      "description": "A dish card for RecipePlanner. imageUrl must be a real provided image URL or empty for a neutral illustrated plate. Do not invent images or reuse roast photos for unrelated recipes."
     },
     "RecipePlanner": {
-      "signature": "RecipePlanner(title: string, description: string, baseGuests: number, ingredients: {name: string, quantity: number, unit: string}[], steps: {time: string, title: string, description: string}[], dishes: {name: string, description: string, imageUrl: string}[])",
-      "description": "Scalable meal planner with illustrated dish cards, a guest stepper, calculated shopping quantities, a copyable shopping list and interactive timed cooking checklist. Ingredient quantities are for baseGuests; use unit empty for whole items, kg or g for weight. Use real image URLs when available, otherwise an empty imageUrl for an illustrated dish."
+      "signature": "RecipePlanner(title: string, description: string, baseGuests: number, ingredients: RecipeIngredient[], steps: RecipeStep[], dishes: MenuDish[], guests?: $binding<number>, maxGuests?: number, portionNote?: string, cookingNote?: string)",
+      "description": "Compose any meal or menu from RecipeIngredient, RecipeStep and MenuDish refs. Quantities are measured for baseGuests and scale to an editable guest count. guests accepts a $state binding for linked controls. Optional notes explain portion and timing assumptions. Never substitute default roast ingredients for a custom meal."
+    },
+    "WardrobePiece": {
+      "signature": "WardrobePiece(id: string, name: string, category: string, color: string, kind: \"shirt\" | \"tee\" | \"jacket\" | \"trousers\" | \"shoes\" | \"bag\" | \"dress\" | \"skirt\" | \"shorts\" | \"hat\" | \"accessory\", imageUrl?: string)",
+      "description": "A garment or accessory. id is unique in its wardrobe; category is a free-form filter. kind selects a silhouette, and a real imageUrl can represent any item beyond those silhouettes. color is a hex color."
+    },
+    "WardrobeOutfit": {
+      "signature": "WardrobeOutfit(name: string, occasion: string, itemIds: string[])",
+      "description": "A named combination of WardrobePiece ids for any occasion. itemIds must match items in the same WardrobePlanner; categories, occasions and item counts are unrestricted within the bounds."
+    },
+    "PackingRule": {
+      "signature": "PackingRule(weather: string, includeItemIds: string[], excludeItemIds: string[], note: string)",
+      "description": "A declarative wardrobe packing rule. weather matches one of the planner's weatherOptions, or '*' applies always. Include or exclude existing item ids. Rules run in order; exclusions win within a rule. note explains the adjustment."
     },
     "WardrobePlanner": {
-      "signature": "WardrobePlanner(title: string, description: string, items: {id: string, name: string, category: string, color: string, kind: \"shirt\" | \"tee\" | \"jacket\" | \"trousers\" | \"shoes\" | \"bag\", imageUrl?: string}[], outfits: {name: string, occasion: string, itemIds: string[]}[])",
-      "description": "Interactive capsule wardrobe with clothing illustrations or supplied real photos, category filters, selectable coordinated outfits, saved favorites and a copyable shortlist. kind determines the illustration. color is a hex color. Outfit itemIds must match item id values. Never invent product prices or shopping links."
+      "signature": "WardrobePlanner(title: string, description: string, items: WardrobePiece[], outfits: WardrobeOutfit[], weatherOptions?: string[], tripLengthOptions?: number[], defaultWeather?: string, defaultTripDays?: number, packingRules?: PackingRule[])",
+      "description": "Compose wardrobes from WardrobePiece and WardrobeOutfit refs. Category filters, favorites, outfit combinations and packing work for arbitrary supplied items. Optional weatherOptions, tripLengthOptions and PackingRule refs customize personalization; no clothing types or weather decisions are assumed for a custom wardrobe. Never invent prices or purchase links."
+    },
+    "TripStop": {
+      "signature": "TripStop(day: number, name: string, region: string, category: string, wiki: string, lat: number, lng: number, description: string, stay: string, highlight: string)",
+      "description": "One day of a road trip in ANY region. Supply real coordinates and exact Wikipedia title for photos. Days should have unique numbers."
     },
     "RoadTripPlanner": {
-      "signature": "RoadTripPlanner(title: string)",
-      "description": "A specific ten-day Pacific Northwest road-trip experience from Seattle through Olympic Peninsula and Oregon coast to Portland, the Columbia Gorge and Mount Hood. Includes real map filters, destination photos, ten editable day stops, party-size and travel-style budget assumptions, seasonal preferences and copyable itinerary. Use ONLY for this Pacific Northwest example. For arbitrary destinations use RouteMap, RouteStops and RouteSuggestions instead."
+      "signature": "RoadTripPlanner(title: string, days?: TripStop[], description?: string, region?: string, currency?: string, lodgingPerNight?: number, foodPerPersonDay?: number, transportPerDay?: number, transportFixed?: number, activitiesPerPerson?: number, seasonalAdvice?: Record<string, string>, travelNote?: string, initialPartySize?: number, initialSeason?: string, initialStyle?: \"Budget-minded\" | \"Balanced\" | \"Comfort first\", partySizes?: number[], seasonOptions?: string[])",
+      "description": "Interactive itinerary for ANY destination and duration. Compose TripStop children, local currency, cost assumptions, seasonal advice and initialPartySize/initialSeason/initialStyle. partySizes and seasonOptions customize preference choices. Supply days for custom destinations; omitting days selects the reference only when title is exactly '10 days in the Pacific Northwest'."
+    },
+    "ColorSwatch": {
+      "signature": "ColorSwatch(name: string, hex: string)",
+      "description": "Named color for a RecolorableScene palette."
+    },
+    "ColorRegion": {
+      "signature": "ColorRegion(id: string, label: string, originalColor: string)",
+      "description": "Editable region of a scene. Match id to SceneShape.region to recolor all matching shapes together."
+    },
+    "GuideStep": {
+      "signature": "GuideStep(title: string, body: string, tip?: string, illustration?: SceneDrawing, explodedIllustration?: SceneDrawing, find?: string, check?: string, id?: string)",
+      "description": "One instruction in an IllustratedStepGuide or AssemblyGuide. Supply original SceneDrawing illustrations for this step; never use unrelated preset artwork. explodedIllustration optionally supplies an expanded parts view. find lists parts needed; check labels completion."
+    },
+    "GridOption": {
+      "signature": "GridOption(id: string, name: string, color: string, short?: string, note?: string, ink?: string, icon?: string, tip?: string, illustration?: SceneDrawing, textColor?: string)",
+      "description": "An assignable item in EditableGrid: a plant, seat type, room use, task or material. id is referenced by GridLayout.cells."
+    },
+    "GridLayout": {
+      "signature": "GridLayout(id: string, label: string, rows: number, columns: number, cells: string[], cellLabel?: string, summary?: string)",
+      "description": "A rectangular editable layout. cells contains option IDs in row-major order, one per cell. Multiple layouts preserve independent edits."
+    },
+    "RecolorableScene": {
+      "signature": "RecolorableScene(title: string, scene: SceneDrawing, palette: ColorSwatch[], regions: ColorRegion[], description?: string, footnote?: string, originalLabel?: string, selectedRegion?: $binding<string>, colors?: $binding<Record<string, string>>)",
+      "description": "Recolor any original vector scene: rooms, furniture, clothing or product finishes. Compose SceneDrawing with region IDs, ColorRegion definitions and a ColorSwatch palette. Multiple regions recolor independently. colors and selectedRegion can bind to shared $variables."
+    },
+    "IllustratedStepGuide": {
+      "signature": "IllustratedStepGuide(title: string, steps: GuideStep[], description?: string, level?: string, repeatLabel?: string, activeStep?: $binding<number>)",
+      "description": "Arbitrary illustrated instructions for folding, crafts, cooking, drawing or learning. Every step has model-supplied text and optional safe vector illustration. Includes progress, tips and previous/next controls. activeStep is zero-based and may bind to shared $state for external navigation."
+    },
+    "EditableGrid": {
+      "signature": "EditableGrid(title: string, options: GridOption[], layouts: GridLayout[], description?: string, footnote?: string, footer?: string, optionLabel?: string, resetLabel?: string, selectedLayout?: $binding<string>, assignments?: $binding<Record<string, string[]>>)",
+      "description": "Editable rectangular planning grid with model-supplied dimensions, layouts, assignable options, colors and notes. Use for gardens, seating, floor plans, task boards or storage. assignments can bind shared $state as a map of layout ID to row-major option IDs; selectedLayout also supports shared state."
+    },
+    "AssemblyGuide": {
+      "signature": "AssemblyGuide(title: string, steps: GuideStep[], description?: string, footnote?: string, activeStep?: $binding<number>)",
+      "description": "Step-by-step assembly or repair of any object. Supply GuideSteps with parts, instructions, completion checks, and original assembled/exploded SceneDrawing views. Any number of steps; activeStep may bind to shared $state."
     },
     "RoomColorPreview": {
-      "signature": "RoomColorPreview(title: string)",
-      "description": "Interactive room wall-color preview with six muted paint swatches, original comparison, and a recolorable illustrated living room. Use for paint choices and interior color exploration."
+      "signature": "RoomColorPreview(title: string, palette?: ColorSwatch[], regions?: ColorRegion[], scene?: SceneDrawing, description?: string)",
+      "description": "Living-room preset of RecolorableScene. Optional palette, regions and original scene allow custom interiors. For other objects use RecolorableScene."
     },
     "OrigamiGuide": {
-      "signature": "OrigamiGuide(title: string)",
-      "description": "Twelve-step interactive origami fox guide with a distinct paper-fold illustration per step, orange progress segments, folding tips, and previous/next navigation."
+      "signature": "OrigamiGuide(title: string, steps?: GuideStep[], description?: string, level?: string)",
+      "description": "Origami preset of IllustratedStepGuide. Default is the twelve-step fox; supply GuideSteps and their own illustrations for a different fold. Never change only the title to claim a different model."
     },
     "GardenPlanner": {
-      "signature": "GardenPlanner(title: string)",
-      "description": "Editable 4-by-4-foot kitchen garden plan with four planters or sixteen squares, plant selection, growing notes, and reset. Use for small-space gardening."
+      "signature": "GardenPlanner(title: string, options?: GridOption[], layouts?: GridLayout[], description?: string, footer?: string)",
+      "description": "Garden preset of EditableGrid. Supply plant GridOptions and any rectangular GridLayouts for a different garden. Defaults to four planters or sixteen squares."
     },
     "BikeRepair": {
-      "signature": "BikeRepair(title: string)",
-      "description": "Youth bicycle assembly checklist with six guided steps, highlighted parts, assembled/exploded illustration, progress and safety checks. Refer to the manufacturer’s manual for specifications."
+      "signature": "BikeRepair(title: string, steps?: GuideStep[], description?: string, footnote?: string)",
+      "description": "Youth bicycle preset of AssemblyGuide. Optional GuideSteps replace instructions and artwork together. Use AssemblyGuide for other objects and supply matching scene illustrations."
+    },
+    "SceneShape": {
+      "signature": "SceneShape(kind: \"path\" | \"circle\" | \"ellipse\" | \"rect\" | \"line\" | \"text\", d?: string, x?: number, y?: number, width?: number, height?: number, r?: number, x2?: number, y2?: number, fill?: string, stroke?: string, strokeWidth?: number, opacity?: number, text?: string, region?: string)",
+      "description": "A safe vector shape used inside SceneDrawing or DiagramPart. Geometry is in scene coordinates. For paths use d; circles use x/y/r; ellipses use x/y/width/height as radii. Text uses text and height as font size."
+    },
+    "SceneDrawing": {
+      "signature": "SceneDrawing(viewBox: any, shapes: SceneShape[])",
+      "description": "A vector drawing composed of SceneShape records. Supply [minX,minY,width,height] and shapes. No SVG markup or JavaScript."
+    },
+    "DiagramPart": {
+      "signature": "DiagramPart(id: string, label: string, group?: string, description?: string, shapes: SceneShape[], offset: any, pivot?: any, rotates?: boolean)",
+      "description": "One independently movable part of any object. Supply vector shapes, group, explanation, and explode offset. Wheels/rotors can have rotates=true and a pivot. Parts are data, never hardcoded to an object type."
+    },
+    "ExplodedDiagram": {
+      "signature": "ExplodedDiagram(title: string, parts: DiagramPart[], viewBox?: any, description?: string, motionLabel?: string, showControls?: boolean, explode?: $binding<number>, selected?: $binding<string>, showHeading?: boolean)",
+      "description": "Exploded view of ANY object: bicycle, unicycle, camera, engine, plant, etc. Compose DiagramPart and SceneShape records. Include margins in viewBox for fully exploded offsets. explode and selected can bind to shared $state; set showControls=false to compose external RangeControl/ChoiceControl."
+    },
+    "RangeControl": {
+      "signature": "RangeControl(name: string, label: string, min: number, max: number, step?: number, value?: $binding<number>, unit?: string)",
+      "description": "Composable scalar slider. Bind value to a $variable to control other components immediately (e.g. ExplodedDiagram.explode, ValueDisplay, Contribution.value). Same visual control as every example."
+    },
+    "ChoiceControl": {
+      "signature": "ChoiceControl(name: string, label: string, options: string[], value?: $binding<string>)",
+      "description": "A row of choices that reads/writes a shared $variable. Use with ExplodedDiagram.selected or any computed expression. Options must match the target IDs or groups."
+    },
+    "ValueDisplay": {
+      "signature": "ValueDisplay(label: string, value: number, prefix?: string, suffix?: string, decimals?: number)",
+      "description": "Live numeric result. value accepts a built-in OpenUI expression such as $quantity * $price; recalculates when inputs change."
+    },
+    "Contribution": {
+      "signature": "Contribution(label: string, value: number, color: string, prefix?: string, suffix?: string)",
+      "description": "Labeled contribution to a total. value can be an OpenUI expression or $variable; signed values are supported."
+    },
+    "ContributionChart": {
+      "signature": "ContributionChart(items: Contribution[], label?: string)",
+      "description": "Proportional stacked bar for any composition: spending, energy, budgets, revenue. Use Contribution children whose values reference shared $variables. Handles deductions separately and keeps labels legible."
+    },
+    "KnowledgeCheck": {
+      "signature": "KnowledgeCheck(question: string, options: string[], answer: number, explanation: string, value?: $binding<number>)",
+      "description": "A reusable multiple-choice knowledge check. answer is the zero-based correct option index. Optional value can bind to shared state."
+    },
+    "InteractivePanel": {
+      "signature": "InteractivePanel(title: string, children: (TextContent | MarkDownRenderer | CardHeader | Callout | TextCallout | CodeBlock | Image | ImageBlock | ImageGallery | Separator | HorizontalBarChart | RadarChart | PieChart | RadialChart | SingleStackedBarChart | ScatterChart | AreaChart | BarChart | LineChart | Table | TagBlock | Form | Buttons | IconButton | Steps | InlineHeader | EntityList | EditableTable | SnippetCardBlock | OverviewCardBlock | ContextCardBlock | CompositeCardBlock | VisualCardBlock | ListBlock | FollowUpBlock | SectionBlock | Tabs | Carousel | RouteMap | RouteStops | RouteSuggestions | BicycleExplorer | DistributionExplorer | EconomyExplorer | DroneExplorer | DroneMarket | MontyHall | RetroGame | BillLineItem | BillSplitter | SavingsCalculator | RecipeIngredient | RecipeStep | MenuDish | RecipePlanner | WardrobePiece | WardrobeOutfit | PackingRule | WardrobePlanner | TripStop | RoadTripPlanner | ColorSwatch | ColorRegion | GuideStep | GridOption | GridLayout | RecolorableScene | IllustratedStepGuide | EditableGrid | AssemblyGuide | RoomColorPreview | OrigamiGuide | GardenPlanner | BikeRepair | SceneShape | SceneDrawing | DiagramPart | ExplodedDiagram | RangeControl | ChoiceControl | ValueDisplay | Contribution | ContributionChart | KnowledgeCheck | InteractiveGroup)[], description?: string, badge?: string)",
+      "description": "Polished panel for a custom interactive explanation or calculator. Compose independent RangeControl, ChoiceControl, ValueDisplay, ContributionChart, KnowledgeCheck and base library children. Connect them using shared $variables and built-in expressions. InteractiveGroup provides columns."
+    },
+    "InteractiveGroup": {
+      "signature": "InteractiveGroup(children: (TextContent | MarkDownRenderer | CardHeader | Callout | TextCallout | CodeBlock | Image | ImageBlock | ImageGallery | Separator | HorizontalBarChart | RadarChart | PieChart | RadialChart | SingleStackedBarChart | ScatterChart | AreaChart | BarChart | LineChart | Table | TagBlock | Form | Buttons | IconButton | Steps | InlineHeader | EntityList | EditableTable | SnippetCardBlock | OverviewCardBlock | ContextCardBlock | CompositeCardBlock | VisualCardBlock | ListBlock | FollowUpBlock | SectionBlock | Tabs | Carousel | RouteMap | RouteStops | RouteSuggestions | BicycleExplorer | DistributionExplorer | EconomyExplorer | DroneExplorer | DroneMarket | MontyHall | RetroGame | BillLineItem | BillSplitter | SavingsCalculator | RecipeIngredient | RecipeStep | MenuDish | RecipePlanner | WardrobePiece | WardrobeOutfit | PackingRule | WardrobePlanner | TripStop | RoadTripPlanner | ColorSwatch | ColorRegion | GuideStep | GridOption | GridLayout | RecolorableScene | IllustratedStepGuide | EditableGrid | AssemblyGuide | RoomColorPreview | OrigamiGuide | GardenPlanner | BikeRepair | SceneShape | SceneDrawing | DiagramPart | ExplodedDiagram | RangeControl | ChoiceControl | ValueDisplay | Contribution | ContributionChart | KnowledgeCheck)[], columns?: \"one\" | \"two\" | \"three\")",
+      "description": "Compose controls, results, charts, text and illustrations into a responsive group. Use two columns for paired controls or metrics. All reactive children can share $variables."
     }
   },
   "componentGroups": [
@@ -627,7 +743,62 @@
       ]
     },
     {
-      "name": "Intelligent UI",
+      "name": "Composable intelligent UI",
+      "components": [
+        "SceneShape",
+        "SceneDrawing",
+        "DiagramPart",
+        "ExplodedDiagram",
+        "RangeControl",
+        "ChoiceControl",
+        "ValueDisplay",
+        "Contribution",
+        "ContributionChart",
+        "KnowledgeCheck",
+        "ColorSwatch",
+        "ColorRegion",
+        "GuideStep",
+        "GridOption",
+        "GridLayout",
+        "RecolorableScene",
+        "IllustratedStepGuide",
+        "EditableGrid",
+        "AssemblyGuide",
+        "InteractivePanel",
+        "InteractiveGroup"
+      ],
+      "notes": [
+        "Generate the data and compose components for the user's actual subject. Use ExplodedDiagram with arbitrary DiagramPart and SceneShape records for bicycles, unicycles, cameras or other objects; changing a title never changes geometry.",
+        "SceneDrawing is bounded vector data, not raw SVG markup or code. Provide original geometry, labels, offsets and a viewBox that includes every part at full expansion.",
+        "Bind reactive props to shared $variables. A RangeControl can drive ExplodedDiagram.explode, calculations and multiple outputs together. Prefer native expressions over hard-coded calculated results.",
+        "RecolorableScene, IllustratedStepGuide, AssemblyGuide and EditableGrid accept new scenes, regions, steps and dimensions. Never reuse unrelated example artwork."
+      ]
+    },
+    {
+      "name": "Data-driven everyday tools",
+      "components": [
+        "BillLineItem",
+        "BillSplitter",
+        "SavingsCalculator",
+        "RecipeIngredient",
+        "RecipeStep",
+        "MenuDish",
+        "RecipePlanner",
+        "WardrobePiece",
+        "WardrobeOutfit",
+        "PackingRule",
+        "WardrobePlanner",
+        "TripStop",
+        "RoadTripPlanner"
+      ],
+      "notes": [
+        "Supply RecipeIngredient, RecipeStep and MenuDish records for any meal. Quantities relate to baseGuests. Supply new WardrobePiece, WardrobeOutfit and PackingRule records for a custom wardrobe.",
+        "BillLineItem.people contains zero-based person indices. SavingsCalculator is hypothetical compound growth. RoadTripPlanner accepts arbitrary TripStop records, currency and cost assumptions.",
+        "Omitted datasets select reference presets; always provide datasets for a different subject or location. Do not present invented budgets, scenarios or routes as verified live data."
+      ]
+    },
+    {
+      "name": "Reference presets and specialized simulations",
       "components": [
         "BicycleExplorer",
         "DistributionExplorer",
@@ -636,22 +807,14 @@
         "DroneMarket",
         "MontyHall",
         "RetroGame",
-        "BillSplitter",
-        "SavingsCalculator",
-        "RecipePlanner",
-        "WardrobePlanner",
-        "RoadTripPlanner",
         "RoomColorPreview",
         "OrigamiGuide",
         "GardenPlanner",
         "BikeRepair"
       ],
       "notes": [
-        "Choose the component that directly fits the question. Each interactive component includes its own heading and controls.",
-        "Use RecipePlanner for scalable meal planning, BillSplitter for bills, SavingsCalculator for hypothetical savings, WardrobePlanner for outfits.",
-        "Use RoadTripPlanner for the ten-day Pacific Northwest reference itinerary. For other destinations, compose the Travel components.",
-        "Use BicycleExplorer for mechanics, BikeRepair for assembly steps, DistributionExplorer for statistics, EconomyExplorer for GDP, DroneMarket for drone businesses, MontyHall for probability and RetroGame for a playable arcade.",
-        "Use RoomColorPreview for paint palettes, OrigamiGuide for paper folding, GardenPlanner for planting layouts. Do not invent live data or imply generated suggestions are verified facts."
+        "These are bounded reference experiences: seven-speed bicycle, fox origami, living room, garden, youth-bike assembly, GDP and drone market. For a different subject compose the generic components above.",
+        "DistributionExplorer, MontyHall and RetroGame have purpose-built statistical/game mechanics. Do not imply they simulate arbitrary systems."
       ]
     }
   ],
@@ -944,20 +1107,71 @@
       "RetroGame": {
         "$ref": "#/$defs/RetroGame"
       },
+      "BillLineItem": {
+        "$ref": "#/$defs/BillLineItem"
+      },
       "BillSplitter": {
         "$ref": "#/$defs/BillSplitter"
       },
       "SavingsCalculator": {
         "$ref": "#/$defs/SavingsCalculator"
       },
+      "RecipeIngredient": {
+        "$ref": "#/$defs/RecipeIngredient"
+      },
+      "RecipeStep": {
+        "$ref": "#/$defs/RecipeStep"
+      },
+      "MenuDish": {
+        "$ref": "#/$defs/MenuDish"
+      },
       "RecipePlanner": {
         "$ref": "#/$defs/RecipePlanner"
+      },
+      "WardrobePiece": {
+        "$ref": "#/$defs/WardrobePiece"
+      },
+      "WardrobeOutfit": {
+        "$ref": "#/$defs/WardrobeOutfit"
+      },
+      "PackingRule": {
+        "$ref": "#/$defs/PackingRule"
       },
       "WardrobePlanner": {
         "$ref": "#/$defs/WardrobePlanner"
       },
+      "TripStop": {
+        "$ref": "#/$defs/TripStop"
+      },
       "RoadTripPlanner": {
         "$ref": "#/$defs/RoadTripPlanner"
+      },
+      "ColorSwatch": {
+        "$ref": "#/$defs/ColorSwatch"
+      },
+      "ColorRegion": {
+        "$ref": "#/$defs/ColorRegion"
+      },
+      "GuideStep": {
+        "$ref": "#/$defs/GuideStep"
+      },
+      "GridOption": {
+        "$ref": "#/$defs/GridOption"
+      },
+      "GridLayout": {
+        "$ref": "#/$defs/GridLayout"
+      },
+      "RecolorableScene": {
+        "$ref": "#/$defs/RecolorableScene"
+      },
+      "IllustratedStepGuide": {
+        "$ref": "#/$defs/IllustratedStepGuide"
+      },
+      "EditableGrid": {
+        "$ref": "#/$defs/EditableGrid"
+      },
+      "AssemblyGuide": {
+        "$ref": "#/$defs/AssemblyGuide"
       },
       "RoomColorPreview": {
         "$ref": "#/$defs/RoomColorPreview"
@@ -970,6 +1184,42 @@
       },
       "BikeRepair": {
         "$ref": "#/$defs/BikeRepair"
+      },
+      "SceneShape": {
+        "$ref": "#/$defs/SceneShape"
+      },
+      "SceneDrawing": {
+        "$ref": "#/$defs/SceneDrawing"
+      },
+      "DiagramPart": {
+        "$ref": "#/$defs/DiagramPart"
+      },
+      "ExplodedDiagram": {
+        "$ref": "#/$defs/ExplodedDiagram"
+      },
+      "RangeControl": {
+        "$ref": "#/$defs/RangeControl"
+      },
+      "ChoiceControl": {
+        "$ref": "#/$defs/ChoiceControl"
+      },
+      "ValueDisplay": {
+        "$ref": "#/$defs/ValueDisplay"
+      },
+      "Contribution": {
+        "$ref": "#/$defs/Contribution"
+      },
+      "ContributionChart": {
+        "$ref": "#/$defs/ContributionChart"
+      },
+      "KnowledgeCheck": {
+        "$ref": "#/$defs/KnowledgeCheck"
+      },
+      "InteractivePanel": {
+        "$ref": "#/$defs/InteractivePanel"
+      },
+      "InteractiveGroup": {
+        "$ref": "#/$defs/InteractiveGroup"
       }
     },
     "required": [
@@ -1068,15 +1318,44 @@
       "DroneMarket",
       "MontyHall",
       "RetroGame",
+      "BillLineItem",
       "BillSplitter",
       "SavingsCalculator",
+      "RecipeIngredient",
+      "RecipeStep",
+      "MenuDish",
       "RecipePlanner",
+      "WardrobePiece",
+      "WardrobeOutfit",
+      "PackingRule",
       "WardrobePlanner",
+      "TripStop",
       "RoadTripPlanner",
+      "ColorSwatch",
+      "ColorRegion",
+      "GuideStep",
+      "GridOption",
+      "GridLayout",
+      "RecolorableScene",
+      "IllustratedStepGuide",
+      "EditableGrid",
+      "AssemblyGuide",
       "RoomColorPreview",
       "OrigamiGuide",
       "GardenPlanner",
-      "BikeRepair"
+      "BikeRepair",
+      "SceneShape",
+      "SceneDrawing",
+      "DiagramPart",
+      "ExplodedDiagram",
+      "RangeControl",
+      "ChoiceControl",
+      "ValueDisplay",
+      "Contribution",
+      "ContributionChart",
+      "KnowledgeCheck",
+      "InteractivePanel",
+      "InteractiveGroup"
     ],
     "additionalProperties": false,
     "$defs": {
@@ -1232,19 +1511,70 @@
                   "$ref": "#/$defs/RetroGame"
                 },
                 {
+                  "$ref": "#/$defs/BillLineItem"
+                },
+                {
                   "$ref": "#/$defs/BillSplitter"
                 },
                 {
                   "$ref": "#/$defs/SavingsCalculator"
                 },
                 {
+                  "$ref": "#/$defs/RecipeIngredient"
+                },
+                {
+                  "$ref": "#/$defs/RecipeStep"
+                },
+                {
+                  "$ref": "#/$defs/MenuDish"
+                },
+                {
                   "$ref": "#/$defs/RecipePlanner"
+                },
+                {
+                  "$ref": "#/$defs/WardrobePiece"
+                },
+                {
+                  "$ref": "#/$defs/WardrobeOutfit"
+                },
+                {
+                  "$ref": "#/$defs/PackingRule"
                 },
                 {
                   "$ref": "#/$defs/WardrobePlanner"
                 },
                 {
+                  "$ref": "#/$defs/TripStop"
+                },
+                {
                   "$ref": "#/$defs/RoadTripPlanner"
+                },
+                {
+                  "$ref": "#/$defs/ColorSwatch"
+                },
+                {
+                  "$ref": "#/$defs/ColorRegion"
+                },
+                {
+                  "$ref": "#/$defs/GuideStep"
+                },
+                {
+                  "$ref": "#/$defs/GridOption"
+                },
+                {
+                  "$ref": "#/$defs/GridLayout"
+                },
+                {
+                  "$ref": "#/$defs/RecolorableScene"
+                },
+                {
+                  "$ref": "#/$defs/IllustratedStepGuide"
+                },
+                {
+                  "$ref": "#/$defs/EditableGrid"
+                },
+                {
+                  "$ref": "#/$defs/AssemblyGuide"
                 },
                 {
                   "$ref": "#/$defs/RoomColorPreview"
@@ -1257,6 +1587,42 @@
                 },
                 {
                   "$ref": "#/$defs/BikeRepair"
+                },
+                {
+                  "$ref": "#/$defs/SceneShape"
+                },
+                {
+                  "$ref": "#/$defs/SceneDrawing"
+                },
+                {
+                  "$ref": "#/$defs/DiagramPart"
+                },
+                {
+                  "$ref": "#/$defs/ExplodedDiagram"
+                },
+                {
+                  "$ref": "#/$defs/RangeControl"
+                },
+                {
+                  "$ref": "#/$defs/ChoiceControl"
+                },
+                {
+                  "$ref": "#/$defs/ValueDisplay"
+                },
+                {
+                  "$ref": "#/$defs/Contribution"
+                },
+                {
+                  "$ref": "#/$defs/ContributionChart"
+                },
+                {
+                  "$ref": "#/$defs/KnowledgeCheck"
+                },
+                {
+                  "$ref": "#/$defs/InteractivePanel"
+                },
+                {
+                  "$ref": "#/$defs/InteractiveGroup"
                 }
               ]
             }
@@ -5005,6 +5371,7 @@
         "type": "object",
         "properties": {
           "stops": {
+            "maxItems": 50,
             "type": "array",
             "items": {
               "$ref": "#/$defs/RouteStop"
@@ -5022,28 +5389,43 @@
         "type": "object",
         "properties": {
           "name": {
-            "type": "string"
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 160
           },
           "wikiTitle": {
-            "type": "string"
+            "type": "string",
+            "maxLength": 200
           },
           "lat": {
-            "type": "number"
+            "type": "number",
+            "minimum": -90,
+            "maximum": 90
           },
           "lng": {
-            "type": "number"
+            "type": "number",
+            "minimum": -180,
+            "maximum": 180
           },
           "time": {
-            "type": "string"
+            "type": "string",
+            "maxLength": 120
           },
           "story": {
-            "type": "string"
+            "type": "string",
+            "maxLength": 1200
           },
           "beforeYouGo": {
-            "type": "string"
+            "type": "string",
+            "maxLength": 600
           },
           "category": {
-            "type": "string"
+            "type": "string",
+            "maxLength": 60
+          },
+          "id": {
+            "type": "string",
+            "maxLength": 120
           }
         },
         "required": [
@@ -5057,12 +5439,13 @@
         ],
         "additionalProperties": false,
         "id": "RouteStop",
-        "description": "One stop on a route. wikiTitle is the exact English Wikipedia article title (used to load real photos). lat/lng are decimal coordinates. time e.g. '9:00 · 1 hr'. story: 1-2 sentences of history. beforeYouGo: one practical tip. Optional category groups the map, e.g. 'Landmarks', 'Museums' or 'Neighborhoods'."
+        "description": "One stop on a route. wikiTitle is the exact English Wikipedia article title (used to load real photos). lat/lng are decimal coordinates. time e.g. '9:00 · 1 hr'. story: 1-2 sentences of history. beforeYouGo: one practical tip. Optional category groups the map, e.g. 'Landmarks', 'Museums' or 'Neighborhoods'. Optional id distinguishes repeated visits or stops with identical names in a route."
       },
       "RouteStops": {
         "type": "object",
         "properties": {
           "stops": {
+            "maxItems": 50,
             "type": "array",
             "items": {
               "$ref": "#/$defs/RouteStop"
@@ -5080,9 +5463,11 @@
         "type": "object",
         "properties": {
           "title": {
-            "type": "string"
+            "type": "string",
+            "maxLength": 160
           },
           "stops": {
+            "maxItems": 12,
             "type": "array",
             "items": {
               "$ref": "#/$defs/RouteStop"
@@ -5204,52 +5589,105 @@
         "id": "RetroGame",
         "description": "Playable retro handheld console with Snake, Breakout and Pong, real collision physics, scoring, keyboard and touch directional controls, pause and restart. game selects the initial game. Retro beige handheld housing and green pixel screen."
       },
+      "BillLineItem": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "maxLength": 120
+          },
+          "amount": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 100000
+          },
+          "people": {
+            "maxItems": 12,
+            "type": "array",
+            "items": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 11
+            }
+          }
+        },
+        "required": [
+          "name",
+          "amount",
+          "people"
+        ],
+        "additionalProperties": false,
+        "id": "BillLineItem",
+        "description": "An expense for BillSplitter. amount is in the selected currency's main unit. people contains zero-based indexes into the splitter's people array; assign at least one person when splitting by item."
+      },
       "BillSplitter": {
         "type": "object",
         "properties": {
           "title": {
-            "type": "string"
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 160
           },
           "currency": {
-            "type": "string"
+            "type": "string",
+            "pattern": "^[A-Z]{3}$"
           },
           "people": {
+            "minItems": 1,
+            "maxItems": 12,
             "type": "array",
             "items": {
-              "type": "string"
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 40
             }
           },
           "items": {
+            "maxItems": 100,
             "type": "array",
             "items": {
-              "type": "object",
-              "properties": {
-                "name": {
-                  "type": "string"
-                },
-                "amount": {
-                  "type": "number"
-                },
-                "people": {
-                  "type": "array",
-                  "items": {
-                    "type": "number"
-                  }
-                }
-              },
-              "required": [
-                "name",
-                "amount",
-                "people"
-              ],
-              "additionalProperties": false
+              "$ref": "#/$defs/BillLineItem"
             }
           },
           "taxPercent": {
-            "type": "number"
+            "type": "number",
+            "minimum": 0,
+            "maximum": 100
           },
           "tipPercent": {
-            "type": "number"
+            "type": "number",
+            "minimum": 0,
+            "maximum": 100
+          },
+          "description": {
+            "type": "string",
+            "maxLength": 500
+          },
+          "splitMethod": {
+            "type": "string",
+            "enum": [
+              "items",
+              "equal"
+            ]
+          },
+          "tipBasis": {
+            "type": "string",
+            "enum": [
+              "subtotal",
+              "after-tax"
+            ]
+          },
+          "peopleLabel": {
+            "type": "string",
+            "maxLength": 120
+          },
+          "itemsLabel": {
+            "type": "string",
+            "maxLength": 120
+          },
+          "subtotalLabel": {
+            "type": "string",
+            "maxLength": 60
           }
         },
         "required": [
@@ -5262,28 +5700,55 @@
         ],
         "additionalProperties": false,
         "id": "BillSplitter",
-        "description": "Interactive dinner bill splitter with editable people, items, shared-item assignments, equal splitting, tax and tip. Amounts are in currency units, people arrays contain zero-based person indexes. Shows cent-exact totals and copyable shares."
+        "description": "Compose editable bills, trips or shared expenses from BillLineItem refs and named people. Currency-aware exact splitting, per-item or equal allocation, editable tax/tip and copyable shares. taxPercent and tipPercent accept $state bindings so controls can share state with the response. Optional labels adapt the copy to the expense type."
       },
       "SavingsCalculator": {
         "type": "object",
         "properties": {
           "title": {
-            "type": "string"
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 160
           },
           "currency": {
-            "type": "string"
+            "type": "string",
+            "pattern": "^[A-Z]{3}$"
           },
           "initialSavings": {
-            "type": "number"
+            "type": "number",
+            "minimum": 0,
+            "maximum": 100000000
           },
           "monthlyContribution": {
-            "type": "number"
+            "type": "number",
+            "minimum": 0,
+            "maximum": 1000000
           },
           "years": {
-            "type": "number"
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 80
           },
           "annualReturn": {
-            "type": "number"
+            "type": "number",
+            "minimum": -20,
+            "maximum": 30
+          },
+          "description": {
+            "type": "string",
+            "maxLength": 500
+          },
+          "contributionTiming": {
+            "type": "string",
+            "enum": [
+              "start",
+              "end"
+            ]
+          },
+          "annualContributionGrowth": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 25
           }
         },
         "required": [
@@ -5296,88 +5761,150 @@
         ],
         "additionalProperties": false,
         "id": "SavingsCalculator",
-        "description": "Interactive compound savings or retirement calculator with editable sliders, a live growth chart, contributions and growth totals. Calculates monthly compounding and end-of-month contributions. years 1–50, annualReturn as a percentage 0–15. State assumptions; do not present hypothetical growth as guaranteed."
+        "description": "A configurable projection for any savings goal, currency, balance, monthly deposit and horizon. Numeric inputs accept $state bindings. Calculates monthly compounding with optional start/end-of-month deposits and an annual contribution increase. Includes zero and negative return scenarios; hypothetical projections are not guaranteed."
+      },
+      "RecipeIngredient": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 120
+          },
+          "quantity": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 100000
+          },
+          "unit": {
+            "type": "string",
+            "maxLength": 24
+          },
+          "scaling": {
+            "type": "string",
+            "enum": [
+              "proportional",
+              "whole",
+              "fixed"
+            ]
+          }
+        },
+        "required": [
+          "name",
+          "quantity",
+          "unit"
+        ],
+        "additionalProperties": false,
+        "id": "RecipeIngredient",
+        "description": "An ingredient measured for RecipePlanner's baseGuests. scaling: proportional preserves fractions, whole rounds up whole items, fixed keeps quantity unchanged. Empty unit defaults to whole-item rounding; set proportional for fractions such as half an egg."
+      },
+      "RecipeStep": {
+        "type": "object",
+        "properties": {
+          "time": {
+            "type": "string",
+            "maxLength": 60
+          },
+          "title": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 120
+          },
+          "description": {
+            "type": "string",
+            "maxLength": 800
+          }
+        },
+        "required": [
+          "time",
+          "title",
+          "description"
+        ],
+        "additionalProperties": false,
+        "id": "RecipeStep",
+        "description": "A cooking checklist step. time is a relative or clock label such as '20 minutes before serving' or '6:30 PM'; title and description explain the action."
+      },
+      "MenuDish": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 120
+          },
+          "description": {
+            "type": "string",
+            "maxLength": 400
+          },
+          "imageUrl": {
+            "type": "string",
+            "maxLength": 2000
+          }
+        },
+        "required": [
+          "name",
+          "description",
+          "imageUrl"
+        ],
+        "additionalProperties": false,
+        "id": "MenuDish",
+        "description": "A dish card for RecipePlanner. imageUrl must be a real provided image URL or empty for a neutral illustrated plate. Do not invent images or reuse roast photos for unrelated recipes."
       },
       "RecipePlanner": {
         "type": "object",
         "properties": {
           "title": {
-            "type": "string"
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 160
           },
           "description": {
-            "type": "string"
+            "type": "string",
+            "maxLength": 600
           },
           "baseGuests": {
-            "type": "number"
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 100
           },
           "ingredients": {
+            "maxItems": 100,
             "type": "array",
             "items": {
-              "type": "object",
-              "properties": {
-                "name": {
-                  "type": "string"
-                },
-                "quantity": {
-                  "type": "number"
-                },
-                "unit": {
-                  "type": "string"
-                }
-              },
-              "required": [
-                "name",
-                "quantity",
-                "unit"
-              ],
-              "additionalProperties": false
+              "$ref": "#/$defs/RecipeIngredient"
             }
           },
           "steps": {
+            "maxItems": 60,
             "type": "array",
             "items": {
-              "type": "object",
-              "properties": {
-                "time": {
-                  "type": "string"
-                },
-                "title": {
-                  "type": "string"
-                },
-                "description": {
-                  "type": "string"
-                }
-              },
-              "required": [
-                "time",
-                "title",
-                "description"
-              ],
-              "additionalProperties": false
+              "$ref": "#/$defs/RecipeStep"
             }
           },
           "dishes": {
+            "maxItems": 12,
             "type": "array",
             "items": {
-              "type": "object",
-              "properties": {
-                "name": {
-                  "type": "string"
-                },
-                "description": {
-                  "type": "string"
-                },
-                "imageUrl": {
-                  "type": "string"
-                }
-              },
-              "required": [
-                "name",
-                "description",
-                "imageUrl"
-              ],
-              "additionalProperties": false
+              "$ref": "#/$defs/MenuDish"
             }
+          },
+          "guests": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 100
+          },
+          "maxGuests": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 100
+          },
+          "portionNote": {
+            "type": "string",
+            "maxLength": 400
+          },
+          "cookingNote": {
+            "type": "string",
+            "maxLength": 600
           }
         },
         "required": [
@@ -5390,83 +5917,195 @@
         ],
         "additionalProperties": false,
         "id": "RecipePlanner",
-        "description": "Scalable meal planner with illustrated dish cards, a guest stepper, calculated shopping quantities, a copyable shopping list and interactive timed cooking checklist. Ingredient quantities are for baseGuests; use unit empty for whole items, kg or g for weight. Use real image URLs when available, otherwise an empty imageUrl for an illustrated dish."
+        "description": "Compose any meal or menu from RecipeIngredient, RecipeStep and MenuDish refs. Quantities are measured for baseGuests and scale to an editable guest count. guests accepts a $state binding for linked controls. Optional notes explain portion and timing assumptions. Never substitute default roast ingredients for a custom meal."
+      },
+      "WardrobePiece": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 60
+          },
+          "name": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 120
+          },
+          "category": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 60
+          },
+          "color": {
+            "type": "string",
+            "pattern": "^#(?:[a-fA-F0-9]{3}|[a-fA-F0-9]{6})$"
+          },
+          "kind": {
+            "type": "string",
+            "enum": [
+              "shirt",
+              "tee",
+              "jacket",
+              "trousers",
+              "shoes",
+              "bag",
+              "dress",
+              "skirt",
+              "shorts",
+              "hat",
+              "accessory"
+            ]
+          },
+          "imageUrl": {
+            "type": "string",
+            "maxLength": 2000
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "category",
+          "color",
+          "kind"
+        ],
+        "additionalProperties": false,
+        "id": "WardrobePiece",
+        "description": "A garment or accessory. id is unique in its wardrobe; category is a free-form filter. kind selects a silhouette, and a real imageUrl can represent any item beyond those silhouettes. color is a hex color."
+      },
+      "WardrobeOutfit": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 120
+          },
+          "occasion": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 60
+          },
+          "itemIds": {
+            "minItems": 1,
+            "maxItems": 30,
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 60
+            }
+          }
+        },
+        "required": [
+          "name",
+          "occasion",
+          "itemIds"
+        ],
+        "additionalProperties": false,
+        "id": "WardrobeOutfit",
+        "description": "A named combination of WardrobePiece ids for any occasion. itemIds must match items in the same WardrobePlanner; categories, occasions and item counts are unrestricted within the bounds."
+      },
+      "PackingRule": {
+        "type": "object",
+        "properties": {
+          "weather": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 60
+          },
+          "includeItemIds": {
+            "maxItems": 60,
+            "type": "array",
+            "items": {
+              "type": "string",
+              "maxLength": 60
+            }
+          },
+          "excludeItemIds": {
+            "maxItems": 60,
+            "type": "array",
+            "items": {
+              "type": "string",
+              "maxLength": 60
+            }
+          },
+          "note": {
+            "type": "string",
+            "maxLength": 400
+          }
+        },
+        "required": [
+          "weather",
+          "includeItemIds",
+          "excludeItemIds",
+          "note"
+        ],
+        "additionalProperties": false,
+        "id": "PackingRule",
+        "description": "A declarative wardrobe packing rule. weather matches one of the planner's weatherOptions, or '*' applies always. Include or exclude existing item ids. Rules run in order; exclusions win within a rule. note explains the adjustment."
       },
       "WardrobePlanner": {
         "type": "object",
         "properties": {
           "title": {
-            "type": "string"
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 160
           },
           "description": {
-            "type": "string"
+            "type": "string",
+            "maxLength": 600
           },
           "items": {
+            "minItems": 1,
+            "maxItems": 60,
             "type": "array",
             "items": {
-              "type": "object",
-              "properties": {
-                "id": {
-                  "type": "string"
-                },
-                "name": {
-                  "type": "string"
-                },
-                "category": {
-                  "type": "string"
-                },
-                "color": {
-                  "type": "string"
-                },
-                "kind": {
-                  "type": "string",
-                  "enum": [
-                    "shirt",
-                    "tee",
-                    "jacket",
-                    "trousers",
-                    "shoes",
-                    "bag"
-                  ]
-                },
-                "imageUrl": {
-                  "type": "string"
-                }
-              },
-              "required": [
-                "id",
-                "name",
-                "category",
-                "color",
-                "kind"
-              ],
-              "additionalProperties": false
+              "$ref": "#/$defs/WardrobePiece"
             }
           },
           "outfits": {
+            "maxItems": 30,
             "type": "array",
             "items": {
-              "type": "object",
-              "properties": {
-                "name": {
-                  "type": "string"
-                },
-                "occasion": {
-                  "type": "string"
-                },
-                "itemIds": {
-                  "type": "array",
-                  "items": {
-                    "type": "string"
-                  }
-                }
-              },
-              "required": [
-                "name",
-                "occasion",
-                "itemIds"
-              ],
-              "additionalProperties": false
+              "$ref": "#/$defs/WardrobeOutfit"
+            }
+          },
+          "weatherOptions": {
+            "minItems": 1,
+            "maxItems": 8,
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 60
+            }
+          },
+          "tripLengthOptions": {
+            "minItems": 1,
+            "maxItems": 8,
+            "type": "array",
+            "items": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 90
+            }
+          },
+          "defaultWeather": {
+            "type": "string",
+            "maxLength": 60
+          },
+          "defaultTripDays": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 90
+          },
+          "packingRules": {
+            "maxItems": 30,
+            "type": "array",
+            "items": {
+              "$ref": "#/$defs/PackingRule"
             }
           }
         },
@@ -5478,13 +6117,155 @@
         ],
         "additionalProperties": false,
         "id": "WardrobePlanner",
-        "description": "Interactive capsule wardrobe with clothing illustrations or supplied real photos, category filters, selectable coordinated outfits, saved favorites and a copyable shortlist. kind determines the illustration. color is a hex color. Outfit itemIds must match item id values. Never invent product prices or shopping links."
+        "description": "Compose wardrobes from WardrobePiece and WardrobeOutfit refs. Category filters, favorites, outfit combinations and packing work for arbitrary supplied items. Optional weatherOptions, tripLengthOptions and PackingRule refs customize personalization; no clothing types or weather decisions are assumed for a custom wardrobe. Never invent prices or purchase links."
+      },
+      "TripStop": {
+        "type": "object",
+        "properties": {
+          "day": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 60
+          },
+          "name": {
+            "type": "string"
+          },
+          "region": {
+            "type": "string"
+          },
+          "category": {
+            "type": "string"
+          },
+          "wiki": {
+            "type": "string"
+          },
+          "lat": {
+            "type": "number",
+            "minimum": -90,
+            "maximum": 90
+          },
+          "lng": {
+            "type": "number",
+            "minimum": -180,
+            "maximum": 180
+          },
+          "description": {
+            "type": "string"
+          },
+          "stay": {
+            "type": "string"
+          },
+          "highlight": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "day",
+          "name",
+          "region",
+          "category",
+          "wiki",
+          "lat",
+          "lng",
+          "description",
+          "stay",
+          "highlight"
+        ],
+        "additionalProperties": false,
+        "id": "TripStop",
+        "description": "One day of a road trip in ANY region. Supply real coordinates and exact Wikipedia title for photos. Days should have unique numbers."
       },
       "RoadTripPlanner": {
         "type": "object",
         "properties": {
           "title": {
             "type": "string"
+          },
+          "days": {
+            "minItems": 1,
+            "maxItems": 60,
+            "type": "array",
+            "items": {
+              "$ref": "#/$defs/TripStop"
+            }
+          },
+          "description": {
+            "type": "string"
+          },
+          "region": {
+            "type": "string"
+          },
+          "currency": {
+            "type": "string"
+          },
+          "lodgingPerNight": {
+            "type": "number",
+            "minimum": 0
+          },
+          "foodPerPersonDay": {
+            "type": "number",
+            "minimum": 0
+          },
+          "transportPerDay": {
+            "type": "number",
+            "minimum": 0
+          },
+          "transportFixed": {
+            "type": "number",
+            "minimum": 0
+          },
+          "activitiesPerPerson": {
+            "type": "number",
+            "minimum": 0
+          },
+          "seasonalAdvice": {
+            "type": "object",
+            "propertyNames": {
+              "type": "string"
+            },
+            "additionalProperties": {
+              "type": "string"
+            }
+          },
+          "travelNote": {
+            "type": "string"
+          },
+          "initialPartySize": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 30
+          },
+          "initialSeason": {
+            "type": "string",
+            "maxLength": 60
+          },
+          "initialStyle": {
+            "type": "string",
+            "enum": [
+              "Budget-minded",
+              "Balanced",
+              "Comfort first"
+            ]
+          },
+          "partySizes": {
+            "minItems": 1,
+            "maxItems": 10,
+            "type": "array",
+            "items": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 30
+            }
+          },
+          "seasonOptions": {
+            "minItems": 1,
+            "maxItems": 8,
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 60
+            }
           }
         },
         "required": [
@@ -5492,13 +6273,509 @@
         ],
         "additionalProperties": false,
         "id": "RoadTripPlanner",
-        "description": "A specific ten-day Pacific Northwest road-trip experience from Seattle through Olympic Peninsula and Oregon coast to Portland, the Columbia Gorge and Mount Hood. Includes real map filters, destination photos, ten editable day stops, party-size and travel-style budget assumptions, seasonal preferences and copyable itinerary. Use ONLY for this Pacific Northwest example. For arbitrary destinations use RouteMap, RouteStops and RouteSuggestions instead."
+        "description": "Interactive itinerary for ANY destination and duration. Compose TripStop children, local currency, cost assumptions, seasonal advice and initialPartySize/initialSeason/initialStyle. partySizes and seasonOptions customize preference choices. Supply days for custom destinations; omitting days selects the reference only when title is exactly '10 days in the Pacific Northwest'."
+      },
+      "ColorSwatch": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "hex": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "name",
+          "hex"
+        ],
+        "additionalProperties": false,
+        "id": "ColorSwatch",
+        "description": "Named color for a RecolorableScene palette."
+      },
+      "ColorRegion": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "label": {
+            "type": "string"
+          },
+          "originalColor": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "label",
+          "originalColor"
+        ],
+        "additionalProperties": false,
+        "id": "ColorRegion",
+        "description": "Editable region of a scene. Match id to SceneShape.region to recolor all matching shapes together."
+      },
+      "GuideStep": {
+        "type": "object",
+        "properties": {
+          "title": {
+            "type": "string"
+          },
+          "body": {
+            "type": "string"
+          },
+          "tip": {
+            "type": "string"
+          },
+          "illustration": {
+            "$ref": "#/$defs/SceneDrawing"
+          },
+          "explodedIllustration": {
+            "$ref": "#/$defs/SceneDrawing"
+          },
+          "find": {
+            "type": "string"
+          },
+          "check": {
+            "type": "string"
+          },
+          "id": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "title",
+          "body"
+        ],
+        "additionalProperties": false,
+        "id": "GuideStep",
+        "description": "One instruction in an IllustratedStepGuide or AssemblyGuide. Supply original SceneDrawing illustrations for this step; never use unrelated preset artwork. explodedIllustration optionally supplies an expanded parts view. find lists parts needed; check labels completion."
+      },
+      "SceneDrawing": {
+        "type": "object",
+        "properties": {
+          "viewBox": {
+            "type": "array",
+            "prefixItems": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "number"
+              },
+              {
+                "type": "number",
+                "exclusiveMinimum": 0
+              },
+              {
+                "type": "number",
+                "exclusiveMinimum": 0
+              }
+            ]
+          },
+          "shapes": {
+            "maxItems": 500,
+            "type": "array",
+            "items": {
+              "$ref": "#/$defs/SceneShape"
+            }
+          }
+        },
+        "required": [
+          "viewBox",
+          "shapes"
+        ],
+        "additionalProperties": false,
+        "id": "SceneDrawing",
+        "description": "A vector drawing composed of SceneShape records. Supply [minX,minY,width,height] and shapes. No SVG markup or JavaScript."
+      },
+      "SceneShape": {
+        "id": "SceneShape",
+        "type": "object",
+        "properties": {
+          "kind": {
+            "type": "string",
+            "enum": [
+              "path",
+              "circle",
+              "ellipse",
+              "rect",
+              "line",
+              "text"
+            ]
+          },
+          "d": {
+            "type": "string",
+            "maxLength": 12000
+          },
+          "x": {
+            "type": "number",
+            "minimum": -10000,
+            "maximum": 10000
+          },
+          "y": {
+            "type": "number",
+            "minimum": -10000,
+            "maximum": 10000
+          },
+          "width": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 10000
+          },
+          "height": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 10000
+          },
+          "r": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 10000
+          },
+          "x2": {
+            "type": "number",
+            "minimum": -10000,
+            "maximum": 10000
+          },
+          "y2": {
+            "type": "number",
+            "minimum": -10000,
+            "maximum": 10000
+          },
+          "fill": {
+            "type": "string",
+            "maxLength": 80
+          },
+          "stroke": {
+            "type": "string",
+            "maxLength": 80
+          },
+          "strokeWidth": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 100
+          },
+          "opacity": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 1
+          },
+          "text": {
+            "type": "string",
+            "maxLength": 200
+          },
+          "region": {
+            "type": "string",
+            "maxLength": 80
+          }
+        },
+        "required": [
+          "kind"
+        ],
+        "additionalProperties": false,
+        "description": "A safe vector shape used inside SceneDrawing or DiagramPart. Geometry is in scene coordinates. For paths use d; circles use x/y/r; ellipses use x/y/width/height as radii. Text uses text and height as font size."
+      },
+      "GridOption": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "color": {
+            "type": "string"
+          },
+          "short": {
+            "type": "string"
+          },
+          "note": {
+            "type": "string"
+          },
+          "ink": {
+            "type": "string"
+          },
+          "icon": {
+            "type": "string"
+          },
+          "tip": {
+            "type": "string"
+          },
+          "illustration": {
+            "$ref": "#/$defs/SceneDrawing"
+          },
+          "textColor": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "color"
+        ],
+        "additionalProperties": false,
+        "id": "GridOption",
+        "description": "An assignable item in EditableGrid: a plant, seat type, room use, task or material. id is referenced by GridLayout.cells."
+      },
+      "GridLayout": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "label": {
+            "type": "string"
+          },
+          "rows": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 12
+          },
+          "columns": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 12
+          },
+          "cells": {
+            "maxItems": 144,
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "cellLabel": {
+            "type": "string"
+          },
+          "summary": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "label",
+          "rows",
+          "columns",
+          "cells"
+        ],
+        "additionalProperties": false,
+        "id": "GridLayout",
+        "description": "A rectangular editable layout. cells contains option IDs in row-major order, one per cell. Multiple layouts preserve independent edits."
+      },
+      "RecolorableScene": {
+        "id": "RecolorableScene",
+        "type": "object",
+        "properties": {
+          "title": {
+            "type": "string"
+          },
+          "scene": {
+            "$ref": "#/$defs/SceneDrawing"
+          },
+          "palette": {
+            "minItems": 1,
+            "maxItems": 18,
+            "type": "array",
+            "items": {
+              "$ref": "#/$defs/ColorSwatch"
+            }
+          },
+          "regions": {
+            "minItems": 1,
+            "maxItems": 12,
+            "type": "array",
+            "items": {
+              "$ref": "#/$defs/ColorRegion"
+            }
+          },
+          "description": {
+            "type": "string"
+          },
+          "footnote": {
+            "type": "string"
+          },
+          "originalLabel": {
+            "type": "string"
+          },
+          "selectedRegion": {
+            "type": "string"
+          },
+          "colors": {
+            "type": "object",
+            "propertyNames": {
+              "type": "string"
+            },
+            "additionalProperties": {
+              "type": "string"
+            }
+          }
+        },
+        "required": [
+          "title",
+          "scene",
+          "palette",
+          "regions"
+        ],
+        "additionalProperties": false,
+        "description": "Recolor any original vector scene: rooms, furniture, clothing or product finishes. Compose SceneDrawing with region IDs, ColorRegion definitions and a ColorSwatch palette. Multiple regions recolor independently. colors and selectedRegion can bind to shared $variables."
+      },
+      "IllustratedStepGuide": {
+        "id": "IllustratedStepGuide",
+        "type": "object",
+        "properties": {
+          "title": {
+            "type": "string"
+          },
+          "steps": {
+            "minItems": 1,
+            "maxItems": 40,
+            "type": "array",
+            "items": {
+              "$ref": "#/$defs/GuideStep"
+            }
+          },
+          "description": {
+            "type": "string"
+          },
+          "level": {
+            "type": "string"
+          },
+          "repeatLabel": {
+            "type": "string"
+          },
+          "activeStep": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          }
+        },
+        "required": [
+          "title",
+          "steps"
+        ],
+        "additionalProperties": false,
+        "description": "Arbitrary illustrated instructions for folding, crafts, cooking, drawing or learning. Every step has model-supplied text and optional safe vector illustration. Includes progress, tips and previous/next controls. activeStep is zero-based and may bind to shared $state for external navigation."
+      },
+      "EditableGrid": {
+        "id": "EditableGrid",
+        "type": "object",
+        "properties": {
+          "title": {
+            "type": "string"
+          },
+          "options": {
+            "minItems": 1,
+            "maxItems": 36,
+            "type": "array",
+            "items": {
+              "$ref": "#/$defs/GridOption"
+            }
+          },
+          "layouts": {
+            "minItems": 1,
+            "maxItems": 6,
+            "type": "array",
+            "items": {
+              "$ref": "#/$defs/GridLayout"
+            }
+          },
+          "description": {
+            "type": "string"
+          },
+          "footnote": {
+            "type": "string"
+          },
+          "footer": {
+            "type": "string"
+          },
+          "optionLabel": {
+            "type": "string"
+          },
+          "resetLabel": {
+            "type": "string"
+          },
+          "selectedLayout": {
+            "type": "string"
+          },
+          "assignments": {
+            "type": "object",
+            "propertyNames": {
+              "type": "string"
+            },
+            "additionalProperties": {
+              "maxItems": 144,
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          }
+        },
+        "required": [
+          "title",
+          "options",
+          "layouts"
+        ],
+        "additionalProperties": false,
+        "description": "Editable rectangular planning grid with model-supplied dimensions, layouts, assignable options, colors and notes. Use for gardens, seating, floor plans, task boards or storage. assignments can bind shared $state as a map of layout ID to row-major option IDs; selectedLayout also supports shared state."
+      },
+      "AssemblyGuide": {
+        "id": "AssemblyGuide",
+        "type": "object",
+        "properties": {
+          "title": {
+            "type": "string"
+          },
+          "steps": {
+            "minItems": 1,
+            "maxItems": 40,
+            "type": "array",
+            "items": {
+              "$ref": "#/$defs/GuideStep"
+            }
+          },
+          "description": {
+            "type": "string"
+          },
+          "footnote": {
+            "type": "string"
+          },
+          "activeStep": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          }
+        },
+        "required": [
+          "title",
+          "steps"
+        ],
+        "additionalProperties": false,
+        "description": "Step-by-step assembly or repair of any object. Supply GuideSteps with parts, instructions, completion checks, and original assembled/exploded SceneDrawing views. Any number of steps; activeStep may bind to shared $state."
       },
       "RoomColorPreview": {
-        "id": "RoomColorPreview",
         "type": "object",
         "properties": {
           "title": {
+            "type": "string"
+          },
+          "palette": {
+            "type": "array",
+            "items": {
+              "$ref": "#/$defs/ColorSwatch"
+            }
+          },
+          "regions": {
+            "type": "array",
+            "items": {
+              "$ref": "#/$defs/ColorRegion"
+            }
+          },
+          "scene": {
+            "$ref": "#/$defs/SceneDrawing"
+          },
+          "description": {
             "type": "string"
           }
         },
@@ -5506,13 +6783,25 @@
           "title"
         ],
         "additionalProperties": false,
-        "description": "Interactive room wall-color preview with six muted paint swatches, original comparison, and a recolorable illustrated living room. Use for paint choices and interior color exploration."
+        "id": "RoomColorPreview",
+        "description": "Living-room preset of RecolorableScene. Optional palette, regions and original scene allow custom interiors. For other objects use RecolorableScene."
       },
       "OrigamiGuide": {
-        "id": "OrigamiGuide",
         "type": "object",
         "properties": {
           "title": {
+            "type": "string"
+          },
+          "steps": {
+            "type": "array",
+            "items": {
+              "$ref": "#/$defs/GuideStep"
+            }
+          },
+          "description": {
+            "type": "string"
+          },
+          "level": {
             "type": "string"
           }
         },
@@ -5520,13 +6809,31 @@
           "title"
         ],
         "additionalProperties": false,
-        "description": "Twelve-step interactive origami fox guide with a distinct paper-fold illustration per step, orange progress segments, folding tips, and previous/next navigation."
+        "id": "OrigamiGuide",
+        "description": "Origami preset of IllustratedStepGuide. Default is the twelve-step fox; supply GuideSteps and their own illustrations for a different fold. Never change only the title to claim a different model."
       },
       "GardenPlanner": {
-        "id": "GardenPlanner",
         "type": "object",
         "properties": {
           "title": {
+            "type": "string"
+          },
+          "options": {
+            "type": "array",
+            "items": {
+              "$ref": "#/$defs/GridOption"
+            }
+          },
+          "layouts": {
+            "type": "array",
+            "items": {
+              "$ref": "#/$defs/GridLayout"
+            }
+          },
+          "description": {
+            "type": "string"
+          },
+          "footer": {
             "type": "string"
           }
         },
@@ -5534,13 +6841,25 @@
           "title"
         ],
         "additionalProperties": false,
-        "description": "Editable 4-by-4-foot kitchen garden plan with four planters or sixteen squares, plant selection, growing notes, and reset. Use for small-space gardening."
+        "id": "GardenPlanner",
+        "description": "Garden preset of EditableGrid. Supply plant GridOptions and any rectangular GridLayouts for a different garden. Defaults to four planters or sixteen squares."
       },
       "BikeRepair": {
-        "id": "BikeRepair",
         "type": "object",
         "properties": {
           "title": {
+            "type": "string"
+          },
+          "steps": {
+            "type": "array",
+            "items": {
+              "$ref": "#/$defs/GuideStep"
+            }
+          },
+          "description": {
+            "type": "string"
+          },
+          "footnote": {
             "type": "string"
           }
         },
@@ -5548,7 +6867,876 @@
           "title"
         ],
         "additionalProperties": false,
-        "description": "Youth bicycle assembly checklist with six guided steps, highlighted parts, assembled/exploded illustration, progress and safety checks. Refer to the manufacturer’s manual for specifications."
+        "id": "BikeRepair",
+        "description": "Youth bicycle preset of AssemblyGuide. Optional GuideSteps replace instructions and artwork together. Use AssemblyGuide for other objects and supply matching scene illustrations."
+      },
+      "DiagramPart": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "maxLength": 80
+          },
+          "label": {
+            "type": "string",
+            "maxLength": 100
+          },
+          "group": {
+            "type": "string",
+            "maxLength": 100
+          },
+          "description": {
+            "type": "string",
+            "maxLength": 2000
+          },
+          "shapes": {
+            "maxItems": 200,
+            "type": "array",
+            "items": {
+              "$ref": "#/$defs/SceneShape"
+            }
+          },
+          "offset": {
+            "type": "array",
+            "prefixItems": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "number"
+              }
+            ]
+          },
+          "pivot": {
+            "type": "array",
+            "prefixItems": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "number"
+              }
+            ]
+          },
+          "rotates": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "id",
+          "label",
+          "shapes",
+          "offset"
+        ],
+        "additionalProperties": false,
+        "id": "DiagramPart",
+        "description": "One independently movable part of any object. Supply vector shapes, group, explanation, and explode offset. Wheels/rotors can have rotates=true and a pivot. Parts are data, never hardcoded to an object type."
+      },
+      "ExplodedDiagram": {
+        "type": "object",
+        "properties": {
+          "title": {
+            "type": "string"
+          },
+          "parts": {
+            "maxItems": 40,
+            "type": "array",
+            "items": {
+              "$ref": "#/$defs/DiagramPart"
+            }
+          },
+          "viewBox": {
+            "type": "array",
+            "prefixItems": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "number"
+              },
+              {
+                "type": "number",
+                "exclusiveMinimum": 0
+              },
+              {
+                "type": "number",
+                "exclusiveMinimum": 0
+              }
+            ]
+          },
+          "description": {
+            "type": "string"
+          },
+          "motionLabel": {
+            "type": "string"
+          },
+          "showControls": {
+            "type": "boolean"
+          },
+          "explode": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 100
+          },
+          "selected": {
+            "type": "string"
+          },
+          "showHeading": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "title",
+          "parts"
+        ],
+        "additionalProperties": false,
+        "id": "ExplodedDiagram",
+        "description": "Exploded view of ANY object: bicycle, unicycle, camera, engine, plant, etc. Compose DiagramPart and SceneShape records. Include margins in viewBox for fully exploded offsets. explode and selected can bind to shared $state; set showControls=false to compose external RangeControl/ChoiceControl."
+      },
+      "RangeControl": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "label": {
+            "type": "string"
+          },
+          "min": {
+            "type": "number"
+          },
+          "max": {
+            "type": "number"
+          },
+          "step": {
+            "type": "number",
+            "exclusiveMinimum": 0
+          },
+          "value": {
+            "type": "number"
+          },
+          "unit": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "name",
+          "label",
+          "min",
+          "max"
+        ],
+        "additionalProperties": false,
+        "id": "RangeControl",
+        "description": "Composable scalar slider. Bind value to a $variable to control other components immediately (e.g. ExplodedDiagram.explode, ValueDisplay, Contribution.value). Same visual control as every example."
+      },
+      "ChoiceControl": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "label": {
+            "type": "string"
+          },
+          "options": {
+            "minItems": 1,
+            "maxItems": 20,
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "value": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "name",
+          "label",
+          "options"
+        ],
+        "additionalProperties": false,
+        "id": "ChoiceControl",
+        "description": "A row of choices that reads/writes a shared $variable. Use with ExplodedDiagram.selected or any computed expression. Options must match the target IDs or groups."
+      },
+      "ValueDisplay": {
+        "type": "object",
+        "properties": {
+          "label": {
+            "type": "string"
+          },
+          "value": {
+            "type": "number"
+          },
+          "prefix": {
+            "type": "string"
+          },
+          "suffix": {
+            "type": "string"
+          },
+          "decimals": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 6
+          }
+        },
+        "required": [
+          "label",
+          "value"
+        ],
+        "additionalProperties": false,
+        "id": "ValueDisplay",
+        "description": "Live numeric result. value accepts a built-in OpenUI expression such as $quantity * $price; recalculates when inputs change."
+      },
+      "Contribution": {
+        "type": "object",
+        "properties": {
+          "label": {
+            "type": "string"
+          },
+          "value": {
+            "type": "number"
+          },
+          "color": {
+            "type": "string"
+          },
+          "prefix": {
+            "type": "string"
+          },
+          "suffix": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "label",
+          "value",
+          "color"
+        ],
+        "additionalProperties": false,
+        "id": "Contribution",
+        "description": "Labeled contribution to a total. value can be an OpenUI expression or $variable; signed values are supported."
+      },
+      "ContributionChart": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "maxItems": 30,
+            "type": "array",
+            "items": {
+              "$ref": "#/$defs/Contribution"
+            }
+          },
+          "label": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "items"
+        ],
+        "additionalProperties": false,
+        "id": "ContributionChart",
+        "description": "Proportional stacked bar for any composition: spending, energy, budgets, revenue. Use Contribution children whose values reference shared $variables. Handles deductions separately and keeps labels legible."
+      },
+      "KnowledgeCheck": {
+        "type": "object",
+        "properties": {
+          "question": {
+            "type": "string"
+          },
+          "options": {
+            "minItems": 2,
+            "maxItems": 8,
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "answer": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "explanation": {
+            "type": "string"
+          },
+          "value": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "question",
+          "options",
+          "answer",
+          "explanation"
+        ],
+        "additionalProperties": false,
+        "id": "KnowledgeCheck",
+        "description": "A reusable multiple-choice knowledge check. answer is the zero-based correct option index. Optional value can bind to shared state."
+      },
+      "InteractivePanel": {
+        "type": "object",
+        "properties": {
+          "title": {
+            "type": "string"
+          },
+          "children": {
+            "type": "array",
+            "items": {
+              "anyOf": [
+                {
+                  "anyOf": [
+                    {
+                      "$ref": "#/$defs/TextContent"
+                    },
+                    {
+                      "$ref": "#/$defs/MarkDownRenderer"
+                    },
+                    {
+                      "$ref": "#/$defs/CardHeader"
+                    },
+                    {
+                      "$ref": "#/$defs/Callout"
+                    },
+                    {
+                      "$ref": "#/$defs/TextCallout"
+                    },
+                    {
+                      "$ref": "#/$defs/CodeBlock"
+                    },
+                    {
+                      "$ref": "#/$defs/Image"
+                    },
+                    {
+                      "$ref": "#/$defs/ImageBlock"
+                    },
+                    {
+                      "$ref": "#/$defs/ImageGallery"
+                    },
+                    {
+                      "$ref": "#/$defs/Separator"
+                    },
+                    {
+                      "$ref": "#/$defs/HorizontalBarChart"
+                    },
+                    {
+                      "$ref": "#/$defs/RadarChart"
+                    },
+                    {
+                      "$ref": "#/$defs/PieChart"
+                    },
+                    {
+                      "$ref": "#/$defs/RadialChart"
+                    },
+                    {
+                      "$ref": "#/$defs/SingleStackedBarChart"
+                    },
+                    {
+                      "$ref": "#/$defs/ScatterChart"
+                    },
+                    {
+                      "$ref": "#/$defs/AreaChart"
+                    },
+                    {
+                      "$ref": "#/$defs/BarChart"
+                    },
+                    {
+                      "$ref": "#/$defs/LineChart"
+                    },
+                    {
+                      "$ref": "#/$defs/Table"
+                    },
+                    {
+                      "$ref": "#/$defs/TagBlock"
+                    },
+                    {
+                      "$ref": "#/$defs/Form"
+                    },
+                    {
+                      "$ref": "#/$defs/Buttons"
+                    },
+                    {
+                      "$ref": "#/$defs/IconButton"
+                    },
+                    {
+                      "$ref": "#/$defs/Steps"
+                    },
+                    {
+                      "$ref": "#/$defs/InlineHeader"
+                    },
+                    {
+                      "$ref": "#/$defs/EntityList"
+                    },
+                    {
+                      "$ref": "#/$defs/EditableTable"
+                    },
+                    {
+                      "$ref": "#/$defs/SnippetCardBlock"
+                    },
+                    {
+                      "$ref": "#/$defs/OverviewCardBlock"
+                    },
+                    {
+                      "$ref": "#/$defs/ContextCardBlock"
+                    },
+                    {
+                      "$ref": "#/$defs/CompositeCardBlock"
+                    },
+                    {
+                      "$ref": "#/$defs/VisualCardBlock"
+                    },
+                    {
+                      "$ref": "#/$defs/ListBlock"
+                    },
+                    {
+                      "$ref": "#/$defs/FollowUpBlock"
+                    },
+                    {
+                      "$ref": "#/$defs/SectionBlock"
+                    },
+                    {
+                      "$ref": "#/$defs/Tabs"
+                    },
+                    {
+                      "$ref": "#/$defs/Carousel"
+                    },
+                    {
+                      "$ref": "#/$defs/RouteMap"
+                    },
+                    {
+                      "$ref": "#/$defs/RouteStops"
+                    },
+                    {
+                      "$ref": "#/$defs/RouteSuggestions"
+                    },
+                    {
+                      "$ref": "#/$defs/BicycleExplorer"
+                    },
+                    {
+                      "$ref": "#/$defs/DistributionExplorer"
+                    },
+                    {
+                      "$ref": "#/$defs/EconomyExplorer"
+                    },
+                    {
+                      "$ref": "#/$defs/DroneExplorer"
+                    },
+                    {
+                      "$ref": "#/$defs/DroneMarket"
+                    },
+                    {
+                      "$ref": "#/$defs/MontyHall"
+                    },
+                    {
+                      "$ref": "#/$defs/RetroGame"
+                    },
+                    {
+                      "$ref": "#/$defs/BillLineItem"
+                    },
+                    {
+                      "$ref": "#/$defs/BillSplitter"
+                    },
+                    {
+                      "$ref": "#/$defs/SavingsCalculator"
+                    },
+                    {
+                      "$ref": "#/$defs/RecipeIngredient"
+                    },
+                    {
+                      "$ref": "#/$defs/RecipeStep"
+                    },
+                    {
+                      "$ref": "#/$defs/MenuDish"
+                    },
+                    {
+                      "$ref": "#/$defs/RecipePlanner"
+                    },
+                    {
+                      "$ref": "#/$defs/WardrobePiece"
+                    },
+                    {
+                      "$ref": "#/$defs/WardrobeOutfit"
+                    },
+                    {
+                      "$ref": "#/$defs/PackingRule"
+                    },
+                    {
+                      "$ref": "#/$defs/WardrobePlanner"
+                    },
+                    {
+                      "$ref": "#/$defs/TripStop"
+                    },
+                    {
+                      "$ref": "#/$defs/RoadTripPlanner"
+                    },
+                    {
+                      "$ref": "#/$defs/ColorSwatch"
+                    },
+                    {
+                      "$ref": "#/$defs/ColorRegion"
+                    },
+                    {
+                      "$ref": "#/$defs/GuideStep"
+                    },
+                    {
+                      "$ref": "#/$defs/GridOption"
+                    },
+                    {
+                      "$ref": "#/$defs/GridLayout"
+                    },
+                    {
+                      "$ref": "#/$defs/RecolorableScene"
+                    },
+                    {
+                      "$ref": "#/$defs/IllustratedStepGuide"
+                    },
+                    {
+                      "$ref": "#/$defs/EditableGrid"
+                    },
+                    {
+                      "$ref": "#/$defs/AssemblyGuide"
+                    },
+                    {
+                      "$ref": "#/$defs/RoomColorPreview"
+                    },
+                    {
+                      "$ref": "#/$defs/OrigamiGuide"
+                    },
+                    {
+                      "$ref": "#/$defs/GardenPlanner"
+                    },
+                    {
+                      "$ref": "#/$defs/BikeRepair"
+                    },
+                    {
+                      "$ref": "#/$defs/SceneShape"
+                    },
+                    {
+                      "$ref": "#/$defs/SceneDrawing"
+                    },
+                    {
+                      "$ref": "#/$defs/DiagramPart"
+                    },
+                    {
+                      "$ref": "#/$defs/ExplodedDiagram"
+                    },
+                    {
+                      "$ref": "#/$defs/RangeControl"
+                    },
+                    {
+                      "$ref": "#/$defs/ChoiceControl"
+                    },
+                    {
+                      "$ref": "#/$defs/ValueDisplay"
+                    },
+                    {
+                      "$ref": "#/$defs/Contribution"
+                    },
+                    {
+                      "$ref": "#/$defs/ContributionChart"
+                    },
+                    {
+                      "$ref": "#/$defs/KnowledgeCheck"
+                    }
+                  ]
+                },
+                {
+                  "$ref": "#/$defs/InteractiveGroup"
+                }
+              ]
+            }
+          },
+          "description": {
+            "type": "string"
+          },
+          "badge": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "title",
+          "children"
+        ],
+        "additionalProperties": false,
+        "id": "InteractivePanel",
+        "description": "Polished panel for a custom interactive explanation or calculator. Compose independent RangeControl, ChoiceControl, ValueDisplay, ContributionChart, KnowledgeCheck and base library children. Connect them using shared $variables and built-in expressions. InteractiveGroup provides columns."
+      },
+      "InteractiveGroup": {
+        "type": "object",
+        "properties": {
+          "children": {
+            "type": "array",
+            "items": {
+              "anyOf": [
+                {
+                  "$ref": "#/$defs/TextContent"
+                },
+                {
+                  "$ref": "#/$defs/MarkDownRenderer"
+                },
+                {
+                  "$ref": "#/$defs/CardHeader"
+                },
+                {
+                  "$ref": "#/$defs/Callout"
+                },
+                {
+                  "$ref": "#/$defs/TextCallout"
+                },
+                {
+                  "$ref": "#/$defs/CodeBlock"
+                },
+                {
+                  "$ref": "#/$defs/Image"
+                },
+                {
+                  "$ref": "#/$defs/ImageBlock"
+                },
+                {
+                  "$ref": "#/$defs/ImageGallery"
+                },
+                {
+                  "$ref": "#/$defs/Separator"
+                },
+                {
+                  "$ref": "#/$defs/HorizontalBarChart"
+                },
+                {
+                  "$ref": "#/$defs/RadarChart"
+                },
+                {
+                  "$ref": "#/$defs/PieChart"
+                },
+                {
+                  "$ref": "#/$defs/RadialChart"
+                },
+                {
+                  "$ref": "#/$defs/SingleStackedBarChart"
+                },
+                {
+                  "$ref": "#/$defs/ScatterChart"
+                },
+                {
+                  "$ref": "#/$defs/AreaChart"
+                },
+                {
+                  "$ref": "#/$defs/BarChart"
+                },
+                {
+                  "$ref": "#/$defs/LineChart"
+                },
+                {
+                  "$ref": "#/$defs/Table"
+                },
+                {
+                  "$ref": "#/$defs/TagBlock"
+                },
+                {
+                  "$ref": "#/$defs/Form"
+                },
+                {
+                  "$ref": "#/$defs/Buttons"
+                },
+                {
+                  "$ref": "#/$defs/IconButton"
+                },
+                {
+                  "$ref": "#/$defs/Steps"
+                },
+                {
+                  "$ref": "#/$defs/InlineHeader"
+                },
+                {
+                  "$ref": "#/$defs/EntityList"
+                },
+                {
+                  "$ref": "#/$defs/EditableTable"
+                },
+                {
+                  "$ref": "#/$defs/SnippetCardBlock"
+                },
+                {
+                  "$ref": "#/$defs/OverviewCardBlock"
+                },
+                {
+                  "$ref": "#/$defs/ContextCardBlock"
+                },
+                {
+                  "$ref": "#/$defs/CompositeCardBlock"
+                },
+                {
+                  "$ref": "#/$defs/VisualCardBlock"
+                },
+                {
+                  "$ref": "#/$defs/ListBlock"
+                },
+                {
+                  "$ref": "#/$defs/FollowUpBlock"
+                },
+                {
+                  "$ref": "#/$defs/SectionBlock"
+                },
+                {
+                  "$ref": "#/$defs/Tabs"
+                },
+                {
+                  "$ref": "#/$defs/Carousel"
+                },
+                {
+                  "$ref": "#/$defs/RouteMap"
+                },
+                {
+                  "$ref": "#/$defs/RouteStops"
+                },
+                {
+                  "$ref": "#/$defs/RouteSuggestions"
+                },
+                {
+                  "$ref": "#/$defs/BicycleExplorer"
+                },
+                {
+                  "$ref": "#/$defs/DistributionExplorer"
+                },
+                {
+                  "$ref": "#/$defs/EconomyExplorer"
+                },
+                {
+                  "$ref": "#/$defs/DroneExplorer"
+                },
+                {
+                  "$ref": "#/$defs/DroneMarket"
+                },
+                {
+                  "$ref": "#/$defs/MontyHall"
+                },
+                {
+                  "$ref": "#/$defs/RetroGame"
+                },
+                {
+                  "$ref": "#/$defs/BillLineItem"
+                },
+                {
+                  "$ref": "#/$defs/BillSplitter"
+                },
+                {
+                  "$ref": "#/$defs/SavingsCalculator"
+                },
+                {
+                  "$ref": "#/$defs/RecipeIngredient"
+                },
+                {
+                  "$ref": "#/$defs/RecipeStep"
+                },
+                {
+                  "$ref": "#/$defs/MenuDish"
+                },
+                {
+                  "$ref": "#/$defs/RecipePlanner"
+                },
+                {
+                  "$ref": "#/$defs/WardrobePiece"
+                },
+                {
+                  "$ref": "#/$defs/WardrobeOutfit"
+                },
+                {
+                  "$ref": "#/$defs/PackingRule"
+                },
+                {
+                  "$ref": "#/$defs/WardrobePlanner"
+                },
+                {
+                  "$ref": "#/$defs/TripStop"
+                },
+                {
+                  "$ref": "#/$defs/RoadTripPlanner"
+                },
+                {
+                  "$ref": "#/$defs/ColorSwatch"
+                },
+                {
+                  "$ref": "#/$defs/ColorRegion"
+                },
+                {
+                  "$ref": "#/$defs/GuideStep"
+                },
+                {
+                  "$ref": "#/$defs/GridOption"
+                },
+                {
+                  "$ref": "#/$defs/GridLayout"
+                },
+                {
+                  "$ref": "#/$defs/RecolorableScene"
+                },
+                {
+                  "$ref": "#/$defs/IllustratedStepGuide"
+                },
+                {
+                  "$ref": "#/$defs/EditableGrid"
+                },
+                {
+                  "$ref": "#/$defs/AssemblyGuide"
+                },
+                {
+                  "$ref": "#/$defs/RoomColorPreview"
+                },
+                {
+                  "$ref": "#/$defs/OrigamiGuide"
+                },
+                {
+                  "$ref": "#/$defs/GardenPlanner"
+                },
+                {
+                  "$ref": "#/$defs/BikeRepair"
+                },
+                {
+                  "$ref": "#/$defs/SceneShape"
+                },
+                {
+                  "$ref": "#/$defs/SceneDrawing"
+                },
+                {
+                  "$ref": "#/$defs/DiagramPart"
+                },
+                {
+                  "$ref": "#/$defs/ExplodedDiagram"
+                },
+                {
+                  "$ref": "#/$defs/RangeControl"
+                },
+                {
+                  "$ref": "#/$defs/ChoiceControl"
+                },
+                {
+                  "$ref": "#/$defs/ValueDisplay"
+                },
+                {
+                  "$ref": "#/$defs/Contribution"
+                },
+                {
+                  "$ref": "#/$defs/ContributionChart"
+                },
+                {
+                  "$ref": "#/$defs/KnowledgeCheck"
+                }
+              ]
+            }
+          },
+          "columns": {
+            "type": "string",
+            "enum": [
+              "one",
+              "two",
+              "three"
+            ]
+          }
+        },
+        "required": [
+          "children"
+        ],
+        "additionalProperties": false,
+        "id": "InteractiveGroup",
+        "description": "Compose controls, results, charts, text and illustrations into a responsive group. Use two columns for paired controls or metrics. All reactive children can share $variables."
       },
       "Slice": {
         "type": "object",
