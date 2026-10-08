@@ -8,7 +8,7 @@ const inter = Inter({
 
 export const metadata: Metadata = {
   title: "Open Intelligent UI",
-  description: "Plan a sightseeing route with generative UI built on OpenUI and OpenUI Gateway.",
+  description: "Plan a sightseeing route with generative UI built on OpenUI.",
 };
 
 export default function RootLayout({

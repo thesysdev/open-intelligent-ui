@@ -2,7 +2,7 @@
 
 An [OpenUI](https://openui.com) demo that recreates the "plan a sightseeing route in San Francisco" experience. The model streams OpenUI Lang, and the app renders it with its own travel components:
 
-- `RouteMap`: a Leaflet map with numbered pins and a walking path. It expands, and tapping a pin jumps to that stop's card.
+- `RouteMap`: a [MapLibre GL](https://maplibre.org) vector map (free [OpenFreeMap](https://openfreemap.org) tiles, no key) with numbered pins and a walking path. It expands, and tapping a pin jumps to that stop's card.
 - `RouteStops` / `RouteStop`: photo cards with a story and a "Before you go" section, plus remove/add-back. Photos and coordinates come from the Wikipedia/Wikimedia APIs.
 - `RouteSuggestions`: suggested extra stops with "+ Add to my route". Adding one puts a new pin on the map, extends the path, updates the stop count and appends a card marked "Added".
 - A "Customize your route" form, built from OpenUI's own form components. Its button uses `@ToAssistant`, which sends the user's choices back to the model as the next turn, and the model answers with a rebuilt route.

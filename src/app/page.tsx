@@ -1,6 +1,6 @@
 "use client";
 import "@openuidev/react-ui/styles/index.css";
-import "leaflet/dist/leaflet.css";
+import "maplibre-gl/dist/maplibre-gl.css";
 import "@/lib/route/route.css";
 
 import {
