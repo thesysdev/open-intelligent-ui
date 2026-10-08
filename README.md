@@ -4,20 +4,21 @@
 
 In ChatGPT's Intelligent UI, a request such as "plan a day in San Francisco" returns an interactive answer (a map, photographs and an editable itinerary) rather than text. This repository reproduces that experience with open-source components, so that the same kind of interface can be built, modified and shipped inside any application.
 
-[OpenUI](https://github.com/thesysdev/openui) is the open standard for Generative UI. It is MIT-licensed and developed by [Thesys](https://www.thesys.dev); the domain openui.com belongs to the OpenUI project.
+[OpenUI](https://github.com/thesysdev/openui) is the open standard for Generative UI.
 
 > This project is independent and is not affiliated with or endorsed by OpenAI. "Intelligent UI" refers to the ChatGPT feature that this demo recreates.
 
 ## What's in the demo
 
-The model streams OpenUI Lang through OpenUI Gateway, and the app renders it as an answer built from its own travel components:
+The model streams OpenUI Lang through OpenUI Gateway, and the app renders it as an answer built from custom travel components. They are defined in this repository (`src/lib/travel/components.tsx`) with OpenUI's `defineComponent` and registered alongside OpenUI's built-in chat components:
 
 - `TravelHeading` and `TravelProse`: editorial headings and paragraphs with streaming word fades.
 - `TravelImage` and `TravelGallery`: a three-photo strip using Gateway image-search results, with Wikipedia fallbacks.
 - `TravelStop` and `TravelItinerary`: destination data and compact photo/text rows, sharing the same stop references with `TravelMap`.
 - `TravelMap`: a [MapLibre GL](https://maplibre.org) street map with emoji pins, category filters, expansion and map-to-itinerary selection. Pins appear while the answer streams; once it ends, the map frames the route and draws its line.
 - `TravelSuggestions`: extra places with "+ Add to my route". Adding one puts a pin on the map and appends it to the itinerary; every stop can also be removed and added back.
-- A "Customize your route" form built from OpenUI's own form components, which sends the chosen preferences back to the model with `@ToAssistant`.
+
+The "Customize your route" form at the end of each answer uses OpenUI's built-in form components (`Form`, `RadioGroup`, `CheckBoxGroup`, `Button`) and sends the chosen preferences back to the model with `@ToAssistant`.
 
 ## Setup
 
@@ -40,6 +41,7 @@ Open http://localhost:3000 and try: `I'm in San Francisco for a day, plan a sigh
 ## How it works
 
 - **Generation.** `/api/chat` calls OpenUI Gateway's Responses API with `generateSystemPrompt({ cloud: true })`, so Gateway validates and corrects the generated OpenUI Lang against this app's component library. Gateway's hosted `image_search` tool finds current photos; the model copies the returned URLs into `TravelImage.src` and `TravelStop.imageUrl`.
+- **Chat Completions.** OpenUI Gateway also supports the Chat Completions API, and OpenUI works with either. This example uses the Responses API because Gateway's hosted tools, such as `image_search`, are available only there. An application already built on Chat Completions can keep that protocol and pair it with `openAIReadableStreamAdapter` or `openAIAdapter` in the browser.
 - **Photos.** Each photo falls back to Wikipedia when it has no URL or its image fails to load. A gallery photo with no working image at all is dropped so the others fill the row.
 - **Route edits.** Removed stops, added suggestions and the selected stop live in OpenUI's response state (`useStateField`), so `AgentInterface` saves them with the message. `/api/chat` turns them into a short note so the model knows the user's current route on the next turn.
 - **Map data.** Wikipedia lookups and street-route geometry go through the app's own server routes, `/api/wiki` and `/api/street-route`, which validate input and cache results. Street geometry comes from the public OSRM demo server's driving profile: a road overview, not walking or transit directions. When it's unavailable, a labelled direct connection is drawn instead.
