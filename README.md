@@ -48,8 +48,15 @@ Open http://localhost:3000 and try: `I'm in San Francisco for a day, plan a sigh
 
 ## Run with a local model (Ollama)
 
-The demo can also run on a local model through [Ollama](https://ollama.com), with no API key.
+The demo can also run on a local model through [Ollama](https://ollama.com), with no API key required.
 
+You can use **OpenUI / Open Intelligent UI** with any local LLM provider, including:
+- [Ollama](https://ollama.com)
+- [LM Studio](https://lmstudio.ai)
+- [Unsloth Studio](https://unsloth.ai)
+- [AnythingLLM](https://anythingllm.com)
+
+We also have an [OpenWebUI plugin](https://github.com/thesysdev/openwebui-plugin) that can be set up with Open Intelligent UI.
 1. Install Ollama and pull a model. The default is `qwen3.8:27b` (about 18 GB, best with 32 GB of memory or more); `gpt-oss:20b` and `qwen3:8b` are smaller alternatives.
 
    ```bash
@@ -75,8 +82,7 @@ What changes with a local model:
 
 - **No image search.** Gateway's hosted `image_search` is not available, so photos come from Wikipedia.
 - **No output correction.** Gateway validates and corrects the generated OpenUI Lang; locally, the model's output is rendered as written, so larger models give better results.
-- **Speed depends on your hardware.** The first request after Ollama loads the model has to read the whole prompt; later requests reuse it and are much faster. For reasoning models, `REASONING_EFFORT=low` cuts the wait considerably. In testing with `gpt-oss:20b` on an M4 Pro with 24 GB, a full answer took about 53 seconds cold and 23 seconds warm with `REASONING_EFFORT=low`.
-
+- **Speed depends on your hardware.** The first request after Ollama loads the model has to read the whole prompt; later requests reuse it and are much faster. For reasoning models, `REASONING_EFFORT=low` cuts the wait considerably. 
 ## How it works
 
 - **Generation.** `/api/chat` calls OpenUI Gateway's Responses API with `generateSystemPrompt({ cloud: true })`, so Gateway validates and corrects the generated OpenUI Lang against this app's component library. Gateway's hosted `image_search` tool finds current photos; the model copies the returned URLs into `TravelImage.src` and `TravelStop.imageUrl`.
