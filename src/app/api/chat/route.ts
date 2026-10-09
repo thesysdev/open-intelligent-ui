@@ -1,26 +1,42 @@
 import librarySpec from "@/generated/spec.json";
-import { promptOptions } from "@/lib/prompt-options";
+import { localPromptOptions, promptOptions } from "@/lib/prompt-options";
 import { generateSystemPrompt } from "@openuidev/lang-core";
 import OpenAI from "openai";
 import type { ReasoningEffort } from "openai/resources/shared";
 import type { ResponseInputItem, Tool } from "openai/resources/responses/responses";
 
-// OpenUI Gateway speaks the Responses protocol, so the stock OpenAI SDK works
-// against it. The key stays on the server. Created on first request so the app
-// builds without THESYS_API_KEY set.
+// Both backends speak the Responses protocol, so the stock OpenAI SDK works
+// against either and the browser stream is the same.
+//
+// OpenUI Gateway (default): cloud: true lets Gateway build the prompt from this
+// library spec and validate/correct the OpenUI Lang it streams back. Gateway
+// also runs image search itself; the model puts the image URLs into the
+// components (image_search is a Gateway extension to the SDK's tool union).
+//
+// Ollama (MODEL_PROVIDER=ollama, or OLLAMA_MODEL set): a local model. The full
+// OpenUI prompt is built here, there is no image search (photos come from
+// Wikipedia), and the output is not corrected, so results depend on the model.
+const useOllama = process.env.MODEL_PROVIDER === "ollama" || !!process.env.OLLAMA_MODEL;
+const backend = useOllama
+  ? {
+      name: "Ollama",
+      model: process.env.OLLAMA_MODEL ?? "qwen3.8:27b",
+      instructions: generateSystemPrompt({ library: librarySpec, promptOptions: localPromptOptions }),
+      tools: [] as Tool[],
+      connect: () => new OpenAI({ apiKey: "ollama", baseURL: process.env.OLLAMA_BASE_URL ?? "http://localhost:11434/v1" }),
+      missingConfig: undefined,
+    }
+  : {
+      name: "OpenUI Gateway",
+      model: process.env.THESYS_MODEL ?? "openai/gpt-5.5",
+      instructions: generateSystemPrompt({ cloud: true, library: librarySpec, promptOptions }),
+      tools: [{ type: "image_search" } as unknown as Tool],
+      connect: () => new OpenAI({ apiKey: process.env.THESYS_API_KEY, baseURL: "https://api.thesys.dev/v1/embed" }),
+      missingConfig: process.env.THESYS_API_KEY ? undefined : "THESYS_API_KEY is not set. Add it to .env.local, or set MODEL_PROVIDER=ollama to use a local model.",
+    };
+
+// Created on first request so the app builds without any keys set.
 let client: OpenAI | undefined;
-function gateway() {
-  client ??= new OpenAI({ apiKey: process.env.THESYS_API_KEY, baseURL: "https://api.thesys.dev/v1/embed" });
-  return client;
-}
-
-// cloud: true lets Gateway build the prompt from this library spec and
-// validate/correct the OpenUI Lang it streams back.
-const instructions = generateSystemPrompt({ cloud: true, library: librarySpec, promptOptions });
-
-// Gateway runs image search itself; the model gets the results and puts the
-// image URLs into the components. It's a Gateway extension to the SDK's tool union.
-const tools = [{ type: "image_search" } as unknown as Tool];
 
 const MAX_ITEMS = 60;
 const MAX_BODY_BYTES = 1_000_000;
@@ -40,7 +56,7 @@ function describeRouteEdits(content: string): string {
 }
 
 // The browser sends the whole conversation each turn. Keep only user and
-// assistant text: earlier image-search calls already ran inside Gateway, and
+// assistant text: earlier tool calls already ran on the backend, and
 // trusted instructions never come from the browser.
 function toInput(messages: unknown): ResponseInputItem[] | null {
   if (!Array.isArray(messages)) return null;
@@ -70,18 +86,17 @@ export async function POST(req: Request) {
   }
   if (!input) return Response.json({ error: { message: "messages must be a non-empty array" } }, { status: 400 });
 
-  if (!process.env.THESYS_API_KEY) {
-    return Response.json({ error: { message: "THESYS_API_KEY is not set. Add it to .env.local." } }, { status: 500 });
-  }
+  if (backend.missingConfig) return Response.json({ error: { message: backend.missingConfig } }, { status: 500 });
 
   let stream: AsyncIterable<unknown>;
   try {
-    stream = await gateway().responses.create(
+    client ??= backend.connect();
+    stream = await client.responses.create(
       {
-        model: process.env.THESYS_MODEL ?? "openai/gpt-5.5",
-        instructions,
+        model: backend.model,
+        instructions: backend.instructions,
         input,
-        tools,
+        ...(backend.tools.length ? { tools: backend.tools } : {}),
         store: false,
         ...(process.env.REASONING_EFFORT ? { reasoning: { effort: process.env.REASONING_EFFORT as ReasoningEffort } } : {}),
         stream: true,
@@ -89,10 +104,10 @@ export async function POST(req: Request) {
       { signal: req.signal }, // propagate browser aborts
     );
   } catch (err) {
-    // Surface upstream failures (bad key, unknown model) as an HTTP error.
+    // Surface upstream failures (bad key, unknown model, Ollama not running) as an HTTP error.
     const e = err as { status?: number; message?: string };
     console.error(err);
-    return Response.json({ error: { message: e.message ?? "upstream error" } }, { status: e.status ?? 502 });
+    return Response.json({ error: { message: `${backend.name}: ${e.message ?? "upstream error"}` } }, { status: e.status ?? 502 });
   }
 
   // Relay the Responses events as SSE; the client parses them with openAIResponsesAdapter().
