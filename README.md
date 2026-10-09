@@ -40,9 +40,49 @@ Open http://localhost:3000 and try: `I'm in San Francisco for a day, plan a sigh
 
 | Variable | Required | Purpose |
 | --- | --- | --- |
-| `THESYS_API_KEY` | Yes | OpenUI Gateway key, used only on the server. |
+| `THESYS_API_KEY` | Yes, unless using Ollama | OpenUI Gateway key, used only on the server. |
 | `THESYS_MODEL` | No | A `{provider}/{model}` id. Defaults to `openai/gpt-5.5`. |
+| `MODEL_PROVIDER` | No | Set to `ollama` to run a local model instead of Gateway; see [Run with a local model](#run-with-a-local-model-ollama). |
+| `OLLAMA_MODEL` | No | The Ollama model to use. Defaults to `qwen3.8:27b`. |
+| `OLLAMA_BASE_URL` | No | Ollama's OpenAI-compatible endpoint. Defaults to `http://localhost:11434/v1`. |
 
+## Run with a local model (Ollama)
+
+The demo can also run on a local model through [Ollama](https://ollama.com), with no API key required.
+
+You can use **OpenUI / Open Intelligent UI** with any local LLM provider, including:
+- [Ollama](https://ollama.com)
+- [LM Studio](https://lmstudio.ai)
+- [Unsloth Studio](https://unsloth.ai)
+- [AnythingLLM](https://anythingllm.com)
+
+We also have an [OpenWebUI plugin](https://github.com/thesysdev/openwebui-plugin) that can be set up with Open Intelligent UI.
+1. Install Ollama and pull a model. The default is `qwen3.8:27b` (about 18 GB, best with 32 GB of memory or more); `gpt-oss:20b` and `qwen3:8b` are smaller alternatives.
+
+   ```bash
+   ollama pull qwen3.8:27b
+   ```
+
+2. Give the model a larger context window. The OpenUI prompt for this app is about 15,000 tokens, and Ollama's default window is 4,096, which silently cuts the prompt and produces broken output. Either start Ollama with a larger default:
+
+   ```bash
+   OLLAMA_CONTEXT_LENGTH=32768 ollama serve
+   ```
+
+   or create a model variant with a larger window and use its name as `OLLAMA_MODEL`:
+
+   ```bash
+   printf 'FROM qwen3.8:27b\nPARAMETER num_ctx 32768\n' > Modelfile
+   ollama create qwen3.8-32k -f Modelfile
+   ```
+
+3. In `.env.local`, set `MODEL_PROVIDER=ollama` (and `OLLAMA_MODEL` to use another model), then `npm run dev`.
+
+What changes with a local model:
+
+- **No image search.** Gateway's hosted `image_search` is not available, so photos come from Wikipedia.
+- **No output correction.** Gateway validates and corrects the generated OpenUI Lang; locally, the model's output is rendered as written, so larger models give better results.
+- **Speed depends on your hardware.** The first request after Ollama loads the model has to read the whole prompt; later requests reuse it and are much faster. For reasoning models, `REASONING_EFFORT=low` cuts the wait considerably. 
 ## How it works
 
 - **Generation.** `/api/chat` calls OpenUI Gateway's Responses API with `generateSystemPrompt({ cloud: true })`, so Gateway validates and corrects the generated OpenUI Lang against this app's component library. Gateway's hosted `image_search` tool finds current photos; the model copies the returned URLs into `TravelImage.src` and `TravelStop.imageUrl`.
@@ -60,11 +100,11 @@ Open http://localhost:3000 and try: `I'm in San Francisco for a day, plan a sigh
 | `src/app/page.tsx` | The chat page. Renders `AgentInterface` with the component library, theme, welcome screen and starter prompts, and connects it to `/api/chat`. |
 | `src/app/globals.css` | Global CSS reset. |
 | `src/app/shell.css` | Restyles the `AgentInterface` shell (sidebar, composer, starters, message bubbles), using theme tokens where they exist. |
-| `src/app/api/chat/route.ts` | Chat endpoint. Validates the request, forwards the conversation to OpenUI Gateway with image search enabled, and streams the response back. |
+| `src/app/api/chat/route.ts` | Chat endpoint. Validates the request, forwards the conversation to OpenUI Gateway with image search enabled (or to a local Ollama model when `OLLAMA_MODEL` is set), and streams the response back. |
 | `src/app/api/wiki/route.ts` | Wikipedia lookup: photos and coordinates for a place, cached on the server. |
 | `src/app/api/street-route/route.ts` | Street geometry between stops from OSRM, cached on the server. |
 | `src/lib/library.ts` | The OpenUI component library: OpenUI's chat components plus the travel components, with the Travel group's layout note. |
-| `src/lib/prompt-options.ts` | Extra prompt examples and rules for travel answers, added on top of OpenUI's defaults. |
+| `src/lib/prompt-options.ts` | Extra prompt examples and rules for travel answers, added on top of OpenUI's defaults, with a variant for local models that have no image search. |
 | `src/lib/response-theme.ts` | Theme tokens (colors, fonts, radii, shadows, chat bubbles), built with `createTheme()`. |
 | `src/lib/response-theme.css` | Styles OpenUI's built-in components inside answers (buttons, forms, tabs, tables), and defines the `--iui-*` aliases the travel styles use. |
 | `src/lib/route/root.tsx` | The `Card` root every answer renders inside; accepts the travel components as children. |

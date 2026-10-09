@@ -97,18 +97,20 @@ function Photo({ photo, bookmark = false, hideIfMissing = false }: { photo: Part
   // which differs from the raw string when it has spaces or accented letters.
   const primary = safeUrl(photo.src, true);
   const primaryOk = !!primary && !failedUrls.includes(primary);
+  // Without a Wikipedia title, the alt text (usually the place name) is often a valid one.
+  const wikiTitle = photo.wikiTitle || photo.alt;
   useEffect(() => {
-    if (primaryOk || !photo.wikiTitle) return;
+    if (primaryOk || !wikiTitle) return;
     let active = true;
-    const title = photo.wikiTitle;
+    const title = wikiTitle;
     fetchWiki(title).then((info) => { if (active) setWikiImages({ title, urls: info.photos }); });
     return () => { active = false; };
-  }, [primaryOk, photo.wikiTitle]);
+  }, [primaryOk, wikiTitle]);
   // Try the supplied image, then each Wikipedia photo in turn.
-  const src = [primary, ...(wikiImages && wikiImages.title === photo.wikiTitle ? wikiImages.urls : [])]
+  const src = [primary, ...(wikiImages && wikiImages.title === wikiTitle ? wikiImages.urls : [])]
     .map((url) => safeUrl(url, true)).find((url) => url && !failedUrls.includes(url));
   // Nothing left to try: no working URL and Wikipedia already answered (or there is no title).
-  const exhausted = !src && !primaryOk && (!photo.wikiTitle || wikiImages?.title === photo.wikiTitle);
+  const exhausted = !src && !primaryOk && (!wikiTitle || wikiImages?.title === wikiTitle);
   if (exhausted && hideIfMissing) return null;
   const href = safeUrl(photo.link);
   const image = src
@@ -152,8 +154,7 @@ function withAdded(stops: TravelStopData[], added: readonly TravelStopData[]) {
 }
 
 function StopImage({ stop }: { stop: TravelStopData }) {
-  // Without a wikiTitle, the place name is usually a valid Wikipedia title too.
-  return <Photo photo={{ src: stop.imageUrl || stop.photos?.[0], alt: stop.name, wikiTitle: stop.wikiTitle || stop.name, focalX: stop.imageFocalX }} />;
+  return <Photo photo={{ src: stop.imageUrl || stop.photos?.[0], alt: stop.name, wikiTitle: stop.wikiTitle, focalX: stop.imageFocalX }} />;
 }
 
 export function TravelStopRow({ stop }: { stop: TravelStopData }) {
