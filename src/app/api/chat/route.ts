@@ -73,8 +73,13 @@ function toInput(messages: unknown): ResponseInputItem[] | null {
     if (!item || typeof item !== "object") return [];
     const { role, content } = item as { role?: unknown; content?: unknown };
     if (role !== "user" && role !== "assistant") return [];
-    if (typeof content !== "string" && !Array.isArray(content)) return [];
-    return [{ role, content } as ResponseInputItem];
+    if (typeof content === "string") return [{ role, content } as ResponseInputItem];
+    if (!Array.isArray(content) || !content.length || !content.every((part) =>
+      part && typeof part === "object" && typeof part.text === "string"
+      && (part.type === "input_text" || part.type === "output_text" || part.type === "text"))) return [];
+    // Both providers receive the same validated text; never pass arbitrary
+    // browser objects through as Responses content blocks.
+    return [{ role, content: content.map((part) => part.text).join("") } as ResponseInputItem];
   });
   return items.length ? items.slice(-MAX_ITEMS) : null;
 }
