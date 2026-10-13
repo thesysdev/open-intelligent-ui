@@ -121,6 +121,8 @@ export async function POST(req: Request) {
 
   if (backend.missingConfig) return Response.json({ error: { message: backend.missingConfig } }, { status: 500 });
 
+  const upstream = new AbortController();
+  const signal = AbortSignal.any([req.signal, upstream.signal]);
   let events: AsyncIterable<unknown>;
   try {
     client ??= backend.connect();
@@ -135,7 +137,7 @@ export async function POST(req: Request) {
               ...(effort ? { reasoning: { effort } } : {}),
               stream: true,
             },
-            { signal: req.signal }, // propagate browser aborts
+            { signal }, // propagate request and response-reader aborts
           )
         : asResponsesEvents(
             await client.chat.completions.create(
@@ -146,7 +148,7 @@ export async function POST(req: Request) {
                 // OpenRouter reads reasoning.effort; OpenAI-style servers read reasoning_effort.
                 ...(effort ? { reasoning_effort: effort, reasoning: { effort } } : {}),
               } as ChatCompletionCreateParamsStreaming,
-              { signal: req.signal },
+              { signal },
             ),
           );
   } catch (err) {
@@ -158,16 +160,26 @@ export async function POST(req: Request) {
 
   // Relay the Responses events as SSE; the client parses them with openAIResponsesAdapter().
   const encoder = new TextEncoder();
+  const iterator = events[Symbol.asyncIterator]();
+  let cancelled = false;
   const body = new ReadableStream<Uint8Array>({
-    async start(controller) {
+    async pull(controller) {
       try {
-        for await (const event of events) controller.enqueue(encoder.encode(`data: ${JSON.stringify(event)}\n\n`));
+        const event = await iterator.next();
+        if (cancelled) return;
+        if (event.done) controller.close();
+        else controller.enqueue(encoder.encode(`data: ${JSON.stringify(event.value)}\n\n`));
       } catch (err) {
+        if (cancelled) return;
         const message = err instanceof Error ? err.message : String(err);
         controller.enqueue(encoder.encode(`data: ${JSON.stringify({ type: "error", message })}\n\n`));
-      } finally {
         controller.close();
       }
+    },
+    async cancel(reason) {
+      cancelled = true;
+      upstream.abort(reason);
+      await iterator.return?.();
     },
   });
 
