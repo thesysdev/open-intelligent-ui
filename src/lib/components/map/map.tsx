@@ -101,8 +101,14 @@ export const MapView = defineComponent({
     const height = `min(${Math.min(720, Math.max(200, props.height ?? 400))}px, max(280px, 82vw))`;
 
     const places = placesOf(props.markers, streaming);
-    const visible = places.filter((p) => group === "all" || p.category === group);
     const categories = Array.from(new Set(places.map((p) => p.category).filter((c): c is string => !!c)));
+    const currentGroup = group === "all" || categories.includes(group) ? group : "all";
+    const visible = places.filter((p) => currentGroup === "all" || p.category === currentGroup);
+    useEffect(() => {
+      // Reactive marker lists can remove a category after it is selected.
+      // Fall back immediately, and do not revive the old filter later.
+      if (group !== currentGroup) setGroup(currentGroup);
+    }, [group, currentGroup]);
     const placeSignature = JSON.stringify(places.map((p) => [p.key, p.lat, p.lng, p.icon, p.category, p.order]));
     const routingKey = visible.map((p) => `${p.lng},${p.lat}`).join(";");
     const streetPoints = useStreetRoute(routingKey, !!props.route);
@@ -203,12 +209,12 @@ export const MapView = defineComponent({
         anchored.current = true;
       }
       // Object identities change every token; reconcile completed primitive values only.
-    }, [lib, ready, placeSignature, group, selected]);
+    }, [lib, ready, placeSignature, currentGroup, selected]);
 
     // Once streaming ends (or the filter changes), fly to fit the markers.
     useEffect(() => {
       if (!ready || !map.current || streaming || !fitPoints.current.length) return;
-      const nextFit = JSON.stringify([group, routingKey]);
+      const nextFit = JSON.stringify([currentGroup, routingKey]);
       if (fitSignature.current === nextFit) return;
       fitSignature.current = nextFit;
       // A filter change must not keep displaying the previous group's route.
@@ -222,7 +228,7 @@ export const MapView = defineComponent({
       // fitBounds may not emit moveend when the viewport already matches.
       const timer = window.setTimeout(() => setFramedKey(routingKey), FLY_MS + 40);
       return () => clearTimeout(timer);
-    }, [ready, streaming, routingKey, group]);
+    }, [ready, streaming, routingKey, currentGroup]);
 
     // After framing, draw the route line once; later geometry changes update it in place.
     useEffect(() => {
@@ -269,7 +275,7 @@ export const MapView = defineComponent({
           <div className="iui-map-top-left">
             {categories.length > 1 && (
               <label className="iui-map-pill iui-map-filter">
-                <select aria-label="Filter places" value={group} onChange={(event) => setGroup(event.target.value)}>
+                <select aria-label="Filter places" value={currentGroup} onChange={(event) => setGroup(event.target.value)}>
                   <option value="all">All places</option>
                   {categories.map((category) => <option key={category} value={category}>{category}</option>)}
                 </select>
