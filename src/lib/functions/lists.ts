@@ -149,11 +149,17 @@ export const Range = defineFunction({
   returns: z.array(z.number()),
   fn: ({ start, end, step = 1 }) => {
     if (step === 0 || !Number.isFinite(step)) throw new Error("step must be a non-zero number");
-    const count = Math.max(0, Math.ceil((end - start) / step));
-    if (count > MAX_ITEMS) throw new Error(`more than ${MAX_ITEMS} items`);
+    let count = Math.max(0, Math.ceil((end - start) / step));
     const whole = Number.isInteger(start) && Number.isInteger(step);
     // Rounding keeps fractional steps clean: 0.1 * 3 is 0.30000000000000004
-    return Array.from({ length: count }, (_, i) => (whole ? start + i * step : Number((start + i * step).toPrecision(12))));
+    const at = (i: number) => whole ? start + i * step : Number((start + i * step).toPrecision(12));
+    // A quotient like (0.4 - 0.1) / 0.1 can be just above 3. The
+    // rounded final value must still obey the exclusive endpoint contract.
+    if (count > 0 && (step > 0 ? at(count - 1) >= end : at(count - 1) <= end)) count -= 1;
+    if (count > MAX_ITEMS) throw new Error(`more than ${MAX_ITEMS} items`);
+    // For very narrow ranges several values may round onto or past end.
+    // Check every rounded output, after enforcing the allocation bound.
+    return Array.from({ length: count }, (_, i) => at(i)).filter((n) => step > 0 ? n < end : n > end);
   },
 });
 
