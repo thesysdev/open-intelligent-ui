@@ -174,6 +174,13 @@ export const Input = defineComponent({
     const numeric = props.type === "number";
     // A number field shows what is typed ("1." or "-") until it parses.
     const [draft, setDraft] = useState<string | null>(null);
+    const writtenValue = useRef<unknown>(field.value);
+    useEffect(() => {
+      // @Set/@Reset and other controls can update the bound value while this
+      // field is focused. A draft only belongs to this field's last edit.
+      if (!Object.is(field.value, writtenValue.current)) setDraft(null);
+      writtenValue.current = field.value;
+    }, [field.value]);
     const shown = draft ?? (numeric ? (typeof field.value === "number" ? String(field.value) : String(field.value ?? "")) : String(field.value ?? ""));
     return (
       <Field label={props.label}>
@@ -189,8 +196,13 @@ export const Input = defineComponent({
             if (!numeric) return field.setValue(text);
             setDraft(text);
             const parsed = Number(text.replace(/,/g, ""));
-            if (text.trim() === "") field.setValue(null as unknown as number);
-            else if (Number.isFinite(parsed)) field.setValue(parsed);
+            if (text.trim() === "") {
+              writtenValue.current = null;
+              field.setValue(null as unknown as number);
+            } else if (Number.isFinite(parsed)) {
+              writtenValue.current = parsed;
+              field.setValue(parsed);
+            }
           }}
           onBlur={() => setDraft(null)}
         />
