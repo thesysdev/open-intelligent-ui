@@ -13,7 +13,10 @@ async function query(host: string, params: Record<string, string>): Promise<Page
   const url = `https://${host}/w/api.php?${new URLSearchParams({ action: "query", format: "json", formatversion: "2", ...params })}`;
   const response = await fetch(url, { headers: HEADERS, signal: AbortSignal.timeout(8000) });
   if (!response.ok) throw new Error(`${host} ${response.status}`);
-  const data: { query?: { pages?: Page[] } } = await response.json();
+  const data: { error?: { code?: string }; query?: { pages?: Page[] } } = await response.json();
+  // MediaWiki can report maxlag, rate limits and internal errors with HTTP 200.
+  // These are retryable failures, not empty search results to cache.
+  if (data.error) throw new Error(`MediaWiki ${data.error.code ?? "query failed"}`);
   return (data.query?.pages ?? []).sort((a, b) => (a.index ?? 0) - (b.index ?? 0));
 }
 
