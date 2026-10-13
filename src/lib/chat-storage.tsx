@@ -43,7 +43,13 @@ export function localChatStorage(): ChatStorage {
       async createThread(firstMessage) {
         const thread: Thread = { id: crypto.randomUUID(), title: titleOf(firstMessage as Message), createdAt: new Date().toISOString() };
         const threads = [thread, ...read<Thread[]>(THREADS, [])];
-        for (const old of threads.slice(MAX_THREADS)) localStorage.removeItem(messagesKey(old.id));
+        for (const old of threads.slice(MAX_THREADS)) {
+          try {
+            localStorage.removeItem(messagesKey(old.id));
+          } catch {
+            // Eviction is best effort too: blocked storage must not stop chat.
+          }
+        }
         write(THREADS, threads.slice(0, MAX_THREADS));
         write(messagesKey(thread.id), [firstMessage]);
         return thread;
