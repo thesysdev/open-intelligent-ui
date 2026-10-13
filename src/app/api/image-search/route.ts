@@ -18,7 +18,8 @@ async function query(host: string, params: Record<string, string>): Promise<Page
 }
 
 // Words that say what the photo shows; an article must share one with the query.
-const words = (text: string) => text.toLowerCase().split(/[^\p{L}\p{N}]+/u).filter((w) => w.length > 3);
+const CONNECTING_WORDS = new Set(["an", "and", "the", "of", "in", "at", "on", "to", "for", "with"]);
+const words = (text: string) => text.toLowerCase().split(/[^\p{L}\p{N}]+/u).filter((w) => w.length > 1 && !CONNECTING_WORDS.has(w));
 
 type TitledPage = Page & { title?: string };
 
