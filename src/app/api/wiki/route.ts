@@ -9,8 +9,8 @@ const cache = new Map<string, WikiInfo>();
 const HEADERS = { "User-Agent": "open-intelligent-ui (https://github.com/thesysdev/open-intelligent-ui)" };
 
 // A missing article is a real answer (cached); any other failure is retried next time.
-async function get(url: string) {
-  const response = await fetch(url, { headers: HEADERS });
+async function get(url: string, signal: AbortSignal) {
+  const response = await fetch(url, { headers: HEADERS, signal });
   if (response.status === 404) return {};
   if (!response.ok) throw new Error(`Wikipedia ${response.status}`);
   return response.json();
@@ -23,9 +23,10 @@ export async function GET(req: Request) {
   if (!info) {
     const t = encodeURIComponent(title.replace(/ /g, "_"));
     try {
+      const signal = AbortSignal.any([req.signal, AbortSignal.timeout(8000)]);
       const [summary, media]: [WikiSummary, WikiMedia] = await Promise.all([
-        get(`https://en.wikipedia.org/api/rest_v1/page/summary/${t}`),
-        get(`https://en.wikipedia.org/api/rest_v1/page/media-list/${t}`),
+        get(`https://en.wikipedia.org/api/rest_v1/page/summary/${t}`, signal),
+        get(`https://en.wikipedia.org/api/rest_v1/page/media-list/${t}`, signal),
       ]);
       // Lead image first, then up to two more photos; skip maps, logos, flags and SVGs.
       const photos: string[] = [];
