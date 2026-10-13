@@ -15,10 +15,20 @@ const MAX_THREADS = 50;
 function read<T>(key: string, fallback: T): T {
   try {
     const raw = localStorage.getItem(key);
-    return raw ? (JSON.parse(raw) as T) : fallback;
+    if (!raw) return fallback;
+    const value: unknown = JSON.parse(raw);
+    return Array.isArray(fallback) && !Array.isArray(value) ? fallback : value as T;
   } catch {
     return fallback;
   }
+}
+
+function readThreads(): Thread[] {
+  return read<unknown[]>(THREADS, []).filter((value): value is Thread => {
+    if (!value || typeof value !== "object") return false;
+    const thread = value as Partial<Thread>;
+    return typeof thread.id === "string" && typeof thread.title === "string" && typeof thread.createdAt === "string";
+  });
 }
 
 function write(key: string, value: unknown) {
@@ -38,11 +48,11 @@ export function localChatStorage(): ChatStorage {
   return {
     thread: {
       async listThreads() {
-        return { threads: read<Thread[]>(THREADS, []) };
+        return { threads: readThreads() };
       },
       async createThread(firstMessage) {
         const thread: Thread = { id: crypto.randomUUID(), title: titleOf(firstMessage as Message), createdAt: new Date().toISOString() };
-        const threads = [thread, ...read<Thread[]>(THREADS, [])];
+        const threads = [thread, ...readThreads()];
         for (const old of threads.slice(MAX_THREADS)) localStorage.removeItem(messagesKey(old.id));
         write(THREADS, threads.slice(0, MAX_THREADS));
         write(messagesKey(thread.id), [firstMessage]);
@@ -52,11 +62,11 @@ export function localChatStorage(): ChatStorage {
         return read<Message[]>(messagesKey(threadId), []);
       },
       async updateThread(thread) {
-        write(THREADS, read<Thread[]>(THREADS, []).map((t) => (t.id === thread.id ? { ...t, ...thread, isPending: undefined } : t)));
+        write(THREADS, readThreads().map((t) => (t.id === thread.id ? { ...t, ...thread, isPending: undefined } : t)));
         return thread;
       },
       async deleteThread(id) {
-        write(THREADS, read<Thread[]>(THREADS, []).filter((t) => t.id !== id));
+        write(THREADS, readThreads().filter((t) => t.id !== id));
         try {
           localStorage.removeItem(messagesKey(id));
         } catch {}
