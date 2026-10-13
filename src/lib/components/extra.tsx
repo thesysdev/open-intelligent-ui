@@ -128,21 +128,33 @@ export const Code = defineComponent({
   description: "Code block with a copy button.",
   component: function CodeView({ props }) {
     const [copied, setCopied] = useState(false);
+    const [copyError, setCopyError] = useState(false);
+    const resetTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+    useEffect(() => () => { if (resetTimer.current) clearTimeout(resetTimer.current); }, []);
     const code = str(props.code);
-    const copy = () =>
-      void navigator.clipboard?.writeText(code).then(() => {
+    const copy = async () => {
+      setCopyError(false);
+      try {
+        if (!navigator.clipboard) throw new Error("Clipboard unavailable");
+        await navigator.clipboard.writeText(code);
         setCopied(true);
-        setTimeout(() => setCopied(false), 1500);
-      });
+        if (resetTimer.current) clearTimeout(resetTimer.current);
+        resetTimer.current = setTimeout(() => setCopied(false), 1500);
+      } catch {
+        setCopied(false);
+        setCopyError(true);
+      }
+    };
     return (
       <div className="iui-codeblock">
         <div className="iui-codeblock-head">
           <span>{str(props.language) || "code"}</span>
-          <button type="button" onClick={copy} aria-label="Copy code">
+          <button type="button" onClick={() => void copy()} aria-label="Copy code">
             {copied ? <Check size={14} /> : <Copy size={14} />}
             {copied ? "Copied" : "Copy"}
           </button>
         </div>
+        {copyError && <span role="status">Unable to copy code. Select and copy it manually.</span>}
         <pre>
           <code>{code}</code>
         </pre>
@@ -266,4 +278,3 @@ export const Celebration = defineComponent({
     );
   },
 });
-
