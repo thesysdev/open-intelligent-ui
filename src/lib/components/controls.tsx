@@ -267,16 +267,30 @@ export const SegmentedControl = defineComponent({
   component: function SegmentedView({ props, statementId }) {
     const field = useStateField(useFieldName(undefined, statementId), props.value);
     const value = field.value == null ? "" : String(field.value);
+    const choices = optionList(props.options);
+    const selected = choices.findIndex((o) => o.value === value);
+    const tabStop = selected < 0 ? 0 : selected;
     return (
       <div className={cx("iui-segmented", props.block && "iui-block")} role="radiogroup">
-        {optionList(props.options).map((o, i) => (
+        {choices.map((o, i) => (
           <button
             key={`${o.value}-${i}`}
             type="button"
             role="radio"
             aria-checked={o.value === value}
+            tabIndex={i === tabStop ? 0 : -1}
             className={cx(o.value === value && "is-selected")}
             onClick={() => field.setValue(o.value)}
+            onKeyDown={(event) => {
+              const direction = event.key === "ArrowRight" || event.key === "ArrowDown" ? 1
+                : event.key === "ArrowLeft" || event.key === "ArrowUp" ? -1 : 0;
+              const next = event.key === "Home" ? 0 : event.key === "End" ? choices.length - 1
+                : direction ? (i + direction + choices.length) % choices.length : null;
+              if (next === null) return;
+              event.preventDefault();
+              field.setValue(choices[next].value);
+              event.currentTarget.parentElement?.querySelectorAll("button")[next]?.focus();
+            }}
           >
             {o.label}
           </button>
