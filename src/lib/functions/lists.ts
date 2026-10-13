@@ -4,6 +4,19 @@ import { list, MAX_ITEMS, read, same } from "./shared";
 
 const index = (i: number, length: number) => (i < 0 ? length + i : i);
 
+// Canonical keys follow same(): record order is immaterial and numeric ids
+// compare with their exact string form. Type tags keep true/"true" distinct.
+function valueKey(item: unknown): string {
+  if (item === null) return "null";
+  if (Array.isArray(item)) return `array:${JSON.stringify(item.map(valueKey))}`;
+  if (typeof item === "object") {
+    const record = item as Record<string, unknown>;
+    return `object:${JSON.stringify(Object.keys(record).sort().map((key) => [key, valueKey(record[key])]))}`;
+  }
+  if (typeof item === "string" && String(Number(item)) === item) return `number:${item}`;
+  return `${typeof item}:${String(item)}`;
+}
+
 export const Append = defineFunction({
   name: "Append",
   description: "Copy of the list with item added at the end",
@@ -126,7 +139,7 @@ export const Unique = defineFunction({
   fn: ({ list }) => {
     const seen = new Set<string>();
     return list.filter((item) => {
-      const key = item !== null && typeof item === "object" ? `o:${JSON.stringify(item)}` : `p:${String(item)}`;
+      const key = valueKey(item);
       if (seen.has(key)) return false;
       seen.add(key);
       return true;
