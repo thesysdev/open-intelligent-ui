@@ -2,6 +2,8 @@
 
 **An open-source implementation of the "Intelligent UI" experience introduced in ChatGPT, built on [OpenUI](https://openui.com).**
 
+**[Try the live demo](https://www.openui.com/demo/intelligent-ui)**
+
 In ChatGPT's Intelligent UI, a request such as "plan a day in San Francisco" returns an interactive answer (a map, photographs and an editable itinerary) rather than text. This repository reproduces that experience with open-source components, so that the same kind of interface can be built, modified and shipped inside any application.
 
 [OpenUI](https://github.com/thesysdev/openui) is an open standard for Generative UI.
