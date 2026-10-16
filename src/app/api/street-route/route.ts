@@ -21,7 +21,10 @@ export async function GET(req: Request) {
       if (!response.ok) throw new Error(`OSRM ${response.status}`);
       const data: { code?: string; routes?: { geometry?: { coordinates?: [number, number][] } }[] } = await response.json();
       const coordinates = data.routes?.[0]?.geometry?.coordinates ?? [];
-      if (data.code !== "Ok" || coordinates.length < 2) throw new Error("No street route");
+      if (data.code !== "Ok" || !Array.isArray(coordinates) || coordinates.length < 2
+        || !coordinates.every((point) => Array.isArray(point) && point.length === 2
+          && point.every((value) => typeof value === "number" && Number.isFinite(value))
+          && Math.abs(point[0]) <= 180 && Math.abs(point[1]) <= 90)) throw new Error("No street route");
       route = coordinates.map(([lng, lat]) => [lat, lng]);
       if (cache.size >= 200) cache.delete(cache.keys().next().value!);
       cache.set(key, route);
