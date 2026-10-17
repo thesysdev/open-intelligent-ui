@@ -36,9 +36,14 @@ export const Pivot = defineFunction({
   returns: z.array(z.record(z.string(), z.union([z.string(), z.number()]))),
   fn: ({ rows, rowKey, colKey, field, agg: how }) => {
     const cols = [...groups(rows, colKey).keys()].map(String);
+    // The output schema uses key for the row label; a category of that name
+    // cannot be represented without silently replacing the label.
+    if (cols.includes("key")) throw new Error('column name "key" is reserved for row labels');
     return [...groups(rows, rowKey)].map(([k, members]) => {
       const out: Record<string, string | number> = { key: k };
-      for (const col of cols) out[col] = 0;
+      for (const col of cols) {
+        Object.defineProperty(out, col, { value: 0, enumerable: true, writable: true, configurable: true });
+      }
       for (const [c, cell] of groups(members, colKey)) out[String(c)] = aggregate(cell, field, defaultAgg(field, how));
       return out;
     });

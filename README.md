@@ -30,6 +30,8 @@ The model streams OpenUI Lang 1.0, and the app renders it with a library of prim
 - **Functions:** 59 generic `@functions` (`src/lib/functions/`) next to the 1.0 built-ins, so an answer can compute with its own state: lists (`@Append`, `@Remove`, `@Update`, `@Toggle`, `@Includes`, `@Range`, `@Chunk`, `@Shuffle`, ...), numbers (`@Pow`, `@Random`, `@Clamp`, `@Percent`, `@Allocate` for splits that add up to the cent, `@Payment` for loans, `@Convert` for units), text (`@Format`, `@Join`, `@Split`, `@Replace`, `@Capitalize`, `@Plural`, `@Duration`, `@Default`), colors (`@MixColor`), dates (`@Today`, `@FormatDate`, `@AddDays`, `@AddMonths`, `@DaysBetween`, `@MonthsBetween`, `@StartOf`) and data for dashboards (`@GroupBy`, `@Pivot`, `@Top`, `@Between`, `@Bucket`, `@Cumulative`, `@MovingAvg`, `@Change`, `@Histogram`, `@Stats`). A bad argument makes a call evaluate to null, as in 1.0.
 - **Actions:** `@CopyToClipboard(text)`, for copying a shopping list or a split.
 
+`@Pivot` reserves its output field `key` for row labels. A category named `key` evaluates to null with an error instead of overwriting the label; other property names, including `__proto__`, remain valid categories.
+
 The dev-only page `/gallery` renders hand-written programs: a working answer for each of the 16 Intelligent UI examples (from the 7-speed bike to the arcade game), two dashboards over demo data, the prompt's worked examples, and programs that exercise every component.
 
 ## Setup
@@ -176,4 +178,3 @@ npm run bench -- --answers <dir>        # re-check and re-shoot saved <id>.oui a
 ```
 
 Results go to `bench-out/<model>-<time>/`: `answers/`, `shots/`, `report.json` and `report.md`. Other options: `--only id,id`, `--kind tool|dashboard`, `--widths`, `--no-shots`, `--concurrency`, `--temperature`, `--max-tokens`, `--app`.
-
