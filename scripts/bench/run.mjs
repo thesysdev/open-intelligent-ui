@@ -264,3 +264,10 @@ const md = [
 writeFileSync(path.join(out, "report.md"), md.join("\n"));
 console.log(JSON.stringify(summary, null, 2));
 console.log(`Report: ${path.join(out, "report.md")}`);
+
+// Keep the reports even when automation must reject this run.
+if (!summary.answered || summary.failed || done.some((entry) => {
+  const c = entry.check;
+  return !c.parsed || c.errors.length || c.unresolved.length || c.unknownNames.length || c.unknownComponents.length ||
+    Object.values(entry.render ?? {}).some((r) => r.errors.length || r.console.length || r.overflow);
+})) process.exitCode = 1;
