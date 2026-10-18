@@ -175,7 +175,7 @@ npm run bench -- --fake                 # the hand-written programs stand in for
 npm run bench -- --answers <dir>        # re-check and re-shoot saved <id>.oui answers
 ```
 
-Results go to `bench-out/<model>-<time>/`: `answers/`, `shots/`, `report.json` and `report.md`. Other options: `--only id,id`, `--kind tool|dashboard`, `--widths`, `--no-shots`, `--concurrency`, `--temperature`, `--max-tokens`, `--app`.
+Results go to `bench-out/<model>-<time>/`: `answers/`, `shots/`, `report.json` and `report.md`. If browser setup or screenshot rendering fails, answers and both reports are preserved, `summary.screenshotError` records the failure, browser cleanup is attempted, and the command exits unsuccessfully. Other options: `--only id,id`, `--kind tool|dashboard`, `--widths`, `--no-shots`, `--concurrency`, `--temperature`, `--max-tokens`, `--app`.
 
 ## License
 
