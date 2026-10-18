@@ -1,6 +1,6 @@
 import { defineFunction } from "@openuidev/react-lang";
 import { z } from "zod/v4";
-import { isoDay, parseDate } from "./dates";
+import { isoDay, parseDate, utcDay } from "./dates";
 import { agg, aggregate, finite, groups, list, MAX_ITEMS, numbers, read, toNum, type Agg } from "./shared";
 
 const keyValue = () => z.array(z.object({ key: z.union([z.string(), z.number()]), value: z.number() }));
@@ -90,14 +90,14 @@ function periodStart(day: number, unit: "day" | "week" | "month"): number {
   if (unit === "day") return day;
   if (unit === "week") return day - ((new Date(day * 86_400_000).getUTCDay() + 6) % 7); // Monday
   const d = new Date(day * 86_400_000);
-  return Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), 1) / 86_400_000;
+  return utcDay(d.getUTCFullYear(), d.getUTCMonth(), 1);
 }
 
 function nextPeriod(start: number, unit: "day" | "week" | "month"): number {
   if (unit === "day") return start + 1;
   if (unit === "week") return start + 7;
   const d = new Date(start * 86_400_000);
-  return Date.UTC(d.getUTCFullYear(), d.getUTCMonth() + 1, 1) / 86_400_000;
+  return utcDay(d.getUTCFullYear(), d.getUTCMonth() + 1, 1);
 }
 
 export const Bucket = defineFunction({
