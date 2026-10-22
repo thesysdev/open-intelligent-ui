@@ -18,7 +18,10 @@ type Spec = {
 
 const COLORS = 6;
 const seriesColor = (i: number) => `var(--iui-chart-${(i % COLORS) + 1})`;
-const num = (value: unknown) => (typeof value === "number" && Number.isFinite(value) ? value : Number(value) || 0);
+const num = (value: unknown) => {
+  const number = typeof value === "number" ? value : Number(value) || 0;
+  return Number.isFinite(number) ? number : 0;
+};
 const label = (row: Row, x: string) => String(row[x] ?? "");
 
 function makeFormat(kind: string | undefined, currency: string | undefined): Format {
