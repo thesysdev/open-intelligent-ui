@@ -180,3 +180,14 @@ Results go to `bench-out/<model>-<time>/`: `answers/`, `shots/`, `report.json` a
 ## License
 
 [MIT](LICENSE)
+
+## Chess coach (`/chess`)
+
+A chat at `/chess` that answers chess questions with a playable board: the game is a list of moves in a `$moves` variable, and the board, score sheet and position checks recompute on every move without another model call.
+
+- Board modes: `view` (a diagram with arrows and highlights), `free` (move both sides), `computer` (play one side against a small built-in engine at easy, medium or hard) and `line` (play one side of an opening or puzzle solution; the board answers with the other side, rejects wrong moves and can show a hint).
+- Rules: [chess.js](https://github.com/jhlywa/chess.js) checks moves, check, mate and draws. The engine in `src/lib/chess/position.ts` is a short alpha-beta search (material, piece-square tables, captures and checks), good for sparring and hints, not deep analysis.
+- Components: `ChessBoard`, `MoveList`, `PositionSummary`, `EvalBar`, `ChessPiece` in `src/lib/chess/components.tsx`. Pieces are Unicode glyphs, so there are no image assets.
+- Functions: `@Fen`, `@Position`, `@LegalMoves`, `@PlayMove`, `@LineProgress`, `@BestMove`, `@Score`.
+- Prompt: `src/lib/chess/prompt-options.ts` (an opening trainer, a sparring game and a puzzle as worked examples); API route `src/app/api/chess/route.ts`. `/preview?library=chess` renders a program with this library.
+- After changing the library: `npm run generate && npm run prompt`.
