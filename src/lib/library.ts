@@ -34,19 +34,16 @@ import { Badge, Caption, Label, Link, List, ListItem, Markdown, Text, Title } fr
  * Generic @functions let a page compute with its own state, so an answer can be
  * a working tool rather than a form sent back to the assistant.
  */
-export const library = createLibrary({
-  root: "Col",
-  components: [
+export const baseComponents = [
     Col, Row, Box, Grid, Card, Carousel, Popover, Divider, Spacer,
     Title, Text, Caption, Label, Badge, Link, List, ListItem, Markdown, Quote, Code, MathBlock,
     Button, IconButton, Pressable, Input, TextArea, Select, SegmentedControl, Slider, Checkbox, RadioGroup, DatePicker, Timer, Form,
     SearchImage, Image, Icon, Table, Chart, MapView, MapMarker, YouTube,
     Flashcard, Celebration,
     ...svgComponents, HtmlView,
-  ],
-  functions,
-  actions,
-  componentGroups: [
+];
+
+export const baseComponentGroups = [
     {
       name: "Layout",
       components: ["Col", "Row", "Box", "Grid", "Card", "Carousel", "Popover", "Divider", "Spacer"],
@@ -67,7 +64,14 @@ export const library = createLibrary({
     { name: "Media and data", components: ["SearchImage", "Image", "Icon", "Table", "Chart", "Map", "MapMarker", "YouTube"] },
     { name: "Play", components: ["Flashcard", "Celebration"] },
     { name: "Drawing", components: ["Svg", "G", "Circle", "Ellipse", "Rect", "Line", "Path", "Polyline", "Polygon", "SvgText", "HtmlView"] },
-  ],
+];
+
+export const library = createLibrary({
+  root: "Col",
+  components: baseComponents,
+  functions,
+  actions,
+  componentGroups: baseComponentGroups,
 });
 
 // The CLI (npm run prompt) picks up these exports by name.

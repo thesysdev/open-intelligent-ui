@@ -180,3 +180,18 @@ Results go to `bench-out/<model>-<time>/`: `answers/`, `shots/`, `report.json` a
 ## License
 
 [MIT](LICENSE)
+
+## Clash Royale deck coach (`/coach`)
+
+A second chat at `/coach` that answers Clash Royale questions with live card UI: decks held in a `$deck` variable, tap-to-swap benches, an elixir meter and deck health checks that recompute on every swap without another model call.
+
+- Card data: `src/lib/coach/cards.ts` (hand-written table of names, elixir, rarity, type, roles; may lag balance changes).
+- Components: `GameCard`, `ElixirMeter`, `DeckSummary` in `src/lib/coach/components.tsx`.
+- Card art: `npm run cards:art` copies card images from [RoyaleAPI/cr-api-assets](https://github.com/RoyaleAPI/cr-api-assets) into `public/cards/` (gitignored, Supercell fan content). Without them, tiles fall back to rarity colors and monograms.
+- Functions: `@Elixir`, `@CardInfo`, `@DeckStats`, `@CardsWith`, `@SwapCard`.
+- Battle sim: `DeckSim` (`src/lib/coach/sim.ts`) plays 150 seeded 3-minute matches against each of 8 archetypes, with elixir, a cycling 4-card hand and rules of thumb for which cards answer which threats, scored against a baseline ladder deck. It reruns on every swap and shows what changed. A toy model, not real match data.
+- Playable arena: `Arena` embeds `public/arena/` (a sandboxed iframe) so the user can battle the current deck against an archetype AI: towers, river and bridges, elixir, a cycling hand, spells, buildings and spawners, 3 minutes plus overtime. Unit stats in `public/arena/cards.js` are approximate. Restarts with the new deck on every swap.
+- Prompt: `src/lib/coach/prompt-options.ts`; API route `src/app/api/coach/route.ts` shares `src/lib/chat-handler.ts` with `/api/chat`.
+- After changing the library: `npm run generate && npm run prompt`.
+
+Fan-made demo, not affiliated with or endorsed by Supercell.
