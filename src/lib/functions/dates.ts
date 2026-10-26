@@ -5,6 +5,13 @@ import { date } from "./shared";
 const DAY = 86_400_000;
 const DATE_ONLY = /^(\d{4})-(\d{2})-(\d{2})$/;
 
+/** UTC calendar construction without Date.UTC's special offset for years 0–99. */
+export function utcDay(year: number, month: number, day: number): number {
+  const at = new Date(0);
+  at.setUTCFullYear(year, month, day);
+  return at.getTime() / DAY;
+}
+
 /**
  * A date as a calendar day (days since 1970-01-01) plus, for a timestamp, the
  * instant. "YYYY-MM-DD" is a calendar date with no time zone; a timestamp or an
@@ -17,15 +24,15 @@ export function parseDate(value: string | number): Parsed {
     const m = DATE_ONLY.exec(value.trim());
     if (m) {
       const [y, mo, d] = [Number(m[1]), Number(m[2]), Number(m[3])];
-      const utc = Date.UTC(y, mo - 1, d);
-      const check = new Date(utc);
+      const day = utcDay(y, mo - 1, d);
+      const check = new Date(day * DAY);
       if (check.getUTCMonth() !== mo - 1 || check.getUTCDate() !== d) throw new Error(`invalid date "${value}"`);
-      return { day: utc / DAY, instant: null };
+      return { day, instant: null };
     }
   }
   const instant = new Date(value);
   if (Number.isNaN(instant.getTime())) throw new Error(`invalid date "${value}"`);
-  return { day: Date.UTC(instant.getFullYear(), instant.getMonth(), instant.getDate()) / DAY, instant };
+  return { day: utcDay(instant.getFullYear(), instant.getMonth(), instant.getDate()), instant };
 }
 
 export function isoDay(day: number): string {
@@ -106,8 +113,8 @@ export const AddMonths = defineFunction({
   fn: ({ date, months }) => {
     const [y, m, d] = ymd(parseDate(date).day);
     const target = m + Math.trunc(months);
-    const last = new Date(Date.UTC(y, target + 1, 0)).getUTCDate();
-    return isoDay(Date.UTC(y, target, Math.min(d, last)) / DAY);
+    const last = new Date(utcDay(y, target + 1, 0) * DAY).getUTCDate();
+    return isoDay(utcDay(y, target, Math.min(d, last)));
   },
 });
 
@@ -135,7 +142,7 @@ export const StartOf = defineFunction({
     const day = parseDate(date).day;
     const [y, m] = ymd(day);
     if (unit === "week") return isoDay(day - ((new Date(day * DAY).getUTCDay() + 6) % 7));
-    return isoDay(Date.UTC(y, unit === "month" ? m : 0, 1) / DAY);
+    return isoDay(utcDay(y, unit === "month" ? m : 0, 1));
   },
 });
 
