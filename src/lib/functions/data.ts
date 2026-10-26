@@ -10,7 +10,21 @@ const defaultAgg = (field: string | undefined, how: Agg | undefined): Agg => how
 
 /** Copy of each row with `field` replaced; field "" maps a list of numbers. */
 function mapField(rows: unknown[], field: string, values: number[]): unknown[] {
-  return rows.map((row, i) => (field ? { ...(row as object), [field]: values[i] } : values[i]));
+  const path = field.split(".");
+  function replace(row: unknown, keys: string[], value: number): unknown {
+    const source = row !== null && typeof row === "object" ? row : {};
+    const copy = Array.isArray(source) ? [...source] : { ...source };
+    const [key, ...rest] = keys;
+    const child = Object.hasOwn(source, key!) ? (source as Record<string, unknown>)[key!] : undefined;
+    // Define an own data property, including keys such as __proto__, and
+    // copy every parent so updating a series never mutates its input rows.
+    Object.defineProperty(copy, key!, {
+      value: rest.length ? replace(child, rest, value) : value,
+      enumerable: true, writable: true, configurable: true,
+    });
+    return copy;
+  }
+  return rows.map((row, i) => (field ? replace(row, path, values[i]!) : values[i]));
 }
 
 export const GroupBy = defineFunction({
