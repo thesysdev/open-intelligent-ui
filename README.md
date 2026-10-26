@@ -175,7 +175,7 @@ npm run bench -- --fake                 # the hand-written programs stand in for
 npm run bench -- --answers <dir>        # re-check and re-shoot saved <id>.oui answers
 ```
 
-Results go to `bench-out/<model>-<time>/`: `answers/`, `shots/`, `report.json` and `report.md`. Other options: `--only id,id`, `--kind tool|dashboard`, `--widths`, `--no-shots`, `--concurrency`, `--temperature`, `--max-tokens`, `--app`.
+Results go to `bench-out/<model>-<time>/`: `answers/`, `shots/`, `report.json` and `report.md`. Other options: `--only id,id`, `--kind tool|dashboard`, `--widths`, `--no-shots`, `--concurrency`, `--temperature`, `--max-tokens`, `--app`. Prompt ids are trimmed and must exist; selectors must match at least one prompt. Concurrency, token limits and widths must be positive whole numbers; temperature must be finite and nonnegative. Invalid options fail before creating output.
 
 ## License
 
