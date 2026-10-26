@@ -1,0 +1,20 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' http: https:; style-src 'unsafe-inline'; img-src http: https: data:; connect-src 'none'; frame-src 'none'; form-action 'none'; base-uri 'none'">
+<title>Arena</title>
+<style>
+  html, body { margin: 0; height: 100%; background: #101418; overflow: hidden; }
+  body { display: grid; place-items: center; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; }
+  #box { width: 100%; height: 100%; display: grid; place-items: center; }
+  canvas { touch-action: none; user-select: none; -webkit-user-select: none; cursor: pointer; display: block; }
+</style>
+</head>
+<body>
+<div id="box"><canvas id="c"></canvas></div>
+<script src="cards.js"></script>
+<script src="game.js"></script>
+</body>
+</html>

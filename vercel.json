@@ -1,0 +1,4 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "buildCommand": "(npm run cards:art || echo 'Card art not fetched; /clash tiles fall back to monograms') && npm run build"
+}
