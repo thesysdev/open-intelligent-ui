@@ -192,6 +192,7 @@ A second chat at `/clash` that answers Clash Royale questions with live card UI:
 - Battle sim: `DeckSim` (`src/lib/coach/sim.ts`) plays 150 seeded 3-minute matches against each of 8 archetypes, with elixir, a cycling 4-card hand and rules of thumb for which cards answer which threats, scored against a baseline ladder deck. It reruns on every swap and shows what changed. A toy model, not real match data.
 - Playable arena: `Arena` embeds `public/arena/` (a sandboxed iframe) so the user can battle the current deck against an archetype AI: towers, river and bridges, elixir, a cycling hand, spells, buildings and spawners, 3 minutes plus overtime. Unit stats in `public/arena/cards.js` are approximate. Restarts with the new deck on every swap.
 - Prompt: `src/lib/coach/prompt-options.ts`; API route `src/app/api/clash/route.ts` shares `src/lib/chat-handler.ts` with `/api/chat`.
-- After changing the library: `npm run generate` (the route builds the prompt from `coach-spec.json`).
+- Prompt: edit `src/lib/coach/prompt-options.ts`; `src/generated/coach-system-prompt.txt` is the full prompt it produces, kept for reading and reviewing changes (the route builds the same prompt at runtime).
+- After changing the library or prompt: `npm run generate && npm run prompt`.
 
 Fan-made demo, not affiliated with or endorsed by Supercell.
