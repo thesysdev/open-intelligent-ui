@@ -11,7 +11,7 @@ import {
 } from "@openuidev/react-ui";
 import type { ActionEvent } from "@openuidev/react-lang";
 import { useEffect } from "react";
-import { Brain, Calculator, Compass, Drum, Gamepad2, MapPinned, TentTree, UtensilsCrossed } from "lucide-react";
+import { ChartColumn, ChefHat, Dog, Drum, Hammer, MapPinned, Plane, UtensilsCrossed } from "lucide-react";
 import { runLibraryAction } from "@/lib/actions";
 import { withBase } from "@/lib/base-path";
 import { localChatStorage, SaveMessages } from "@/lib/chat-storage";
@@ -29,15 +29,17 @@ if (typeof window !== "undefined") {
   };
 }
 
+// The examples OpenUI uses across its marketing: the homepage showcase (KALLAX, Kyoto),
+// the README video (San Francisco) and the Intelligent UI blog posts (the rest).
 const starters = [
-  { displayText: "Plan a day out", prompt: "I'm in San Francisco for a day, plan a sightseeing route for me", icon: <MapPinned size={16} /> },
-  { displayText: "Explore a city", prompt: "Plan a relaxed afternoon exploring Lisbon, with three stops and a map", icon: <Compass size={16} /> },
-  { displayText: "Find weekend ideas", prompt: "Help me find a weekend getaway from San Francisco. Compare three destinations", icon: <TentTree size={16} /> },
-  { displayText: "Plan a meal", prompt: "Help me plan a simple vegetarian dinner for six people", icon: <UtensilsCrossed size={16} /> },
-  { displayText: "Build a calculator", prompt: "Build me a working calculator app with a display and keypad", icon: <Calculator size={16} /> },
-  { displayText: "Play on a Game Boy", prompt: "Make a playable Game Boy-style handheld game with a screen, D-pad and A/B buttons", icon: <Gamepad2 size={16} /> },
-  { displayText: "Jam on a drum pad", prompt: "Make a drum pad I can play, with a few pads and a beat counter", icon: <Drum size={16} /> },
-  { displayText: "Take a trivia quiz", prompt: "Quiz me with five fun trivia questions and keep score", icon: <Brain size={16} /> },
+  { displayText: "Build an IKEA KALLAX", prompt: "I just bought an IKEA KALLAX. Can you walk me through building it?", icon: <Hammer size={16} /> },
+  { displayText: "Plan a day in San Francisco", prompt: "I'm in San Francisco for a day, plan a sightseeing route for me", icon: <MapPinned size={16} /> },
+  { displayText: "Visit Kyoto in November", prompt: "Plan a slow four-day trip to Kyoto in November, with temples, gardens and a map", icon: <Plane size={16} /> },
+  { displayText: "Plan a dinner menu", prompt: "Plan a dinner menu for friends, with a shopping list that scales with the number of guests", icon: <UtensilsCrossed size={16} /> },
+  { displayText: "Cook a slow-roasted lamb", prompt: "Walk me through a slow-roasted lamb shoulder with potatoes and herbs", icon: <ChefHat size={16} /> },
+  { displayText: "Design a dog vest", prompt: "Make a moodboard for a dog vest, with material options and colour choices", icon: <Dog size={16} /> },
+  { displayText: "Build a sales dashboard", prompt: "Build an analytics dashboard over demo sales data, with a chart and a what-if scenario slider", icon: <ChartColumn size={16} /> },
+  { displayText: "Jam in a drum lab", prompt: "Make a drum lab I can play: a 16-step sequencer with tempo, swing and a few performance pads", icon: <Drum size={16} /> },
 ];
 
 const llm = fetchLLM({
