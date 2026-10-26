@@ -1,0 +1,2 @@
+# Written by npm run generate and npm run prompt; GitHub collapses these in diffs.
+src/generated/** linguist-generated=true

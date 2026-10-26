@@ -8,8 +8,9 @@ import { useEffect } from "react";
 // their page state (what the user typed, ticked or moved), which the chat
 // saves into the message itself.
 
-const THREADS = "oiu:threads";
-const messagesKey = (id: string) => `oiu:messages:${id}`;
+// prefix keeps each chat's threads apart; the main chat uses "oiu".
+const threadsKey = (prefix: string) => `${prefix}:threads`;
+const messagesKeyFor = (prefix: string) => (id: string) => `${prefix}:messages:${id}`;
 const MAX_THREADS = 50;
 
 function read<T>(key: string, fallback: T): T {
@@ -34,7 +35,9 @@ const titleOf = (message: Message) => {
   return text.replace(/\s+/g, " ").trim().slice(0, 60) || "New chat";
 };
 
-export function localChatStorage(): ChatStorage {
+export function localChatStorage(prefix = "oiu"): ChatStorage {
+  const THREADS = threadsKey(prefix);
+  const messagesKey = messagesKeyFor(prefix);
   return {
     thread: {
       async listThreads() {
@@ -69,14 +72,14 @@ export function localChatStorage(): ChatStorage {
  * Saves the open thread's messages whenever they change and no answer is
  * streaming. Render it inside AgentInterface (it needs the chat store).
  */
-export function SaveMessages() {
+export function SaveMessages({ prefix = "oiu" }: { prefix?: string } = {}) {
   const messages = useThread((s) => s.messages);
   const isRunning = useThread((s) => s.isRunning);
   const threadId = useThreadList((s) => s.selectedThreadId);
   // Written at once: a debounce would lose the last change when the user
   // switches threads right after it.
   useEffect(() => {
-    if (threadId && !isRunning && messages.length > 0) write(messagesKey(threadId), messages);
-  }, [threadId, isRunning, messages]);
+    if (threadId && !isRunning && messages.length > 0) write(messagesKeyFor(prefix)(threadId), messages);
+  }, [threadId, isRunning, messages, prefix]);
   return null;
 }
