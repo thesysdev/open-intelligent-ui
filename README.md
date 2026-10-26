@@ -189,5 +189,5 @@ A chat at `/chess` that answers chess questions with a playable board: the game 
 - Rules: [chess.js](https://github.com/jhlywa/chess.js) checks moves, check, mate and draws. The engine in `src/lib/chess/position.ts` is a short alpha-beta search (material, piece-square tables, captures and checks), good for sparring and hints, not deep analysis.
 - Components: `ChessBoard`, `MoveList`, `PositionSummary`, `EvalBar`, `ChessPiece` in `src/lib/chess/components.tsx`. Pieces are Unicode glyphs, so there are no image assets.
 - Functions: `@Fen`, `@Position`, `@LegalMoves`, `@PlayMove`, `@LineProgress`, `@BestMove`, `@Score`.
-- Prompt: `src/lib/chess/prompt-options.ts` (an opening trainer, a sparring game and a puzzle as worked examples); API route `src/app/api/chess/route.ts`. `/preview?library=chess` renders a program with this library.
-- After changing the library: `npm run generate && npm run prompt`.
+- Prompt: edit `src/lib/chess/prompt-options.ts` (an opening trainer, a sparring game and a puzzle as worked examples); `src/generated/chess-system-prompt.txt` is the full prompt it produces, kept for reading and reviewing changes (the route builds the same prompt at runtime). API route `src/app/api/chess/route.ts`; `/preview?library=chess` renders a program with this library.
+- After changing the library or prompt: `npm run generate && npm run prompt`.
