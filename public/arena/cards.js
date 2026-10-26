@@ -1,11 +1,14 @@
-// Unit stats for the arena, close to tournament-level (level 11) values from
-// public knowledge of the game; rounded, and simplified where a card has a
-// mechanic the engine does not model. Fan-made, not Supercell data.
+// Unit stats for the arena at tournament level (level 11), taken from
+// RoyaleAPI's cr-api-data (github.com/RoyaleAPI/cr-api-data); rounded, and
+// simplified where a card has a mechanic the engine does not model.
+// Speeds: slow 0.75, medium 1, fast 1.5, very fast 2 tiles/s.
 //
 // name: [type, hp, damage, hitSpeed s, range tiles, speed tiles/s, count, flags, splash tiles, extra]
 // type: T troop, B building, S spell
 // flags: A hits air, F flies, B only targets buildings, K dies after its first hit
-// extra: { life, spawn: {card, every, count}, death: {card, count} | {dmg, r}, jump, ... }
+// extra: { life, deploy, spawn: {card, every, count, first}, death: {card, count} | {dmg, r}, jump, ... }
+// Troops and buildings take 1 s to deploy unless extra.deploy says otherwise.
+// Buildings lose their hit points evenly over extra.life seconds.
 // Spells: [S, 0, dmg, delay s, radius, 0, 0, flags, 0, extra]  flags: G ground only
 window.CARD_STATS = {
   // Commons
@@ -18,11 +21,11 @@ window.CARD_STATS = {
   "Minions": ["T", 230, 100, 1.0, 2, 1.5, 3, "AF", 0],
   "Minion Horde": ["T", 230, 100, 1.0, 2, 1.5, 6, "AF", 0],
   "Barbarians": ["T", 670, 192, 1.4, 0.8, 1.0, 5, "", 0],
-  "Elite Barbarians": ["T", 1341, 318, 1.4, 0.8, 2.0, 2, "", 0],
+  "Elite Barbarians": ["T", 1341, 318, 1.4, 0.8, 1.5, 2, "", 0],
   "Royal Giant": ["T", 3025, 340, 1.7, 5, 0.75, 1, "B", 0],
   "Firecracker": ["T", 272, 150, 3.0, 6, 1.5, 1, "A", 1.2],
   "Royal Recruits": ["T", 900, 141, 1.3, 1.0, 1.0, 6, "", 0],
-  "Skeleton Barrel": ["T", 528, 100, 1.0, 0.8, 1.0, 1, "BF", 0, { death: { card: "Skeletons", count: 6 } }],
+  "Skeleton Barrel": ["T", 528, 100, 1.0, 0.8, 1.5, 1, "BF", 0, { death: { card: "Skeletons", count: 6 } }],
   "Goblin Gang": ["T", 170, 100, 1.1, 1.5, 2.0, 5, "A", 0],
   "Bats": ["T", 81, 81, 1.3, 0.8, 2.0, 5, "AF", 0],
   "Electro Spirit": ["T", 230, 150, 0.3, 1.5, 2.0, 1, "AK", 1.5, { stun: 0.5 }],
@@ -34,9 +37,9 @@ window.CARD_STATS = {
   "Arrows": ["S", 0, 366, 0.8, 4, 0, 0, "", 0],
   "Zap": ["S", 0, 192, 0.1, 2.5, 0, 0, "", 0, { stun: 0.5 }],
   "Giant Snowball": ["S", 0, 192, 0.8, 2.5, 0, 0, "", 0, { slow: 2.5 }],
-  "Royal Delivery": ["S", 0, 300, 1.5, 3, 0, 0, "G", 0, { spawn: { card: "Royal Recruits", count: 1 } }],
+  "Royal Delivery": ["S", 0, 300, 1.5, 3, 0, 0, "G", 0, { spawn: { card: "Royal Recruits", count: 1, single: true } }],
   "Cannon": ["B", 822, 127, 1.0, 5.5, 0, 1, "", 0, { life: 30 }],
-  "Mortar": ["B", 1157, 364, 5.0, 11, 0, 1, "", 2, { life: 30, minRange: 3.5 }],
+  "Mortar": ["B", 1157, 364, 5.0, 11, 0, 1, "", 2, { life: 30, minRange: 3.5, deploy: 3.5 }],
   "Tesla": ["B", 1182, 190, 1.1, 5.5, 0, 1, "A", 0, { life: 35 }],
   // Rares
   "Musketeer": ["T", 720, 218, 1.1, 6, 1.0, 1, "A", 0],
@@ -45,7 +48,7 @@ window.CARD_STATS = {
   "Hog Rider": ["T", 1696, 319, 1.6, 0.8, 2.0, 1, "B", 0],
   "Giant": ["T", 4091, 254, 1.5, 1.0, 0.75, 1, "B", 0],
   "Wizard": ["T", 720, 281, 1.4, 5.5, 1.0, 1, "A", 1.5],
-  "Battle Ram": ["T", 762, 500, 1.5, 0.8, 1.5, 1, "B", 0, { death: { card: "Barbarians", count: 2 } }],
+  "Battle Ram": ["T", 762, 286, 1.5, 0.8, 1.0, 1, "B", 0, { charge: 3, death: { card: "Barbarians", count: 2 } }],
   "Ice Golem": ["T", 1256, 84, 2.5, 0.8, 0.75, 1, "B", 0, { death: { dmg: 70, r: 2, slow: 2 } }],
   "Dart Goblin": ["T", 256, 123, 0.7, 6.5, 2.0, 1, "A", 0],
   "Flying Machine": ["T", 578, 169, 1.1, 6, 1.5, 1, "AF", 0],
@@ -57,12 +60,12 @@ window.CARD_STATS = {
   "Heal Spirit": ["T", 230, 60, 0.3, 1.5, 2.0, 1, "AK", 2, { heal: 300 }],
   "Goblin Demolisher": ["T", 1250, 180, 1.8, 5, 1.0, 1, "", 2],
   "Mega Minion": ["T", 835, 290, 1.6, 2, 1.0, 1, "AF", 0],
-  "Furnace": ["B", 1000, 0, 0, 0, 0, 1, "", 0, { life: 30, spawn: { card: "Fire Spirit", every: 5, count: 1 } }],
-  "Goblin Hut": ["B", 1100, 0, 0, 0, 0, 1, "", 0, { life: 30, spawn: { card: "Spear Goblins", every: 3.5, count: 1 } }],
+  "Furnace": ["B", 1000, 0, 0, 0, 0, 1, "", 0, { life: 28, spawn: { card: "Fire Spirit", every: 5, count: 1 } }],
+  "Goblin Hut": ["B", 1100, 0, 0, 0, 0, 1, "", 0, { life: 29, spawn: { card: "Spear Goblins", every: 3.5, count: 1 } }],
   "Bomb Tower": ["B", 1300, 215, 1.6, 6, 0, 1, "", 1.5, { life: 30, death: { dmg: 215, r: 2 } }],
   "Inferno Tower": ["B", 1400, 120, 0.4, 6, 0, 1, "A", 0, { life: 30, ramp: 6 }],
   "Elixir Collector": ["B", 1100, 0, 0, 0, 0, 1, "", 0, { life: 70, elixirEvery: 8.5 }],
-  "Tombstone": ["B", 600, 0, 0, 0, 0, 1, "", 0, { life: 30, spawn: { card: "Skeletons", every: 3.5, count: 1 }, death: { card: "Skeletons", count: 4 } }],
+  "Tombstone": ["B", 600, 0, 0, 0, 0, 1, "", 0, { life: 30, spawn: { card: "Skeletons", every: 3.5, count: 2 }, death: { card: "Skeletons", count: 4 } }],
   "Goblin Cage": ["B", 1100, 0, 0, 0, 0, 1, "", 0, { life: 20, death: { card: "Goblin Brawler", count: 1 } }],
   "Goblin Brawler": ["T", 1000, 230, 1.1, 0.8, 1.5, 1, "", 0],
   "Fireball": ["S", 0, 689, 1.0, 2.5, 0, 0, "", 0, { push: 1 }],
@@ -70,12 +73,12 @@ window.CARD_STATS = {
   "Earthquake": ["S", 0, 150, 0.5, 3.5, 0, 0, "G", 0, { buildingDmg: 500, slow: 1 }],
   // Epics
   "P.E.K.K.A": ["T", 3760, 816, 1.8, 1.0, 0.75, 1, "", 0],
-  "Golem": ["T", 4784, 312, 2.5, 1.0, 0.75, 1, "B", 0, { death: { card: "Golemite", count: 2, dmg: 200, r: 2 } }],
+  "Golem": ["T", 4784, 312, 2.5, 1.0, 0.75, 1, "B", 0, { deploy: 3, death: { card: "Golemite", count: 2, dmg: 200, r: 2 } }],
   "Golemite": ["T", 1000, 100, 2.5, 0.8, 0.75, 1, "B", 0, { death: { dmg: 80, r: 1.5 } }],
   "Prince": ["T", 1920, 392, 1.4, 1.0, 1.0, 1, "", 0, { charge: 2 }],
   "Dark Prince": ["T", 1600, 230, 1.3, 1.0, 1.0, 1, "", 1.2, { charge: 2 }],
   "Baby Dragon": ["T", 1152, 160, 1.5, 3.5, 1.5, 1, "AF", 1.5],
-  "Witch": ["T", 838, 114, 1.1, 5, 1.0, 1, "A", 1, { spawn: { card: "Skeletons", every: 7, count: 1 } }],
+  "Witch": ["T", 838, 114, 1.1, 5, 1.0, 1, "A", 1, { spawn: { card: "Skeletons", every: 7, count: 4, first: 1 } }],
   "Skeleton Army": ["T", 81, 81, 1.0, 0.8, 1.5, 15, "", 0],
   "Balloon": ["T", 1680, 800, 3.0, 0.8, 1.0, 1, "BF", 0, { death: { dmg: 250, r: 2 } }],
   "Giant Skeleton": ["T", 3300, 250, 1.5, 1.0, 1.0, 1, "", 0, { death: { dmg: 1500, r: 3 } }],
@@ -83,12 +86,12 @@ window.CARD_STATS = {
   "Executioner": ["T", 1100, 230, 2.4, 4.5, 1.0, 1, "A", 1.5],
   "Hunter": ["T", 800, 350, 2.2, 4, 1.0, 1, "A", 0],
   "Guards": ["T", 350, 100, 1.1, 0.8, 1.5, 3, "", 0],
-  "Cannon Cart": ["T", 1100, 200, 1.0, 5.5, 1.5, 1, "", 0],
+  "Cannon Cart": ["T", 1100, 200, 1.0, 5.5, 1.0, 1, "", 0],
   "Electro Dragon": ["T", 1000, 190, 2.1, 3.5, 1.0, 1, "AF", 1.2, { stun: 0.5 }],
   "Goblin Giant": ["T", 3600, 185, 1.7, 1.0, 1.0, 1, "B", 0, { death: { card: "Spear Goblins", count: 1 } }],
   "Electro Giant": ["T", 3900, 150, 1.2, 1.0, 0.75, 1, "B", 0, { reflect: 100 }],
   "Wall Breakers": ["T", 300, 350, 0.3, 0.8, 2.0, 2, "BK", 1.5],
-  "X-Bow": ["B", 1000, 39, 0.3, 11.5, 0, 1, "", 0, { life: 30, minRange: 0 }],
+  "X-Bow": ["B", 1000, 39, 0.3, 11.5, 0, 1, "", 0, { life: 30, minRange: 0, deploy: 3.5 }],
   "Goblin Barrel": ["S", 0, 0, 1.1, 1, 0, 0, "", 0, { spawn: { card: "Goblins", count: 1 }, anywhere: true }],
   "Goblin Drill": ["B", 1200, 0, 0, 0, 0, 1, "", 0, { life: 9, spawn: { card: "Goblins", every: 3, count: 1 }, anywhere: true }],
   "Barbarian Barrel": ["S", 0, 205, 0.3, 1.2, 0, 0, "G", 0, { roll: 5, spawn: { card: "Barbarians", count: 1, single: true } }],
@@ -115,16 +118,16 @@ window.CARD_STATS = {
   "Sparky": ["T", 1300, 1500, 5.0, 5, 0.75, 1, "", 2],
   "Lava Hound": ["T", 3581, 48, 1.3, 2, 0.75, 1, "BF", 0, { death: { card: "Lava Pup", count: 6 } }],
   "Lava Pup": ["T", 180, 45, 1.0, 1.5, 1.5, 1, "AF", 0],
-  "Mega Knight": ["T", 3300, 240, 1.7, 1.2, 1.0, 1, "", 1.2, { jump: 4 }],
+  "Mega Knight": ["T", 3300, 240, 1.7, 1.2, 1.0, 1, "", 1.2, { jump: { min: 3.5, max: 5, dmg: 536 } }],
   "Fisherman": ["T", 850, 160, 1.3, 0.8, 1.0, 1, "", 0, { hook: 7 }],
   "Mother Witch": ["T", 550, 125, 1.2, 5.5, 1.0, 1, "A", 0],
-  "Phoenix": ["T", 1000, 200, 1.1, 2, 1.5, 1, "AF", 1],
+  "Phoenix": ["T", 1000, 200, 1.1, 2, 1.0, 1, "AF", 1],
   "Goblin Machine": ["T", 1800, 180, 1.2, 2, 1.0, 1, "A", 0],
-  "Graveyard": ["S", 0, 0, 0.5, 4, 0, 0, "", 0, { grave: { every: 0.5, duration: 10 }, anywhere: true }],
+  "Graveyard": ["S", 0, 0, 0.5, 4, 0, 0, "", 0, { grave: { every: 0.5, delay: 2.2, duration: 9.5 }, anywhere: true }],
   "The Log": ["S", 0, 240, 0.2, 1.9, 0, 0, "G", 0, { roll: 10, push: 1 }],
   // Champions
   "Archer Queen": ["T", 1000, 225, 1.2, 5, 1.0, 1, "A", 0],
-  "Golden Knight": ["T", 1800, 160, 0.9, 0.8, 1.5, 1, "", 0],
+  "Golden Knight": ["T", 1800, 160, 0.9, 0.8, 1.0, 1, "", 0],
   "Skeleton King": ["T", 2300, 190, 1.6, 1.0, 1.0, 1, "", 1],
   "Mighty Miner": ["T", 2000, 250, 0.8, 0.8, 1.0, 1, "", 0, { anywhere: true }],
   "Monk": ["T", 1700, 150, 0.9, 0.8, 1.0, 1, "", 0],
@@ -133,10 +136,10 @@ window.CARD_STATS = {
   "Boss Bandit": ["T", 2000, 250, 1.1, 0.8, 1.5, 1, "", 0, { charge: 2 }],
 };
 
-// Towers
+// Towers, level 11
 window.TOWER_STATS = {
-  princess: { hp: 2534, dmg: 109, hitSpeed: 0.8, range: 7.5 },
-  king: { hp: 4008, dmg: 109, hitSpeed: 1.0, range: 7 },
+  princess: { hp: 3584, dmg: 128, hitSpeed: 0.8, range: 7.5 },
+  king: { hp: 6144, dmg: 128, hitSpeed: 1.0, range: 7 },
 };
 
 // What the opponent plays for each archetype.

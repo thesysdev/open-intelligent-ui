@@ -16,6 +16,9 @@
   const REGEN = 1 / 2.8; // elixir per second
   const MATCH = 180, OVERTIME = 60;
   const AGGRO = 5.5;
+  // The opponent plays like a person: it notices a new threat after REACTION
+  // seconds and looks at its hand every THINK seconds.
+  const REACTION = [0.8, 1.6], THINK = [0.8, 1.4];
 
   const params = Object.fromEntries(new URLSearchParams(location.hash.slice(1)));
   const deckNames = (params.deck || "").split(",").map((s) => s.trim()).filter(Boolean);
@@ -122,8 +125,8 @@
         flags: s.flags, splash: s.splash, extra: s.extra, building: s.type === "B",
         flies: s.flags.includes("F"), hitsAir: s.flags.includes("A"), onlyBuildings: s.flags.includes("B"), kamikaze: s.flags.includes("K"),
         r: s.type === "B" ? 0.9 : Math.min(0.75, 0.28 + Math.sqrt(s.hp) / 90),
-        cd: s.type === "B" ? 1 : 0.5, target: null, dead: false, born: G.time,
-        life: s.extra.life ? s.extra.life : Infinity, spawnCd: s.extra.spawn ? (s.extra.spawn.every || 0) : 0, elixCd: s.extra.elixirEvery || 0,
+        cd: s.hitSpeed * 0.5, target: null, dead: false, born: G.time, deploy: (opts && opts.deploy) || 0,
+        life: s.extra.life ? s.extra.life : Infinity, spawnCd: s.extra.spawn ? (s.extra.spawn.first != null ? s.extra.spawn.first : s.extra.spawn.every || 0) : 0, elixCd: s.extra.elixirEvery || 0,
         stun: 0, freeze: 0, slow: 0, rage: 0, ramp: 0, charge: 0, chargeDist: 0, dot: null, clone: !!(opts && opts.clone),
         retarget: 0, face: team === 0 ? -1 : 1, bump: 0,
       };
@@ -185,7 +188,7 @@
 
   function moveToward(u, tx, ty, dt) {
     let sp = u.speed * (u.rage > 0 ? 1.35 : 1) * (u.slow > 0 ? 0.65 : 1);
-    if (u.charge > 0 && u.chargeDist > 2.5) sp *= 1.6;
+    if (u.extra.charge && u.chargeDist >= u.extra.charge) sp *= 2;
     const dx = tx - u.x, dy = ty - u.y, d = Math.hypot(dx, dy);
     if (d < 1e-3) return;
     const step = Math.min(d, sp * dt);
@@ -285,7 +288,7 @@
     cycle(p, handIndex);
     if (s.type === "S") castSpell(team, s, x, y);
     else {
-      const units = spawn(team, name, x, y);
+      const units = spawn(team, name, x, y, { deploy: s.extra.deploy != null ? s.extra.deploy : 1 });
       if (s.extra.spawnDmg) areaDamage(team, x, y, s.extra.spawnR || 2, s.extra.spawnDmg, units[0], { stun: 0.5 });
       G.fx.push({ kind: "deploy", x, y, r: 1.2, t: 0, dur: 0.5, team });
     }
@@ -304,7 +307,7 @@
     const start = { x: team === 0 ? 9 : 9, y: team === 0 ? 29 : 3 };
     G.projectiles.push({ kind: "spell", x: start.x, y: start.y, tx: x, ty: y, t: 0, dur: s.hitSpeed, team, name: s.name, onHit: () => {
       if (e.spawn && !e.roll) spawn(team, e.spawn.card, x, y, { count: e.spawn.single ? 1 : undefined });
-      if (e.grave) G.fx.push({ kind: "grave", x, y, r: s.range, t: 0, dur: e.grave.duration, team, every: e.grave.every, acc: 0 });
+      if (e.grave) G.fx.push({ kind: "grave", x, y, r: s.range, t: 0, dur: e.grave.duration, team, every: e.grave.every, acc: -(e.grave.delay || 0) });
       if (e.dot) G.fx.push({ kind: "dot", x, y, r: s.range, t: 0, dur: e.dot.duration, team, dps: e.dot.dps, acc: 0 });
       if (e.rage) G.fx.push({ kind: "rage", x, y, r: s.range, t: 0, dur: e.rage, team });
       if (e.pull) {
@@ -337,15 +340,20 @@
     return roles;
   }
   function threatsNear(team) {
-    // Enemy troops in my half, with how dangerous they are.
+    // Enemy troops in my half that it has had time to notice, with how dangerous they are.
     const mine = team === 1 ? (u) => u.y < RIVER.y1 + 2 : (u) => u.y >= RIVER.y0 - 2;
-    return G.units.filter((u) => u.team !== team && !u.dead && mine(u)).map((u) => ({ u, value: (u.hp / 400) + (u.onlyBuildings ? 2 : 0) + (u.flies ? 0.5 : 0) }));
+    return G.units.filter((u) => {
+      if (u.team === team || u.dead || !mine(u)) { if (u.seen) u.seen[team] = null; return false; }
+      u.seen = u.seen || [null, null];
+      if (u.seen[team] == null) u.seen[team] = G.time + REACTION[0] + rnd() * (REACTION[1] - REACTION[0]);
+      return G.time >= u.seen[team];
+    }).map((u) => ({ u, value: (u.hp / 400) + (u.onlyBuildings ? 2 : 0) + (u.flies ? 0.5 : 0) }));
   }
   function aiThink(team, dt) {
     const p = G.players[team];
     G.aiTimer[team] -= dt;
     if (G.aiTimer[team] > 0) return;
-    G.aiTimer[team] = 0.45 + rnd() * 0.4;
+    G.aiTimer[team] = THINK[0] + rnd() * (THINK[1] - THINK[0]);
     const home = team === 1 ? { y: 10 } : { y: 22 };
     const inHand = (i) => stat(p.hand[i]);
 
@@ -451,8 +459,15 @@
     // Units
     for (const u of G.units) {
       if (u.dead) continue;
-      if (u.life !== Infinity) { u.life -= dt; if (u.life <= 0) { u.hp = 0; kill(u, null); continue; } }
-      if (u.stun > 0) u.stun -= dt;
+      if (u.deploy > 0) { u.deploy -= dt; continue; }
+      if (u.life !== Infinity) {
+        // Buildings lose their hit points evenly over their lifetime.
+        u.life -= dt;
+        u.hp -= (u.maxHp / u.extra.life) * dt;
+        if (u.hp <= 0 || u.life <= 0) { u.hp = 0; kill(u, null); continue; }
+      }
+      if (u.jumpCd > 0) u.jumpCd -= dt;
+      if (u.stun > 0) { u.stun -= dt; u.chargeDist = 0; }
       if (u.freeze > 0) { u.freeze -= dt; continue; }
       if (u.slow > 0) u.slow -= dt;
       if (u.rage > 0) u.rage -= dt;
@@ -480,12 +495,13 @@
           u.chargeDist = 0;
         }
       } else if (!u.building) {
-        if (u.extra.jump && gap <= u.extra.jump && gap > 1.5 && u.cd <= 0) {
-          // Mega Knight leaps onto its target.
+        const jump = u.extra.jump;
+        if (jump && !t.tower && gap >= jump.min && gap <= jump.max && !(u.jumpCd > 0)) {
+          // Mega Knight leaps onto a troop or building 3.5 to 5 tiles away.
           u.x = t.x + (u.x - t.x) * (t.r / Math.max(dist(u, t), 0.01)); u.y = t.y + (u.y - t.y) * (t.r / Math.max(dist(u, t), 0.01));
-          areaDamage(u.team, u.x, u.y, 1.6, u.dmg * 2, u, { towerMul: 1 });
-          G.fx.push({ kind: "boom", x: u.x, y: u.y, r: 1.6, t: 0, dur: 0.4 });
-          u.cd = u.hitSpeed;
+          areaDamage(u.team, u.x, u.y, 2.2, jump.dmg, u, { towerMul: 1, ground: true });
+          G.fx.push({ kind: "boom", x: u.x, y: u.y, r: 2.2, t: 0, dur: 0.4 });
+          u.cd = u.hitSpeed; u.jumpCd = 2;
           continue;
         }
         let tx = t.x, ty = t.y;
@@ -496,7 +512,8 @@
           else { tx = bx; ty = u.team === 0 ? RIVER.y0 - 1 : RIVER.y1 + 1; }
         }
         moveToward(u, tx, ty, dt);
-        u.cd = Math.max(0, u.cd - dt);
+        // A troop needs about half its hit speed to swing after it stops.
+        u.cd = Math.max(u.hitSpeed * 0.5, u.cd - dt);
       }
     }
     // Keep same-team ground units from stacking.
@@ -552,7 +569,7 @@
   function attack(u, t) {
     const opts = { stun: u.extra.stun, freeze: u.extra.freeze, slow: u.extra.slow };
     let dmg = u.dmg * (u.ramp ? 1 + u.ramp * 0.8 : 1);
-    if (u.extra.charge && u.chargeDist >= u.extra.charge * 1.2) dmg *= 2;
+    if (u.extra.charge && u.chargeDist >= u.extra.charge) dmg *= 2;
     if (u.extra.heal && u.kamikaze) heal(u.team, u.x, u.y, 2.5, u.extra.heal);
     if (u.range >= 2.5 && !u.building) {
       G.projectiles.push({ kind: "shot", x: u.x, y: u.y, target: t, t: 0, dur: Math.max(0.1, dist(u, t) / 9), team: u.team, dmg, from: u, splash: u.splash, stun: opts.stun, slow: opts.slow });
@@ -653,6 +670,7 @@
   }
   function drawUnit(u) {
     const x = tx(u.x), y = ty(u.y) - (u.flies ? 10 : 0), r = u.r * TILE;
+    if (u.deploy > 0) ctx.globalAlpha = 0.55;
     // Shadow
     ctx.fillStyle = "rgba(0,0,0,0.25)";
     ctx.beginPath(); ctx.ellipse(tx(u.x), ty(u.y) + r * 0.6, r * 0.9, r * 0.4, 0, 0, Math.PI * 2); ctx.fill();
@@ -663,7 +681,6 @@
       ctx.save(); roundRect(x - r + 2, y - r + 2, r * 2 - 4, r * 2 - 4, 4); ctx.clip();
       if (im) ctx.drawImage(im, x - r, y - r * 1.2, r * 2, r * 2.4); else { ctx.fillStyle = "#777"; ctx.fillRect(x - r, y - r, r * 2, r * 2); }
       ctx.restore();
-      if (u.life !== Infinity) { ctx.fillStyle = "rgba(255,255,255,0.8)"; ctx.fillRect(x - r, y + r + 1, r * 2 * Math.max(0, u.life / (u.extra.life || 1)), 2); }
     } else {
       ctx.fillStyle = ring; ctx.beginPath(); ctx.arc(x, y, r + 1.5, 0, Math.PI * 2); ctx.fill();
       const im = img(u.name);
@@ -677,6 +694,12 @@
     if (u.rage > 0) { ctx.strokeStyle = "#c53bd8"; ctx.lineWidth = 2; ctx.beginPath(); ctx.arc(x, y, r + 3, 0, Math.PI * 2); ctx.stroke(); }
     if (u.slow > 0) { ctx.strokeStyle = "#8fd3ff"; ctx.lineWidth = 1.5; ctx.beginPath(); ctx.arc(x, y, r + 3, 0, Math.PI * 2); ctx.stroke(); }
     if (u.hp < u.maxHp) bar(x, y - r - 7, Math.max(14, r * 2), u.hp / u.maxHp, u.team);
+    if (u.deploy > 0) {
+      // Deploy timer: the ring empties as the unit gets ready.
+      ctx.globalAlpha = 1; ctx.strokeStyle = "#fff"; ctx.lineWidth = 2;
+      const total = (stat(u.name) || {}).extra.deploy || 1;
+      ctx.beginPath(); ctx.arc(x, y, r + 3, -Math.PI / 2, -Math.PI / 2 + Math.PI * 2 * Math.min(1, u.deploy / total)); ctx.stroke();
+    }
   }
   function roundRect(x, y, w, h, r) { ctx.beginPath(); ctx.moveTo(x + r, y); ctx.arcTo(x + w, y, x + w, y + h, r); ctx.arcTo(x + w, y + h, x, y + h, r); ctx.arcTo(x, y + h, x, y, r); ctx.arcTo(x, y, x + w, y, r); ctx.closePath(); }
 
@@ -725,6 +748,9 @@
     ctx.font = "10px sans-serif"; ctx.fillStyle = "#9aa4b2";
     ctx.fillText(G.overtime ? "OVERTIME" : G.time >= 120 ? "2x ELIXIR" : "", CW / 2, 39);
     crowns(60, 22, G.players[1].crowns, "#ff5a4d", oppName);
+    // Their elixir, so it is plain the opponent plays by the same rules.
+    const oe = G.players[1].elixir;
+    for (let i = 0; i < 10; i++) { ctx.fillStyle = "#2b3340"; ctx.fillRect(20 + i * 8, 39, 7, 3); const f = clamp(oe - i, 0, 1); if (f > 0) { ctx.fillStyle = "#d63fd6"; ctx.fillRect(20 + i * 8, 39, 7 * f, 3); } }
     crowns(CW - 60, 22, G.players[0].crowns, "#4da3ff", "You");
     if (G.message && G.time < G.messageUntil) {
       ctx.fillStyle = "rgba(0,0,0,0.55)"; roundRect(CW / 2 - 90, TOP + 110, 180, 28, 8); ctx.fill();
