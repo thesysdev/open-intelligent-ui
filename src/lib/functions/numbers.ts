@@ -92,7 +92,13 @@ export const Payment = defineFunction({
   fn: ({ principal, rate, periods }) => {
     if (!(periods > 0)) throw new Error("periods must be positive");
     const r = rate / 100;
-    return finite(r === 0 ? principal / periods : (principal * r) / (1 - Math.pow(1 + r, -periods)));
+    if (r === 0) return finite(principal / periods);
+    // log1p/expm1 preserve interest smaller than machine precision at 1;
+    // subtracting (1 + r)^-periods from 1 loses those repayments entirely.
+    const denominator = r > -1
+      ? -Math.expm1(-periods * Math.log1p(r))
+      : 1 - Math.pow(1 + r, -periods);
+    return finite((principal * r) / denominator);
   },
 });
 
