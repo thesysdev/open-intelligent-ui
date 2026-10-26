@@ -195,6 +195,7 @@ export const Histogram = defineFunction({
     let hi = max ?? (values.length ? Math.max(...values) : 1);
     if (hi <= lo) hi = lo + 1;
     const width = (hi - lo) / n;
+    if (!(width > 0) || !Number.isFinite(width)) throw new Error("bin width must be a positive finite number");
     const decimals = Math.max(0, 1 - Math.floor(Math.log10(width)));
     const counts = new Array<number>(n).fill(0);
     for (const v of values) {
@@ -203,7 +204,10 @@ export const Histogram = defineFunction({
     }
     return counts.map((value, i) => {
       const start = lo + i * width;
-      return { key: String(Number(start.toFixed(decimals))), value, start, end: start + width };
+      // toFixed supports at most 100 decimals; scientific notation keeps
+      // smaller finite bin starts distinct without a RangeError.
+      const key = decimals > 100 ? String(start) : String(Number(start.toFixed(decimals)));
+      return { key, value, start, end: start + width };
     });
   },
 });
