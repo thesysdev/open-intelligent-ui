@@ -196,3 +196,14 @@ A second chat at `/clash` that answers Clash Royale questions with live card UI:
 - After changing the library or prompt: `npm run generate && npm run prompt`.
 
 Fan-made demo, not affiliated with or endorsed by Supercell.
+
+## Chess coach (`/chess`)
+
+A chat at `/chess` that answers chess questions with a playable board: the game is a list of moves in a `$moves` variable, and the board, score sheet and position checks recompute on every move without another model call.
+
+- Board modes: `view` (a diagram with arrows and highlights), `free` (move both sides), `computer` (play one side against a small built-in engine at easy, medium or hard) and `line` (play one side of an opening or puzzle solution; the board answers with the other side, rejects wrong moves and can show a hint).
+- Rules: [chess.js](https://github.com/jhlywa/chess.js) checks moves, check, mate and draws. The engine in `src/lib/chess/position.ts` is a short alpha-beta search (material, piece-square tables, captures and checks), good for sparring and hints, not deep analysis.
+- Components: `ChessBoard`, `MoveList`, `PositionSummary`, `EvalBar`, `ChessPiece` in `src/lib/chess/components.tsx`. Pieces are Unicode glyphs, so there are no image assets.
+- Functions: `@Fen`, `@Position`, `@LegalMoves`, `@PlayMove`, `@LineProgress`, `@BestMove`, `@Score`.
+- Prompt: edit `src/lib/chess/prompt-options.ts` (an opening trainer, a sparring game and a puzzle as worked examples); `src/generated/chess-system-prompt.txt` is the full prompt it produces, kept for reading and reviewing changes (the route builds the same prompt at runtime). API route `src/app/api/chess/route.ts`; `/preview?library=chess` renders a program with this library.
+- After changing the library or prompt: `npm run generate && npm run prompt`.
