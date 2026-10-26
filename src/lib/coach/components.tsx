@@ -333,7 +333,7 @@ export const DeckSim = defineComponent({
   },
 });
 
-const ARENA_OPPONENTS = ["Hog Cycle", "Golem Beatdown", "Lava Loon", "Log Bait", "X-Bow Siege", "Mega Knight", "P.E.K.K.A Bridge Spam", "Graveyard"];
+const ARENA_OPPONENTS = ARCHETYPES.map((a) => a.name);
 
 export const Arena = defineComponent({
   name: "Arena",

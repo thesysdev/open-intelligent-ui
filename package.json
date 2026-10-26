@@ -9,7 +9,7 @@
   "scripts": {
     "generate": "openui generate src/lib/library.ts --spec --out src/generated/spec.json && openui generate src/lib/coach/library.ts --spec --out src/generated/coach-spec.json",
     "generate:apiKey": "openui generate-api-key",
-    "prompt": "openui generate src/lib/library.ts --out src/generated/system-prompt.txt --prompt-options promptOptions && openui generate src/lib/library.ts --out src/generated/dashboard-system-prompt.txt --prompt-options dashboardPromptOptions && rm -f src/generated/*system-prompt.spec.json && openui generate src/lib/coach/library.ts --out src/generated/coach-system-prompt.txt --prompt-options coachPromptOptions && rm -f src/generated/*system-prompt.spec.json",
+    "prompt": "openui generate src/lib/library.ts --out src/generated/system-prompt.txt --prompt-options promptOptions && openui generate src/lib/library.ts --out src/generated/dashboard-system-prompt.txt --prompt-options dashboardPromptOptions && rm -f src/generated/*system-prompt.spec.json",
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
