@@ -36,8 +36,14 @@ const { values: opt } = parseArgs({
     concurrency: { type: "string", default: "4" },
     temperature: { type: "string" },
     "max-tokens": { type: "string", default: "16000" },
+    "request-timeout-ms": { type: "string", default: "120000" },
   },
 });
+
+const requestTimeout = Number(opt["request-timeout-ms"]);
+if (!opt["request-timeout-ms"].trim() || !Number.isInteger(requestTimeout) || requestTimeout < 1 || requestTimeout > 2147483647) {
+  throw new Error("--request-timeout-ms must be a positive whole number no greater than 2147483647.");
+}
 
 const offline = opt.fake || !!opt.answers;
 if (!offline && (!opt.model || !opt["base-url"])) {
@@ -98,12 +104,17 @@ async function ask(prompt) {
     ...(opt.temperature ? { temperature: Number(opt.temperature) } : {}),
   };
   const started = Date.now();
+  const signal = AbortSignal.timeout(requestTimeout);
   const res = await fetch(`${opt["base-url"].replace(/\/$/, "")}/chat/completions`, {
     method: "POST",
     headers: { "Content-Type": "application/json", Authorization: `Bearer ${apiKey}` },
     body: JSON.stringify(body),
+    signal,
   });
-  const json = await res.json().catch(() => ({}));
+  const json = await res.json().catch(() => {
+    if (signal.aborted) throw signal.reason;
+    return {};
+  });
   if (!res.ok) throw new Error(`HTTP ${res.status}: ${JSON.stringify(json).slice(0, 300)}`);
   return { text: json.choices?.[0]?.message?.content ?? "", usage: json.usage ?? null, ms: Date.now() - started, raw: json };
 }
