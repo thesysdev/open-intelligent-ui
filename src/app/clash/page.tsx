@@ -31,7 +31,7 @@ const starters = [
 ];
 
 const llm = fetchLLM({
-  url: withBase("/api/coach"),
+  url: withBase("/api/clash"),
   streamAdapter: openAIResponsesAdapter(),
   messageFormat: openAIConversationMessageFormat,
 });
@@ -42,7 +42,7 @@ function onAction(event: ActionEvent) {
   void runLibraryAction(event);
 }
 
-export default function Coach() {
+export default function Clash() {
   const { setPreference, mode } = useThemeModePreference();
   useEffect(() => {
     document.documentElement.setAttribute("data-openui-theme", mode);

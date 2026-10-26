@@ -45,5 +45,5 @@ yarn-error.log*
 next-env.d.ts
 
 
-# Card art for /coach (Supercell fan content, fetched by npm run cards:art)
+# Card art for /clash (Supercell fan content, fetched by npm run cards:art)
 /public/cards/

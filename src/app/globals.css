@@ -96,5 +96,5 @@ strong {
   grid-template-columns: repeat(4, minmax(0, 1fr));
 }
 
-/* /coach: the fan-made notice under the chat. */
+/* /clash: the fan-made notice under the chat. */
 .coach-disclaimer { position: fixed; right: 12px; bottom: 6px; z-index: 5; margin: 0; font-size: 11px; color: var(--openui-text-neutral-secondary, rgb(0 0 0 / 55%)); pointer-events: none; }

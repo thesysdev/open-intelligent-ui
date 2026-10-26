@@ -1,4 +1,4 @@
-// Copies Clash Royale card images for the /coach demo into public/cards/
+// Copies Clash Royale card images for the /clash demo into public/cards/
 // (gitignored), named by the card's slug, e.g. public/cards/hog-rider.png.
 //
 // Source: RoyaleAPI's cr-api-assets repository, cloned as that repo asks
