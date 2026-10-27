@@ -4,6 +4,7 @@
 // "Get API key" call to action. Styled after the bar on openui.com/chat.
 
 import type { MouseEvent, ReactNode } from "react";
+import { ShiroMascot } from "./mascot";
 import styles from "./site-header.module.css";
 
 const DEMOS_HREF = "https://www.openui.com/demos";
@@ -37,15 +38,6 @@ function ArrowLeft() {
   );
 }
 
-function ArrowUpRight() {
-  return (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-      <path d="M7 17 17 7" />
-      <path d="M7 7h10v10" />
-    </svg>
-  );
-}
-
 function GitHubMark() {
   return (
     <svg className={styles.githubMark} viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
@@ -63,19 +55,19 @@ function GitHubButton() {
   );
 }
 
-export function OpenUISiteHeader() {
+export function OpenUISiteHeader({ title }: { title: string }) {
   return (
     <header className={styles.header}>
       <div className={styles.row}>
         <a className={styles.backLink} href={DEMOS_HREF} onClick={onBackClick} aria-label="Back to OpenUI demos">
           <ArrowLeft />
-          <span className={styles.backLabel}>All demos</span>
+          <span className={styles.backLabel}>{title}</span>
         </a>
         <div className={styles.actions}>
           <GitHubButton />
           <a className={styles.ctaButton} href={API_KEYS_HREF} target="_blank" rel="noopener noreferrer">
+            <ShiroMascot className={styles.ctaMascot} />
             <span>Get API key</span>
-            <ArrowUpRight />
           </a>
         </div>
       </div>
@@ -83,10 +75,18 @@ export function OpenUISiteHeader() {
   );
 }
 
-export function OpenUISiteChrome({ children, contained = false }: { children: ReactNode; contained?: boolean }) {
+export function OpenUISiteChrome({
+  children,
+  title,
+  contained = false,
+}: {
+  children: ReactNode;
+  title: string;
+  contained?: boolean;
+}) {
   return (
     <div className={styles.page}>
-      <OpenUISiteHeader />
+      <OpenUISiteHeader title={title} />
       <div className={contained ? `${styles.app} ${styles.appContained}` : styles.app}>{children}</div>
     </div>
   );

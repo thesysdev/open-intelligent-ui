@@ -141,9 +141,9 @@
   opacity: 0.88;
 }
 
-.ctaButton svg {
-  width: 15px;
-  height: 15px;
+.ctaMascot {
+  width: 20px;
+  height: 16px;
   flex: none;
 }
 
