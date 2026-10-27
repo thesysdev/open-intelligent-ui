@@ -44,7 +44,7 @@
 
 .row {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+  grid-template-columns: auto minmax(0, 1fr);
   align-items: center;
   gap: 8px;
   height: 100%;
@@ -83,16 +83,6 @@
   outline-offset: 2px;
 }
 
-.pitch {
-  margin: 0;
-  overflow: hidden;
-  color: var(--openui-text-neutral-secondary);
-  font-size: 0.9375rem;
-  line-height: 1.2;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
 .actions {
   display: flex;
   align-items: center;
@@ -127,14 +117,6 @@
   flex: none;
 }
 
-.githubCount {
-  font-variant-numeric: tabular-nums;
-}
-
-.githubStars {
-  color: var(--openui-text-neutral-secondary);
-}
-
 .ctaButton {
   display: inline-flex;
   height: 2.25rem;
@@ -165,15 +147,8 @@
   flex: none;
 }
 
-@media (max-width: 899px) {
-  .pitch {
-    display: none;
-  }
-}
-
 @media (max-width: 559px) {
-  .backLabel,
-  .githubStars {
+  .backLabel {
     display: none;
   }
 

@@ -1,33 +1,14 @@
 "use client";
 
-// Slim openui.com bar for the demo: a way back to the site, the GitHub stars and a
+// Slim openui.com bar for the demo: a way back to the site, a GitHub link and a
 // "Get API key" call to action. Styled after the bar on openui.com/chat.
 
-import { type MouseEvent, type ReactNode, useEffect, useState } from "react";
+import type { MouseEvent, ReactNode } from "react";
 import styles from "./site-header.module.css";
 
 const DEMOS_HREF = "https://www.openui.com/demos";
 const GITHUB_HREF = "https://github.com/thesysdev/openui";
 const API_KEYS_HREF = "https://console.thesys.dev/keys";
-const STAR_FALLBACK = 10890;
-
-function useStarCount() {
-  const [count, setCount] = useState(STAR_FALLBACK);
-  useEffect(() => {
-    let cancelled = false;
-    // Root-relative on purpose: on openui.com this is the docs app's cached endpoint.
-    fetch("/api/github-stars")
-      .then((res) => (res.ok ? res.json() : null))
-      .then((data: { stars?: unknown } | null) => {
-        if (!cancelled && typeof data?.stars === "number" && data.stars > 0) setCount(data.stars);
-      })
-      .catch(() => {});
-    return () => {
-      cancelled = true;
-    };
-  }, []);
-  return count;
-}
 
 // Only go back when the previous page is on this site, so the button never sends
 // someone off to wherever they were before landing on the demo.
@@ -74,22 +55,10 @@ function GitHubMark() {
 }
 
 function GitHubButton() {
-  const count = String(useStarCount());
   return (
-    <a
-      href={GITHUB_HREF}
-      target="_blank"
-      rel="noopener noreferrer"
-      className={styles.githubButton}
-      aria-label={`Star OpenUI on GitHub (${count} stars)`}
-    >
+    <a href={GITHUB_HREF} target="_blank" rel="noopener noreferrer" className={styles.githubButton}>
       <GitHubMark />
-      <span className={styles.githubCount} aria-hidden="true">
-        {count}
-      </span>
-      <span className={styles.githubStars} aria-hidden="true">
-        stars
-      </span>
+      <span>View on GitHub</span>
     </a>
   );
 }
@@ -102,7 +71,6 @@ export function OpenUISiteHeader() {
           <ArrowLeft />
           <span className={styles.backLabel}>All demos</span>
         </a>
-        <p className={styles.pitch}>Build your own Generative UI agent with OpenUI</p>
         <div className={styles.actions}>
           <GitHubButton />
           <a className={styles.ctaButton} href={API_KEYS_HREF} target="_blank" rel="noopener noreferrer">
