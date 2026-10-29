@@ -8,5 +8,5 @@ import { OpenUISiteChrome } from "@/components/openui-site-header";
 export function SiteChrome({ children }: { children: ReactNode }) {
   const pathname = usePathname();
   if (pathname.startsWith("/preview")) return children;
-  return <OpenUISiteChrome title="Open Intelligent UI">{children}</OpenUISiteChrome>;
+  return <OpenUISiteChrome>{children}</OpenUISiteChrome>;
 }

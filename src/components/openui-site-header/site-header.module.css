@@ -1,5 +1,6 @@
-/* Light-theme tokens and controls from thesysdev/openui
-   docs/app/chat/chat-page.module.css, build-for-free-menu.module.css and GitHubButton.module.css. */
+/* Ported from thesysdev/openui docs/components/site-header.module.css,
+   site-marketing-header.module.css, site-primary-nav.module.css and
+   GitHubButton.module.css (light theme). Keep in step with those files. */
 
 @font-face {
   font-family: "Inter Display";
@@ -18,21 +19,24 @@
 }
 
 .header {
-  --bar-height: 3.25rem;
   --openui-text-neutral-primary: oklch(0.097 0 0 / 1);
   --openui-text-neutral-secondary: oklch(0.097 0 0 / 0.6);
+  --openui-foreground: oklch(0.994 0 89.876 / 1);
   --openui-border-default: oklch(0.097 0 0 / 0.06);
   --openui-highlight: oklch(0.097 0 0 / 0.04);
+  --openui-highlight-strong: oklch(0.097 0 0 / 0.08);
+  --openui-shadow-l: 0 2px 6px -2px rgb(0 0 0 / 0.08);
+  --openui-shadow-xl: 0 8px 24px -8px rgb(0 0 0 / 0.12);
+  --site-header-height: 4rem;
   position: relative;
   z-index: 50;
   flex: none;
+  width: 100%;
+  padding-inline: 1rem;
   box-sizing: border-box;
-  height: var(--bar-height);
-  padding: 8px;
-  border-bottom: 1px solid var(--openui-border-default);
   background: #fff;
   color: var(--openui-text-neutral-primary);
-  font-family: "Inter Display", "Inter", "Segoe UI", sans-serif;
+  font-family: "Inter Display", "Inter", "Inter Display", sans-serif;
   -webkit-font-smoothing: antialiased;
 }
 
@@ -44,122 +48,578 @@
 
 .row {
   display: grid;
-  grid-template-columns: auto minmax(0, 1fr);
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
   align-items: center;
-  gap: 8px;
-  height: 100%;
+  column-gap: 1rem;
+  min-height: var(--site-header-height);
+  max-width: 1560px;
+  margin-inline: auto;
 }
 
-.backLink {
-  display: inline-flex;
-  height: 2.25rem;
+.brand {
+  display: flex;
   align-items: center;
-  gap: 0.375rem;
   justify-self: start;
-  padding-inline: 0.625rem;
-  border-radius: 10px;
-  color: var(--openui-text-neutral-primary);
-  font-size: 0.9375rem;
-  font-weight: 500;
-  line-height: 1;
+  flex-shrink: 0;
+  grid-column: 1;
   text-decoration: none;
-  white-space: nowrap;
 }
 
-.backLink svg {
-  width: 15px;
-  height: 15px;
-  flex: none;
+.wordmark {
+  display: block;
+  height: 2rem;
+  width: auto;
 }
 
-.backLink:hover {
-  background: var(--openui-highlight);
+.center {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 0;
+  grid-column: 2;
 }
 
-.backLink:focus-visible,
-.githubButton:focus-visible,
-.ctaButton:focus-visible {
-  outline: 2px solid var(--openui-text-neutral-primary);
-  outline-offset: 2px;
-}
-
-.actions {
+.end {
   display: flex;
   align-items: center;
   justify-self: end;
+  grid-column: 3;
+}
+
+/* Desktop nav */
+
+.primaryNav {
+  position: relative;
+  display: none;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.link {
+  display: flex;
+  align-items: center;
+  height: 2rem;
+  margin: 0;
+  padding-inline: 0.5rem;
+  border-radius: 0.375rem;
+  color: var(--openui-text-neutral-primary);
+  text-decoration: none;
+  white-space: nowrap;
+  font-family: "Inter Display", sans-serif;
+  font-size: 15px;
+  font-weight: 400;
+  line-height: 1.5rem;
+  transition:
+    background-color 0.2s ease,
+    color 0.2s ease;
+}
+
+.link:hover {
+  background: var(--openui-highlight-strong);
+}
+
+.dropdown {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.dropdown::after {
+  content: "";
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  height: 0.5rem;
+}
+
+.dropdownTrigger {
+  cursor: pointer;
+  border: 0;
+  background: transparent;
+  color: inherit;
+}
+
+.dropdownTriggerOpen,
+.dropdown:hover .dropdownTrigger {
+  background: var(--openui-highlight-strong);
+}
+
+.viewport {
+  position: absolute;
+  top: calc(100% + 0.5rem);
+  left: 0;
+  z-index: 60;
+  overflow: hidden;
+  border: 1px solid var(--openui-border-default);
+  border-radius: 20px;
+  background: var(--openui-foreground);
+  box-shadow:
+    0 8px 48px -12px rgb(0 0 0 / 0.12),
+    0 4px 12px -6px rgb(0 0 0 / 0.06);
+  opacity: 0;
+  pointer-events: none;
+  visibility: hidden;
+  transition:
+    opacity 0.18s ease,
+    visibility 0s linear 0.18s;
+}
+
+.viewport::before {
+  content: "";
+  position: absolute;
+  top: -0.5rem;
+  right: 0;
+  left: 0;
+  height: 0.5rem;
+}
+
+.viewport[data-open="true"] {
+  opacity: 1;
+  pointer-events: auto;
+  visibility: visible;
+  transition:
+    opacity 0.18s ease,
+    visibility 0s,
+    height 0.5s cubic-bezier(0.32, 0.72, 0, 1);
+}
+
+.viewportContent {
+  position: absolute;
+  top: 0;
+  left: 0;
+  display: flex;
+  flex-direction: column;
+  padding: 20px;
+}
+
+.columns {
+  display: flex;
+  gap: 24px;
+}
+
+.column {
+  flex: 1 1 0;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
   gap: 8px;
 }
 
-.githubButton {
-  display: inline-flex;
-  height: 2.25rem;
-  align-items: center;
-  gap: 0.375rem;
-  padding-inline: 0.75rem;
-  border: 1px solid var(--openui-border-default);
+.groupLabel {
+  margin: 0;
+  padding: 6px 0.5rem 6px 12px;
   border-radius: 10px;
-  background: #fff;
+  background: rgba(10, 10, 10, 0.03);
+  font-family: "Inter", "Inter Display", sans-serif;
+  font-size: 12px;
+  font-weight: 400;
+  line-height: 1.5;
+  color: var(--openui-text-neutral-secondary);
+}
+
+.groupList {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.listItem {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 5px 6px;
+  border-radius: 10px;
   color: var(--openui-text-neutral-primary);
-  font-size: 0.9375rem;
-  font-weight: 500;
-  line-height: 1;
   text-decoration: none;
+  transition: background-color 0.15s ease;
+}
+
+.listItem:hover,
+.listItem:focus-visible {
+  background: rgba(10, 10, 10, 0.03);
+}
+
+.listIcon {
+  position: relative;
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: rgba(10, 10, 10, 0.04);
+  color: var(--openui-text-neutral-secondary);
+  transition:
+    background-color 0.15s ease,
+    color 0.15s ease;
+}
+
+.listGlyph,
+.listArrow {
+  grid-area: 1 / 1;
+  display: grid;
+  place-items: center;
+  transition: opacity 0.15s ease;
+}
+
+.listArrow {
+  opacity: 0;
+}
+
+.listItem:hover .listGlyph {
+  opacity: 0;
+}
+
+.listItem:hover .listArrow {
+  opacity: 1;
+}
+
+.listItem:hover .listIcon {
+  background: #0a0a0a;
+  color: #fff;
+}
+
+.listTitle {
+  font-family: "Inter Display", sans-serif;
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 1.5;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.itemTag {
+  flex: none;
+  padding: 1px 4px;
+  border: 1px solid #0a0a0a;
+  border-radius: 3px;
+  color: #0a0a0a;
+  font-family: "Inter", "Inter Display", sans-serif;
+  font-size: 8px;
+  font-weight: 600;
+  line-height: 1;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
   white-space: nowrap;
 }
 
-.githubButton:hover {
-  background: var(--openui-highlight);
+.banner {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  position: relative;
+  margin: 16px -20px -20px;
+  padding: 12px 20px;
+  font-family: "Inter", "Inter Display", sans-serif;
+  font-size: 12px;
+  font-weight: 400;
+  line-height: 1.5;
+  color: var(--openui-text-neutral-secondary);
+  animation: bannerIn 0.45s cubic-bezier(0.32, 0.72, 0, 1) both;
+}
+
+.banner::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  right: 20px;
+  left: 20px;
+  height: 1px;
+  background: rgba(10, 10, 10, 0.05);
+}
+
+.bannerIcon {
+  flex: none;
+  opacity: 0.7;
+}
+
+@keyframes bannerIn {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* GitHub stars pill */
+
+.githubButton {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  height: 2.5rem;
+  padding-inline: 0.875rem;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 999px;
+  background: #0a0a0a;
+  color: #fff;
+  font-family: "Inter", "Inter Display", "Segoe UI", sans-serif;
+  font-size: 0.9375rem;
+  font-weight: 500;
+  text-decoration: none;
+  cursor: pointer;
+  box-shadow:
+    inset 0 7px 12px -6px rgba(255, 255, 255, 0.16),
+    inset 0 -5px 8px -2px rgba(0, 0, 0, 0.6),
+    inset 0 8px 12px -6px rgba(255, 255, 255, 0.14);
 }
 
 .githubMark {
-  width: 16px;
-  height: 16px;
-  flex: none;
+  flex-shrink: 0;
+  width: 18px;
+  height: 18px;
+  fill: #fff;
+  filter: drop-shadow(0 0 4px rgba(255, 255, 255, 0.5));
 }
 
-.ctaButton {
-  display: inline-flex;
-  height: 2.25rem;
+.githubCount {
+  min-width: 4ch;
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+  text-shadow: 0 0 4px rgba(255, 255, 255, 0.55);
+}
+
+.githubStars {
+  color: rgba(255, 255, 255, 0.55);
+}
+
+.desktopActions {
+  display: none;
   align-items: center;
+}
+
+/* Mobile */
+
+.mobileMenuButton {
+  display: flex;
+  width: 2.5rem;
+  height: 2.5rem;
+  align-items: center;
+  justify-content: center;
+  border: 0;
+  border-radius: 0.5rem;
+  background: transparent;
+  color: var(--openui-text-neutral-primary);
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.mobileMenuButton:hover,
+.mobileTrayLink:hover {
+  background: var(--openui-highlight);
+}
+
+.hamburgerIcon {
+  width: 1.25rem;
+  height: 1.25rem;
+}
+
+.mobileLayer {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  z-index: 50;
+  display: none;
+}
+
+.mobileLayer[data-open="true"] {
+  display: block;
+}
+
+.mobileBackdrop {
+  position: absolute;
+  inset: 0 0 auto;
+  height: 100vh;
+  cursor: pointer;
+  background: rgb(0 0 0 / 60%);
+  backdrop-filter: blur(12px);
+}
+
+.mobileTray {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  height: calc(100dvh - var(--site-header-height));
+  overflow-y: auto;
+  border-top: 1px solid var(--openui-border-default);
+  background: var(--openui-foreground);
+  box-shadow: var(--openui-shadow-xl);
+}
+
+.mobileTrayInner {
+  display: flex;
+  width: 100%;
+  min-height: 100%;
+  max-width: 75rem;
+  margin-inline: auto;
+  flex-direction: column;
   gap: 0.375rem;
-  padding-inline: 0.625rem;
-  border-radius: 10px;
-  background: #0a0a0a;
-  box-shadow:
-    inset 0 2px 1px -0.5px color-mix(in srgb, #0a0a0a 84%, white),
-    inset 0 -3px 6px -1px color-mix(in srgb, #0a0a0a 90%, black);
-  color: #fff;
+  padding: 0.5rem 1.25rem 1rem;
+}
+
+.mobileTraySection {
+  display: flex;
+  flex-direction: column;
+  gap: 0.125rem;
+  padding-block: 0.125rem;
+}
+
+.mobileTraySectionHeading {
+  display: flex;
+  width: 100%;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  margin-bottom: 0.25rem;
+  padding: 0.8125rem 0.75rem;
+  border: 0;
+  border-radius: 0.625rem;
+  background: rgba(10, 10, 10, 0.04);
+  font-family: "Inter", "Inter Display", sans-serif;
+  font-size: 0.8125rem;
+  font-weight: 500;
+  line-height: 1.2;
+  text-align: left;
+  color: var(--openui-text-neutral-secondary);
+  cursor: pointer;
+}
+
+.mobileTrayChevron {
+  flex: none;
+  opacity: 0.7;
+  transition: transform 0.26s cubic-bezier(0.32, 0.72, 0, 1);
+}
+
+.mobileTrayChevronOpen {
+  transform: rotate(180deg);
+}
+
+.mobileTraySectionItems {
+  display: grid;
+  grid-template-rows: 0fr;
+  overflow: hidden;
+  transition: grid-template-rows 0.26s cubic-bezier(0.32, 0.72, 0, 1);
+}
+
+.mobileTraySectionItems[data-open="true"] {
+  grid-template-rows: 1fr;
+}
+
+.mobileTraySectionItems > div {
+  display: flex;
+  min-height: 0;
+  flex-direction: column;
+  gap: 0.125rem;
+}
+
+.mobileTrayLink {
+  position: relative;
+  display: flex;
+  width: 100%;
+  min-height: 3rem;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.6875rem 0.625rem;
+  border-radius: 0.375rem;
+  color: var(--openui-text-neutral-primary);
+  text-decoration: none;
+  transition: background-color 0.2s ease;
+  font-family: "Inter Display", sans-serif;
   font-size: 0.9375rem;
   font-weight: 500;
+  line-height: 1.2;
+  letter-spacing: -0.01em;
+}
+
+.mobileTrayLink + .mobileTrayLink::before {
+  content: "";
+  position: absolute;
+  top: -1px;
+  right: 0.625rem;
+  left: 0.625rem;
+  height: 1px;
+  background: rgba(10, 10, 10, 0.07);
+}
+
+.mobileTrayBadge {
+  padding: 0.125rem 0.375rem;
+  border-radius: 4px;
+  background: #0a0a0a;
+  color: #fff;
+  font-size: 9px;
+  font-weight: 600;
   line-height: 1;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+}
+
+.mobileTrayFooter {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.625rem;
+  position: sticky;
+  bottom: 0;
+  margin-top: auto;
+  margin-bottom: -1rem;
+  padding-block: 1rem;
+  border-top: 1px solid var(--openui-border-default);
+  background: var(--openui-foreground);
+}
+
+.mobileTrayDocsLink {
+  display: inline-flex;
+  height: 2.5rem;
+  align-items: center;
+  gap: 0.375rem;
+  padding-inline: 0.875rem;
+  border: 1px solid var(--openui-border-default);
+  border-radius: 999px;
+  background: var(--openui-foreground);
+  box-shadow: var(--openui-shadow-l);
+  color: var(--openui-text-neutral-primary);
+  font-family: "Inter", "Inter Display", "Segoe UI", sans-serif;
+  font-size: 0.9375rem;
+  font-weight: 500;
   text-decoration: none;
-  white-space: nowrap;
-  transition: opacity 120ms ease;
 }
 
-.ctaButton:hover {
-  opacity: 0.88;
+.mobileTrayFooter a {
+  width: 100%;
+  justify-content: center;
 }
 
-.ctaMascot {
-  width: 20px;
-  height: 16px;
-  flex: none;
+@media (prefers-reduced-motion: reduce) {
+  .banner {
+    animation: none;
+  }
+
+  .viewport[data-open="true"] {
+    transition:
+      opacity 0.18s ease,
+      visibility 0s;
+  }
 }
 
-@media (max-width: 559px) {
-  .backLabel {
+@media (min-width: 1024px) {
+  .primaryNav,
+  .desktopActions {
+    display: flex;
+  }
+
+  .mobileMenuButton,
+  .mobileLayer,
+  .mobileLayer[data-open="true"] {
     display: none;
   }
-
-  .backLink {
-    width: 2.25rem;
-    justify-content: center;
-    padding-inline: 0;
-  }
 }
 
-/* Page chrome: the bar on top, the demo filling the rest of the window.
+/* Page chrome: the header on top, the demo filling the rest of the window.
    Demos size their full-height shells with var(--app-height). */
 .page {
   display: flex;
@@ -168,7 +628,7 @@
 }
 
 .app {
-  --app-height: calc(100dvh - 3.25rem);
+  --app-height: calc(100dvh - 4rem);
   position: relative;
   flex: 1 1 auto;
   min-height: 0;
@@ -176,7 +636,7 @@
 }
 
 /* Makes this the containing block for the demo's fixed elements, so they sit
-   below the bar instead of under it. */
+   below the header instead of under it. */
 .appContained {
   contain: layout;
 }
