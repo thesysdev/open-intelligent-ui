@@ -1,5 +1,5 @@
 /* The gallery page around the rendered programs. */
-.gallery { min-height: 100dvh; background: var(--iui-canvas); color: var(--iui-ink); font-family: var(--iui-font); }
+.gallery { min-height: var(--app-height, 100dvh); background: var(--iui-canvas); color: var(--iui-ink); font-family: var(--iui-font); }
 .gallery-top { position: sticky; top: 0; z-index: 20; display: flex; align-items: center; justify-content: space-between; height: 64px; padding: 0 28px; border-bottom: 1px solid var(--iui-border); background: var(--iui-canvas); }
 .gallery-top > div { display: flex; align-items: center; gap: 14px; }
 .gallery-name { font-size: 19px; font-weight: 600; letter-spacing: -0.6px; }

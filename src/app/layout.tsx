@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
 import { Analytics } from "./analytics";
+import { SiteChrome } from "./site-chrome";
 
 // Variable Inter (no fixed weights), so the theme's in-between weights
 // (440, 560, 640) render as set.
@@ -30,7 +31,7 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <body className={inter.className}>
-        {children}
+        <SiteChrome>{children}</SiteChrome>
         <Analytics />
       </body>
     </html>
