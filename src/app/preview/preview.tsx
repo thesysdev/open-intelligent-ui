@@ -25,7 +25,7 @@ export function Preview({ theme, kind = "chat" }: { theme: "light" | "dark"; kin
   }, []);
 
   return (
-    <div data-theme={theme} style={{ minHeight: "100dvh", background: "var(--iui-canvas)", color: "var(--iui-ink)", fontFamily: "var(--iui-font)" }}>
+    <div data-theme={theme} style={{ minHeight: "calc(100dvh - var(--hosted-header-height, 0px))", background: "var(--iui-canvas)", color: "var(--iui-ink)", fontFamily: "var(--iui-font)" }}>
       <main className="preview-root" style={{ maxWidth: 800, margin: "0 auto", padding: "24px 16px 48px", fontSize: 16, lineHeight: 1.6 }}>
         {program === null ? null : program ? (
           <Renderer response={program} library={kind === "coach" ? coachLibrary : kind === "chess" ? chessLibrary : library} isStreaming={false} onAction={onAction} onError={onError} toolProvider={demoTools} />

@@ -1,6 +1,6 @@
 /* The gallery page around the rendered programs. */
-.gallery { min-height: 100dvh; background: var(--iui-canvas); color: var(--iui-ink); font-family: var(--iui-font); }
-.gallery-top { position: sticky; top: 0; z-index: 20; display: flex; align-items: center; justify-content: space-between; height: 64px; padding: 0 28px; border-bottom: 1px solid var(--iui-border); background: var(--iui-canvas); }
+.gallery { min-height: calc(100dvh - var(--hosted-header-height, 0px)); background: var(--iui-canvas); color: var(--iui-ink); font-family: var(--iui-font); }
+.gallery-top { position: sticky; top: var(--hosted-header-height, 0px); z-index: 20; display: flex; align-items: center; justify-content: space-between; height: 64px; padding: 0 28px; border-bottom: 1px solid var(--iui-border); background: var(--iui-canvas); }
 .gallery-top > div { display: flex; align-items: center; gap: 14px; }
 .gallery-name { font-size: 19px; font-weight: 600; letter-spacing: -0.6px; }
 .gallery-divider { width: 1px; height: 17px; background: var(--iui-border); }
@@ -18,7 +18,7 @@
 .gallery-index:has(+ .gallery-index) { margin-bottom: 0; padding-bottom: 0; border-bottom: 0; }
 .gallery-section { margin-top: 56px; padding-top: 18px; border-top: 1px solid var(--iui-border); font-size: 20px; font-weight: 500; letter-spacing: -0.4px; }
 .gallery-section:first-of-type { margin-top: 36px; padding-top: 0; border-top: 0; }
-.gallery-example { margin-top: 44px; scroll-margin-top: 84px; }
+.gallery-example { margin-top: 44px; scroll-margin-top: calc(var(--hosted-header-height, 0px) + 84px); }
 .gallery-example > header { margin-bottom: 14px; }
 .gallery-example > header h2 { font-size: 15px; font-weight: 500; }
 .gallery-example > header p { margin-top: 3px; color: var(--iui-muted); font-size: 12px; line-height: 1.6; }
