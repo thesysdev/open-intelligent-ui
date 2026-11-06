@@ -3,7 +3,7 @@
 .iui-map { --iui-map-control-shadow: 0 1px 3px rgb(0 0 0 / 14%); position: relative; overflow: hidden; border-radius: var(--iui-radius-2xl); background: var(--iui-map-water); isolation: isolate; }
 /* .iui-map > beats maplibre-gl.css, which loads later and sets .maplibregl-map to position: relative. */
 .iui-map > .iui-map-surface { position: absolute; inset: 0; z-index: 0; background: var(--iui-map-water); }
-.iui-map.is-expanded { position: fixed; inset: 24px; z-index: 1500; height: auto; outline: 24px solid color-mix(in srgb, var(--iui-canvas) 90%, transparent); box-shadow: 0 12px 64px rgb(0 0 0 / 18%); }
+.iui-map.is-expanded { position: fixed; inset: calc(var(--hosted-header-height, 0px) + 24px) 24px 24px; z-index: 1500; height: auto; outline: 24px solid color-mix(in srgb, var(--iui-canvas) 90%, transparent); box-shadow: 0 12px 64px rgb(0 0 0 / 18%); }
 .iui-map-top-left { position: absolute; z-index: 500; top: 12px; left: 12px; display: flex; align-items: center; gap: 8px; }
 .iui-map-pill { display: inline-flex; align-items: center; gap: 6px; min-height: 34px; padding: 6px 12px; border: 1px solid var(--iui-border); border-radius: 999px; background: var(--iui-canvas); color: var(--iui-ink); box-shadow: var(--iui-map-control-shadow); font-size: 12px; line-height: 18px; font-weight: 560; cursor: pointer; }
 .iui-map-filter { position: relative; padding: 0; }
@@ -41,6 +41,6 @@
 @keyframes iui-pin-in { from { opacity: 0; transform: scale(.75); } to { opacity: 1; transform: scale(1); } }
 @media (prefers-reduced-motion: reduce) { .iui-map-marker-content { animation: none; } }
 @media (max-width: 520px) {
-  .iui-map.is-expanded { inset: 12px; outline-width: 12px; }
+  .iui-map.is-expanded { inset: calc(var(--hosted-header-height, 0px) + 12px) 12px 12px; outline-width: 12px; }
   .iui-map-label { max-width: 120px; font-size: 10px; }
 }
