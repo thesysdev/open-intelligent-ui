@@ -84,6 +84,9 @@ strong {
   height: 100%;
   overflow: hidden;
   container-type: size;
+  /* layout containment makes .chat-shell the containing block for position: fixed descendants
+     (the expanded map), so they fill the shell rather than the window. */
+  contain: layout;
 }
 
 /* react-ui sizes the agent container and its last-message anchor to the viewport (100dvh);
