@@ -2,7 +2,7 @@
 
 import { useEffect, useState, type RefObject } from "react";
 
-/** "dark" when the element sits inside data-theme="dark" (its used color-scheme), else "light". */
+/** "dark" when the element sits inside data-theme="dark" or data-openui-theme="dark" (its used color-scheme), else "light". */
 export function useColorScheme(ref: RefObject<HTMLElement | null>): "light" | "dark" {
   const [scheme, setScheme] = useState<"light" | "dark">("light");
   useEffect(() => {
@@ -11,9 +11,9 @@ export function useColorScheme(ref: RefObject<HTMLElement | null>): "light" | "d
       setScheme(value.trim() === "dark" ? "dark" : "light");
     };
     read();
-    // Theme switches flip a data-theme attribute somewhere above us.
+    // Theme switches flip a data-theme or data-openui-theme attribute somewhere above us.
     const observer = new MutationObserver(read);
-    observer.observe(document.documentElement, { attributes: true, subtree: true, attributeFilter: ["data-theme"] });
+    observer.observe(document.documentElement, { attributes: true, subtree: true, attributeFilter: ["data-theme", "data-openui-theme"] });
     return () => observer.disconnect();
   }, [ref]);
   return scheme;
