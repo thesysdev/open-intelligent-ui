@@ -44,6 +44,10 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 
+# agent tooling (local OpenSpec skills/commands/workflows)
+/.claude/
+/.agents/
+
 
 # Card art for /clash (Supercell fan content, fetched by npm run cards:art)
 /public/cards/

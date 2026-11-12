@@ -126,3 +126,16 @@
   --iui-photo-empty: var(--iui-surface);
   --iui-photo-empty-icon: var(--iui-border-strong);
 }
+
+/* Local data-theme pages (gallery, learn) don't import the OpenUI defaults CSS,
+   so --openui-* never flips there. Give [data-theme="dark"] its own neutral
+   tokens (mirroring the OpenUI dark values) so those pages darken fully. The
+   shared :root[data-openui-theme="dark"] rule above keeps following --openui-*,
+   so the chat and its custom themes are unchanged. */
+[data-theme="dark"] {
+  --iui-canvas: oklch(0.205 0 0 / 1);
+  --iui-ink: oklch(0.985 0 89.876 / 1);
+  --iui-on-ink: oklch(0.205 0 0 / 1);
+  --iui-muted: oklch(0.985 0 89.876 / 0.6);
+  --iui-faint: oklch(0.985 0 89.876 / 0.6);
+}

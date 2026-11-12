@@ -139,6 +139,13 @@ What changes with a local model:
 | `docs/openui-chatgpt-comparison.mp4` | Side-by-side video of ChatGPT and this project; `docs/openui-chatgpt-comparison.jpg` is its README preview. |
 | `.env.example` | The environment variables to copy into `.env`. |
 
+## For developers
+
+Learn to use OpenUI and plug in your own component library at **http://localhost:3000/learn** (`npm run dev` first). It is an interactive, self-paced tutorial: each lesson explains a concept and renders editable OpenUI Lang live, then walks through building the small example library in `src/lib/learn/` (components `KpiCard` and `StatusBadge`, the `@Trend` function, and the `get_metrics` data tool).
+
+- **The four primitives** the model can use: `defineComponent`, `defineFunction`, `defineAction`, and data `ToolSpec`s.
+- **The contract**: component and `@function` names, argument order, and option values are what the model writes — change them and regenerate (`npm run generate && npm run prompt`).
+
 ## For designers
 
 `npm install && npm run dev`, then open http://localhost:3000/gallery. It needs no API key: every example and component renders from hand-written programs, with Light and Dark at the top right. Check phone width too.
