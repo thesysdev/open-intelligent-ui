@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
-import { Analytics } from "./analytics";
 
 // Variable Inter (no fixed weights), so the theme's in-between weights
 // (440, 560, 640) render as set.
@@ -31,7 +30,6 @@ export default function RootLayout({
     <html lang="en" suppressHydrationWarning>
       <body className={inter.className}>
         {children}
-        <Analytics />
       </body>
     </html>
   );
