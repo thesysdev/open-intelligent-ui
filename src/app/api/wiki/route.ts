@@ -1,6 +1,8 @@
 // Wikipedia lookups for photo fallbacks and coordinates. Runs on the server so
 // the browser makes one same-origin request per place and results are cached.
 
+import { isPhotoFile } from "@/lib/photo-file";
+
 type WikiSummary = { thumbnail?: { source?: string }; coordinates?: { lat?: number; lon?: number } };
 type WikiMedia = { items?: { type?: string; srcset?: { src: string }[] }[] };
 type WikiInfo = { lat?: number; lng?: number; photos: string[] };
@@ -34,7 +36,7 @@ export async function GET(req: Request) {
       for (const item of media?.items ?? []) {
         if (item.type !== "image" || !item.srcset?.length) continue;
         const src = item.srcset[0].src;
-        if (/\.svg|icon|logo|map|flag|seal/i.test(src)) continue;
+        if (!isPhotoFile(src)) continue;
         const url = src.startsWith("//") ? `https:${src}` : src;
         if (!photos.some((p) => key(p) === key(url))) photos.push(url);
         if (photos.length >= 3) break;
