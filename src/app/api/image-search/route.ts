@@ -2,9 +2,10 @@
 // matching articles, then Wikimedia Commons files. Runs on the server so the
 // browser makes one same-origin request per description and results are cached.
 
+import { isPhotoFile } from "@/lib/photo-file";
+
 const cache = new Map<string, string[]>();
 const HEADERS = { "User-Agent": "open-intelligent-ui (https://github.com/thesysdev/open-intelligent-ui)" };
-const SKIP = /\.svg|icon|logo|map|flag|seal|coat_of_arms|signature|diagram/i;
 const WIDTH = 960;
 
 type Page = { index?: number; thumbnail?: { source?: string }; imageinfo?: { thumburl?: string; url?: string; mime?: string }[] };
@@ -27,7 +28,7 @@ type TitledPage = Page & { title?: string };
 async function search(q: string): Promise<string[]> {
   const images: string[] = [];
   const add = (url: string | undefined) => {
-    if (url && url.startsWith("https://") && !SKIP.test(url) && !images.includes(url)) images.push(url);
+    if (url && url.startsWith("https://") && isPhotoFile(url) && !images.includes(url)) images.push(url);
   };
   const wanted = new Set(words(q));
   // Wikipedia articles first, but only ones whose title is about the query:
