@@ -46,12 +46,16 @@ export function tryMove(game: Chess, move: string): Move | null {
   }
 }
 
+// Move text that is not a move: a move number on its own ("1." in "1. e4 e5") or a result ("1-0").
+const NOT_A_MOVE = /^(\d+\.+|1-0|0-1|1\/2-1\/2|\*)$/;
+
 /** The game after moves from fen: the moves that played (as SAN) and the first that did not. */
 export function replay(moves: unknown, fen?: string | null) {
   const game = newGame(fen);
   const played: Move[] = [];
   let bad: string | null = null;
   for (const m of Array.isArray(moves) ? moves : []) {
+    if (NOT_A_MOVE.test(String(m).trim())) continue;
     const move = tryMove(game, String(m));
     if (!move) {
       bad = String(m);
