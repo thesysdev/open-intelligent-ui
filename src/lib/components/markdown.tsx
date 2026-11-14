@@ -5,7 +5,8 @@ import { webUrl } from "./style";
 // Inline: **bold**, *italic*, ~~strike~~, `code`, [text](https://...).
 // Blocks: paragraphs, # headings, - and 1. lists, > quotes, ``` code, ---, | tables |.
 
-const INLINE = /(`[^`\n]+`)|(\*\*[^*\n]+?\*\*|__[^_\n]+?__)|(~~[^~\n]+?~~)|(\*[^*\s][^*\n]*?\*|_[^_\s][^_\n]*?_)|(\[[^\]\n]+\]\([^)\s]+\))/;
+// A link URL may hold one level of parentheses, as Wikipedia's do: /wiki/Mercury_(planet).
+const INLINE = /(`[^`\n]+`)|(\*\*[^*\n]+?\*\*|__[^_\n]+?__)|(~~[^~\n]+?~~)|(\*[^*\s][^*\n]*?\*|_[^_\s][^_\n]*?_)|(\[[^\]\n]+\]\((?:[^()\s]|\([^()\s]*\))+\))/;
 
 export function inline(text: string, key = "i"): ReactNode {
   const out: ReactNode[] = [];
