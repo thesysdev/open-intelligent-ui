@@ -17,6 +17,7 @@ import { withBase } from "@/lib/base-path";
 import { localChatStorage, SaveMessages } from "@/lib/chat-storage";
 import { webUrl } from "@/lib/components/style";
 import { library } from "@/lib/library";
+import { ThemeProvider } from "@openuidev/intelligent-ui-library";
 
 // The chat opens @OpenUrl with a plain window.open of whatever URL the model wrote, and on
 // openui.com this page shares its origin with the rest of the site. So only http(s) URLs open,
@@ -68,30 +69,33 @@ export default function Home() {
     document.documentElement.setAttribute("data-openui-theme", mode);
   }, [mode]);
 
+  // The library reads its mode from its own ThemeProvider, not from AgentInterface's theme.
   return (
-    <div className="chat-shell">
-      <AgentInterface
-        llm={llm}
-        storage={storage}
-        componentLibrary={library}
-        onAction={onAction}
-        agentName="OpenUI"
-        logoUrl={withBase("/shiro-face.svg")}
-        theme={{ mode }}
-        starters={starters}
-      >
-        <AgentInterface.SidebarFooter>
-          <AgentInterface.ThemeModeToggle mode={mode} onModeChange={setPreference} />
-        </AgentInterface.SidebarFooter>
-        <AgentInterface.ThreadHeader showChatTitle={false} />
-        <AgentInterface.Welcome
-          image={<img src={withBase("/shiro-woodworker.svg")} alt="" className="welcome-mascot" />}
-          title="What can I help with?"
-          starterVariant="card"
-          glowAnimation
-        />
-        <SaveMessages />
-      </AgentInterface>
-    </div>
+    <ThemeProvider mode={mode}>
+      <div className="chat-shell">
+        <AgentInterface
+          llm={llm}
+          storage={storage}
+          componentLibrary={library}
+          onAction={onAction}
+          agentName="OpenUI"
+          logoUrl={withBase("/shiro-face.svg")}
+          theme={{ mode }}
+          starters={starters}
+        >
+          <AgentInterface.SidebarFooter>
+            <AgentInterface.ThemeModeToggle mode={mode} onModeChange={setPreference} />
+          </AgentInterface.SidebarFooter>
+          <AgentInterface.ThreadHeader showChatTitle={false} />
+          <AgentInterface.Welcome
+            image={<img src={withBase("/shiro-woodworker.svg")} alt="" className="welcome-mascot" />}
+            title="What can I help with?"
+            starterVariant="card"
+            glowAnimation
+          />
+          <SaveMessages />
+        </AgentInterface>
+      </div>
+    </ThemeProvider>
   );
 }

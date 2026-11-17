@@ -12,6 +12,7 @@ import { exampleDashboard, exampleShoppingList, exampleSteps, exampleTrip } from
 import { compositionPrograms } from "./composition-programs";
 import { programs, type Program } from "./programs";
 import { toolPrograms } from "./tool-programs";
+import { ThemeProvider } from "@openuidev/intelligent-ui-library";
 
 // The prompt's worked examples, rendered so they are known to work
 const promptExamples: Program[] = [
@@ -73,41 +74,43 @@ export function Gallery({ theme }: { theme: "light" | "dark" }) {
   }, []);
 
   return (
-    <div className="gallery" data-theme={theme}>
-      <header className="gallery-top">
-        <div>
-          <span className="gallery-name">OpenUI</span>
-          <span className="gallery-divider" />
-          <span className="gallery-sub">Component gallery</span>
-        </div>
-        <nav className="gallery-theme" aria-label="Theme">
-          <a href="?theme=light" aria-current={theme === "light" ? "page" : undefined}>Light</a>
-          <a href="?theme=dark" aria-current={theme === "dark" ? "page" : undefined}>Dark</a>
-        </nav>
-      </header>
-      <main className="gallery-content">
-        <div className="gallery-intro">
-          <h1>Primitives, composed by the model</h1>
-          <p>Hand-written OpenUI Lang 1.0 programs rendered by the 1.0 Renderer with this app&apos;s library. {Object.keys(library.components).length} components and {Object.keys(library.functions).length} functions.</p>
+    <ThemeProvider mode={theme}>
+      <div className="gallery" data-theme={theme}>
+        <header className="gallery-top">
+          <div>
+            <span className="gallery-name">OpenUI</span>
+            <span className="gallery-divider" />
+            <span className="gallery-sub">Component gallery</span>
+          </div>
+          <nav className="gallery-theme" aria-label="Theme">
+            <a href="?theme=light" aria-current={theme === "light" ? "page" : undefined}>Light</a>
+            <a href="?theme=dark" aria-current={theme === "dark" ? "page" : undefined}>Dark</a>
+          </nav>
+        </header>
+        <main className="gallery-content">
+          <div className="gallery-intro">
+            <h1>Primitives, composed by the model</h1>
+            <p>Hand-written OpenUI Lang 1.0 programs rendered by the 1.0 Renderer with this app&apos;s library. {Object.keys(library.components).length} components and {Object.keys(library.functions).length} functions.</p>
+            {sections.map((section) => (
+              <nav key={section.title} className="gallery-index" aria-label={section.title}>
+                {section.programs.map((p) => <a key={p.id} href={`#${p.id}`}>{p.title}</a>)}
+              </nav>
+            ))}
+          </div>
           {sections.map((section) => (
-            <nav key={section.title} className="gallery-index" aria-label={section.title}>
-              {section.programs.map((p) => <a key={p.id} href={`#${p.id}`}>{p.title}</a>)}
-            </nav>
+            <Fragment key={section.title}>
+              <h2 className="gallery-section">{section.title}</h2>
+              {section.programs.map((program) => <Example key={program.id} program={program} onAction={onAction} />)}
+            </Fragment>
           ))}
-        </div>
-        {sections.map((section) => (
-          <Fragment key={section.title}>
-            <h2 className="gallery-section">{section.title}</h2>
-            {section.programs.map((program) => <Example key={program.id} program={program} onAction={onAction} />)}
-          </Fragment>
-        ))}
-      </main>
-      {notice && (
-        <div className="gallery-notice" role="status">
-          <span>{notice}</span>
-          <button type="button" aria-label="Dismiss" onClick={() => setNotice("")}>×</button>
-        </div>
-      )}
-    </div>
+        </main>
+        {notice && (
+          <div className="gallery-notice" role="status">
+            <span>{notice}</span>
+            <button type="button" aria-label="Dismiss" onClick={() => setNotice("")}>×</button>
+          </div>
+        )}
+      </div>
+    </ThemeProvider>
   );
 }

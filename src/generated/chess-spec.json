@@ -15,10 +15,10 @@
     },
     "Grid": {
       "signature": "Grid(children: Node[], columns?: number, minChildWidth?: number, gap?: number)",
-      "description": "Equal columns (default 2). With minChildWidth (px), columns drop on narrow screens."
+      "description": "Equal columns, 1 to 12 (default 2). With minChildWidth (px), columns drop on narrow screens."
     },
     "Card": {
-      "signature": "Card(children: Node[], variant?: \"outline\" | \"soft\", padding?: number, gap?: number)",
+      "signature": "Card(children: Node[], variant?: \"outline\" | \"soft\", gap?: number, padding?: number)",
       "description": "Panel with a border; soft is a filled panel for summaries."
     },
     "Carousel": {
@@ -27,11 +27,11 @@
     },
     "Popover": {
       "signature": "Popover(trigger: string | Node[], content: string | Node[])",
-      "description": "Shows content in a small panel when the trigger is clicked: a definition, a source, details behind an Icon(\"info\", \"sm\")."
+      "description": "Shows content in a small panel when the trigger is clicked: a definition, a source, details behind an Icon(\"info\", \"sm\"). The trigger is text or an Icon, never a Button: it is a button already."
     },
     "Divider": {
       "signature": "Divider()",
-      "description": ""
+      "description": "A thin horizontal rule between blocks."
     },
     "Spacer": {
       "signature": "Spacer()",
@@ -87,26 +87,26 @@
     },
     "Button": {
       "signature": "Button(label: string, action?: ActionExpression, variant?: \"solid\" | \"outline\" | \"soft\" | \"ghost\", color?: \"primary\" | \"danger\" | \"success\", size?: \"sm\" | \"md\" | \"lg\", icon?: string, disabled?: boolean, block?: boolean)",
-      "description": "icon is a lucide name."
+      "description": "icon is a lucide name. Without an action it sends its label to the assistant."
     },
     "IconButton": {
       "signature": "IconButton(icon: string, action?: ActionExpression, label?: string, variant?: \"outline\" | \"ghost\" | \"solid\")",
-      "description": "Round icon-only button; label is read aloud."
+      "description": "Round icon-only button; label is read aloud. Needs an action."
     },
     "Pressable": {
       "signature": "Pressable(children: Node[], action?: ActionExpression, selected?: boolean, padding?: number, background?: Color, radius?: Radius)",
-      "description": "Makes any content clickable, such as a tile or a swatch."
+      "description": "Makes any content clickable, such as a tile or a swatch. Needs an action."
     },
     "Input": {
-      "signature": "Input(value: $binding<string | number>, label?: string, type?: \"text\" | \"number\", placeholder?: string)",
-      "description": "Text or number field; a number field stores numbers."
+      "signature": "Input(value: $binding<string | number>, label?: string, type?: \"text\" | \"number\", placeholder?: string, rules?: Rules)",
+      "description": "Text or number field; a number field stores numbers, and null when emptied."
     },
     "TextArea": {
-      "signature": "TextArea(value: $binding<string>, label?: string, placeholder?: string, rows?: number)",
-      "description": ""
+      "signature": "TextArea(value: $binding<string>, label?: string, placeholder?: string, rows?: number, rules?: Rules)",
+      "description": "Multi-line text field; rows is 2 to 20 (default 3)."
     },
     "Select": {
-      "signature": "Select(value: $binding<string>, options: (string | {value: string, label: string})[], label?: string, placeholder?: string)",
+      "signature": "Select(value: $binding<string>, options: (string | {value: string, label: string})[], label?: string, placeholder?: string, rules?: Rules)",
       "description": "Dropdown, for long option lists."
     },
     "SegmentedControl": {
@@ -118,16 +118,16 @@
       "description": "Shows label and value; unit like \"%\" or \"$\" formats the value."
     },
     "Checkbox": {
-      "signature": "Checkbox(checked: $binding<boolean>, label: string, lineThrough?: boolean)",
-      "description": "lineThrough strikes the label when checked, for to-do lists."
+      "signature": "Checkbox(checked: $binding<boolean>, label: string, lineThrough?: boolean, rules?: Rules)",
+      "description": "lineThrough strikes the label when checked, for to-do lists. rules takes only required."
     },
     "RadioGroup": {
-      "signature": "RadioGroup(value: $binding<string>, options: (string | {value: string, label: string, description?: string})[], label?: string, variant?: \"list\" | \"pills\" | \"cards\")",
+      "signature": "RadioGroup(value: $binding<string>, options: (string | {value: string, label: string, description?: string})[], label?: string, variant?: \"list\" | \"pills\" | \"cards\", rules?: Rules)",
       "description": "pills for short choices; cards for choices that need a description line."
     },
     "DatePicker": {
-      "signature": "DatePicker(value: $binding<string>, label?: string, min?: string, max?: string)",
-      "description": "Dates are \"YYYY-MM-DD\"."
+      "signature": "DatePicker(value: $binding<string>, label?: string, min?: string, max?: string, rules?: Rules)",
+      "description": "Dates, min and max are \"YYYY-MM-DD\". rules takes only required."
     },
     "Timer": {
       "signature": "Timer(seconds: $binding<number>, label?: string)",
@@ -135,15 +135,11 @@
     },
     "Form": {
       "signature": "Form(children: Node[])",
-      "description": "Groups fields; their values go with any @ToAssistant inside."
-    },
-    "SearchImage": {
-      "signature": "SearchImage(query: string, aspectRatio?: number, radius?: Radius, fit?: \"cover\" | \"contain\")",
-      "description": "A real photo the app finds for query; it needs no URL and no tool. Name the exact thing in 2 to 4 words: \"Belém Tower Lisbon\", \"iPhone 17\", \"pastel de nata\". Use one for every place, dish, product or thing with a look."
+      "description": "Groups fields; their values go with any @ToAssistant inside, once every field's rules pass."
     },
     "Image": {
       "signature": "Image(src: string, alt: string, aspectRatio?: number, radius?: Radius, fit?: \"cover\" | \"contain\")",
-      "description": "Photo from a URL the user or a tool gave; if it fails, a photo is found for alt."
+      "description": "Photo from a URL the user or a tool gave; never invent a URL. If it fails to load, an empty photo placeholder shows. aspectRatio is 0.2 to 5 (default 1.5)."
     },
     "Icon": {
       "signature": "Icon(name: string, size?: \"sm\" | \"md\" | \"lg\" | \"xl\", color?: Color)",
@@ -154,16 +150,8 @@
       "description": "Each row lists its cells in column order; a cell may be a component. Number columns align right."
     },
     "Chart": {
-      "signature": "Chart(type: \"bar\" | \"line\" | \"area\" | \"pie\" | \"donut\" | \"scatter\", data: Record<string, string | number>[], x?: string, series?: string[], format?: \"number\" | \"currency\" | \"percent\", currency?: string, stacked?: boolean, height?: number)",
-      "description": "Rows of data; x is the category key (a number key for scatter), series the value keys (default: every number key). percent values are like 45; currency is a code like \"EUR\"."
-    },
-    "Map": {
-      "signature": "Map(markers: MapMarker[], route?: boolean, selected?: $binding<string>, height?: number)",
-      "description": "Street map fitted to its markers. route draws the road path in marker order; selected holds the clicked marker's label."
-    },
-    "MapMarker": {
-      "signature": "MapMarker(label: string, lat: number, lng: number, category?: string, icon?: string)",
-      "description": "A place on a Map; icon is one emoji, else the pin shows its number."
+      "signature": "Chart(type: \"bar\" | \"line\" | \"area\" | \"pie\" | \"donut\" | \"scatter\", data: Record<string, string | number>[], x?: string, series?: string[], format?: \"number\" | \"percent\", stacked?: boolean, height?: number)",
+      "description": "Rows of data; x is the category key (a number key for scatter), series the value keys (default: every number key). format applies to pie and donut only: \"percent\" shows each slice as a share of the total, \"number\" its value. stacked stacks bar and area series. height sets the plot height in px; pie and donut ignore it and size themselves."
     },
     "YouTube": {
       "signature": "YouTube(video: string, title?: string)",
@@ -178,48 +166,60 @@
       "description": "Bursts confetti when its condition turns true, e.g. Celebration($score == 5) at the end of a quiz."
     },
     "Svg": {
-      "signature": "Svg(children: Node[], viewBox: string, width?: Length, height?: Length)",
-      "description": "A drawing for steps, parts, mechanisms, diagrams and layouts. Scales to its width; its shapes take expressions, so state can move them."
+      "signature": "Svg(children: (Circle | Ellipse | Rect | Line | Path | Polyline | Polygon | SvgText | G)[], viewBox: string, label?: string, width?: Length, height?: Length)",
+      "description": "A drawing for steps, parts, mechanisms, diagrams and layouts. Scales to its width; its shapes take expressions, so state can move them. label says in a few words what it shows, for screen readers: always give one."
     },
     "Circle": {
       "signature": "Circle(cx: number, cy: number, r: number, fill?: Color, stroke?: Color, strokeWidth?: number, opacity?: number)",
-      "description": ""
+      "description": "fill defaults to the text color; with only a stroke it stays unfilled."
     },
     "Ellipse": {
       "signature": "Ellipse(cx: number, cy: number, rx: number, ry: number, fill?: Color, stroke?: Color, strokeWidth?: number, opacity?: number)",
-      "description": ""
+      "description": "fill defaults to the text color; with only a stroke it stays unfilled."
     },
     "Rect": {
       "signature": "Rect(x: number, y: number, width: number, height: number, fill?: Color, stroke?: Color, strokeWidth?: number, opacity?: number, rx?: number)",
-      "description": ""
+      "description": "rx rounds the corners; fill defaults to the text color, and with only a stroke it stays unfilled."
     },
     "Line": {
       "signature": "Line(x1: number, y1: number, x2: number, y2: number, stroke?: Color, strokeWidth?: number, opacity?: number)",
-      "description": ""
+      "description": "Stroked in the text color, 2 wide, unless stroke and strokeWidth are set."
     },
     "Path": {
       "signature": "Path(d: string, fill?: Color, stroke?: Color, strokeWidth?: number, opacity?: number)",
-      "description": ""
+      "description": "d is SVG path data only (M, L, C, A, Z...), else nothing draws; unfilled unless fill is set."
     },
     "Polyline": {
-      "signature": "Polyline(points: string, stroke?: Color, strokeWidth?: number, fill?: Color, opacity?: number)",
+      "signature": "Polyline(points: string, fill?: Color, stroke?: Color, strokeWidth?: number, opacity?: number)",
       "description": "points like \"0,0 10,5 20,0\"."
     },
     "Polygon": {
       "signature": "Polygon(points: string, fill?: Color, stroke?: Color, strokeWidth?: number, opacity?: number)",
-      "description": ""
-    },
-    "G": {
-      "signature": "G(children: Node[], transform?: string, opacity?: number)",
-      "description": "Group; transform like \"rotate(30 50 50)\" or \"translate(10 0)\"."
+      "description": "Closed shape; points like \"0,0 10,5 20,0\". fill defaults to the text color; with only a stroke it stays unfilled."
     },
     "SvgText": {
       "signature": "SvgText(text: string, x: number, y: number, size?: number, fill?: Color, anchor?: \"start\" | \"middle\" | \"end\", weight?: \"normal\" | \"medium\" | \"semibold\")",
-      "description": ""
+      "description": "A text label at x, y; anchor sets which end sits on x."
+    },
+    "G": {
+      "signature": "G(children: (Circle | Ellipse | Rect | Line | Path | Polyline | Polygon | SvgText)[], transform?: string, opacity?: number)",
+      "description": "Group; transform like \"rotate(30 50 50)\" or \"translate(10 0)\"; one with the wrong number of arguments is dropped."
     },
     "HtmlView": {
       "signature": "HtmlView(html: string, height?: number, title?: string)",
       "description": "Sandboxed HTML page with inline JS, for games and canvas. No network except script CDNs. Fits its content unless height is set."
+    },
+    "SearchImage": {
+      "signature": "SearchImage(query: string, aspectRatio?: number, radius?: Radius, fit?: \"cover\" | \"contain\")",
+      "description": "A real photo the app finds for query; it needs no URL and no tool. Name the exact thing in 2 to 4 words: \"Belém Tower Lisbon\", \"iPhone 17\", \"pastel de nata\". Use one for every place, dish, product or thing with a look."
+    },
+    "Map": {
+      "signature": "Map(markers: MapMarker[], route?: boolean, selected?: $binding<string>, height?: number)",
+      "description": "Street map fitted to its markers. route draws the road path in marker order; selected holds the clicked marker's label."
+    },
+    "MapMarker": {
+      "signature": "MapMarker(label: string, lat: number, lng: number, category?: string, icon?: string)",
+      "description": "A place on a Map; icon is one emoji, else the pin shows its number."
     },
     "ChessBoard": {
       "signature": "ChessBoard(moves: $binding<string[]>, fen?: string, mode?: \"view\" | \"free\" | \"computer\" | \"line\", side?: \"white\" | \"black\", line?: string[], level?: \"easy\" | \"medium\" | \"hard\", arrows?: string[], highlights?: string[])",
@@ -297,19 +297,17 @@
       ],
       "notes": [
         "- An input's first argument is its value, usually a $variable that other statements read.",
-        "- Every input either changes something shown on the page, or sits in a Form whose submit Button sends a short first-person @ToAssistant (\"Help me choose a bike\"); the form values go with it. No dead inputs."
+        "- Every input either changes something shown on the page, or sits in a Form whose submit Button sends a short first-person @ToAssistant (\"Help me choose a bike\"); the form values go with it. No dead inputs.",
+        "- In a Form, a field's last argument rules is checked before the form sends, and an error shows under the field. Rules is {required?, min?, max?, minLength?, maxLength?, email?, url?, numeric?, pattern?}: Input($email, \"Email\", \"text\", null, {required: true, email: true})."
       ]
     },
     {
       "name": "Media and data",
       "components": [
-        "SearchImage",
         "Image",
         "Icon",
         "Table",
         "Chart",
-        "Map",
-        "MapMarker",
         "YouTube"
       ]
     },
@@ -334,19 +332,6 @@
         "Polygon",
         "SvgText",
         "HtmlView"
-      ]
-    },
-    {
-      "name": "Chess coach",
-      "components": [
-        "ChessBoard",
-        "MoveList",
-        "PositionSummary",
-        "EvalBar",
-        "ChessPiece"
-      ],
-      "notes": [
-        "- A game is a list of moves in SAN (\"e4\", \"Nf3\", \"O-O\", \"exd5\", \"e8=Q\"), played from fen or the start position. The board, @Position and @LegalMoves check them, so never write a FEN, a board drawing or a material count yourself; compute them."
       ]
     }
   ],
@@ -525,7 +510,7 @@
     },
     "FormatDate": {
       "signature": "FormatDate(date: string | number, style?: \"date\" | \"short\" | \"long\" | \"weekday\" | \"month\" | \"time\" | \"datetime\" | \"iso\") → string",
-      "description": "A date as text: \"date\" Oct 9, 2026 (default), \"short\" Oct 9, \"long\" Friday, October 9, 2026, \"weekday\" Fri, \"month\" Oct 2026, \"time\" 9:30 PM, \"datetime\", \"iso\" 2026-10-09. Dates are \"YYYY-MM-DD\", ISO or a timestamp"
+      "description": "A date as text: \"date\" Oct 9, 2026 (default), \"short\" Oct 9, \"long\" Friday, October 9, 2026, \"weekday\" Fri, \"month\" Oct 2026, \"time\" 9:30 PM, \"datetime\", \"iso\" 2026-10-09. Dates are \"YYYY-MM-DD\", ISO or a timestamp; \"time\" and \"datetime\" need a timestamp or an ISO date-time, as a plain date has no time"
     },
     "AddDays": {
       "signature": "AddDays(date: string | number, days: number) → string",
@@ -553,7 +538,7 @@
     },
     "Pivot": {
       "signature": "Pivot(rows: any[], rowKey: string, colKey: string, field?: string, agg?: \"sum\" | \"avg\" | \"count\" | \"min\" | \"max\") → Record<string, string | number>[]",
-      "description": "One row per rowKey value with a column per colKey value holding agg of field, for stacked or grouped charts"
+      "description": "One row per rowKey value, under key, with a column per colKey value holding agg of field, for stacked or grouped charts"
     },
     "Top": {
       "signature": "Top(rows: any[], field: string, n: number, direction?: \"desc\" | \"asc\") → any[]",
@@ -561,7 +546,7 @@
     },
     "Between": {
       "signature": "Between(rows: any[], field: string, min?: any, max?: any) → any[]",
-      "description": "Rows whose field is from min to max, both included; compares numbers, or text such as \"YYYY-MM-DD\" dates. Leave min or max null for an open end"
+      "description": "Rows whose field is from min to max, both included; compares numbers, dates by day (\"YYYY-MM-DD\", ISO or a timestamp), or text. Leave min or max null for an open end"
     },
     "Bucket": {
       "signature": "Bucket(rows: any[], dateField: string, unit: \"day\" | \"week\" | \"month\", field?: string, agg?: \"sum\" | \"avg\" | \"count\" | \"min\" | \"max\") → {key: string | number, value: number}[]",
@@ -580,8 +565,8 @@
       "description": "Percent change from previous to current, e.g. @Change(120, 100) is 20; null when previous is 0"
     },
     "Histogram": {
-      "signature": "Histogram(values: number[], bins: number, min?: number, max?: number) → {key: string, value: number, start: number, end: number}[]",
-      "description": "Counts numbers into equal-width bins (value is the count); min and max fix the range, default the data's"
+      "signature": "Histogram(values: number[], bins: number, min?: number, max?: number) → {key: string, value: number}[]",
+      "description": "Counts numbers into equal-width bins as {key, value} rows: key is the bin's start, value the count; min and max fix the range, default the data's"
     },
     "Stats": {
       "signature": "Stats(values: number[]) → {count: number, min: number, max: number, mean: number, median: number, stdev: number}",
@@ -728,9 +713,6 @@
       "Form": {
         "$ref": "#/$defs/Form"
       },
-      "SearchImage": {
-        "$ref": "#/$defs/SearchImage"
-      },
       "Image": {
         "$ref": "#/$defs/Image"
       },
@@ -742,12 +724,6 @@
       },
       "Chart": {
         "$ref": "#/$defs/Chart"
-      },
-      "Map": {
-        "$ref": "#/$defs/Map"
-      },
-      "MapMarker": {
-        "$ref": "#/$defs/MapMarker"
       },
       "YouTube": {
         "$ref": "#/$defs/YouTube"
@@ -782,14 +758,23 @@
       "Polygon": {
         "$ref": "#/$defs/Polygon"
       },
-      "G": {
-        "$ref": "#/$defs/G"
-      },
       "SvgText": {
         "$ref": "#/$defs/SvgText"
       },
+      "G": {
+        "$ref": "#/$defs/G"
+      },
       "HtmlView": {
         "$ref": "#/$defs/HtmlView"
+      },
+      "SearchImage": {
+        "$ref": "#/$defs/SearchImage"
+      },
+      "Map": {
+        "$ref": "#/$defs/Map"
+      },
+      "MapMarker": {
+        "$ref": "#/$defs/MapMarker"
       },
       "ChessBoard": {
         "$ref": "#/$defs/ChessBoard"
@@ -842,13 +827,10 @@
       "DatePicker",
       "Timer",
       "Form",
-      "SearchImage",
       "Image",
       "Icon",
       "Table",
       "Chart",
-      "Map",
-      "MapMarker",
       "YouTube",
       "Flashcard",
       "Celebration",
@@ -860,9 +842,12 @@
       "Path",
       "Polyline",
       "Polygon",
-      "G",
       "SvgText",
+      "G",
       "HtmlView",
+      "SearchImage",
+      "Map",
+      "MapMarker",
       "ChessBoard",
       "MoveList",
       "PositionSummary",
@@ -1039,7 +1024,7 @@
           "children"
         ],
         "additionalProperties": false,
-        "description": "Equal columns (default 2). With minChildWidth (px), columns drop on narrow screens."
+        "description": "Equal columns, 1 to 12 (default 2). With minChildWidth (px), columns drop on narrow screens."
       },
       "Card": {
         "type": "object",
@@ -1055,10 +1040,10 @@
               "soft"
             ]
           },
-          "padding": {
+          "gap": {
             "type": "number"
           },
-          "gap": {
+          "padding": {
             "type": "number"
           }
         },
@@ -1119,12 +1104,13 @@
           "content"
         ],
         "additionalProperties": false,
-        "description": "Shows content in a small panel when the trigger is clicked: a definition, a source, details behind an Icon(\"info\", \"sm\")."
+        "description": "Shows content in a small panel when the trigger is clicked: a definition, a source, details behind an Icon(\"info\", \"sm\"). The trigger is text or an Icon, never a Button: it is a button already."
       },
       "Divider": {
         "type": "object",
         "properties": {},
-        "additionalProperties": false
+        "additionalProperties": false,
+        "description": "A thin horizontal rule between blocks."
       },
       "Spacer": {
         "type": "object",
@@ -1452,7 +1438,7 @@
           "label"
         ],
         "additionalProperties": false,
-        "description": "icon is a lucide name."
+        "description": "icon is a lucide name. Without an action it sends its label to the assistant."
       },
       "ActionExpression": {
         "anyOf": [
@@ -1535,7 +1521,7 @@
           "icon"
         ],
         "additionalProperties": false,
-        "description": "Round icon-only button; label is read aloud."
+        "description": "Round icon-only button; label is read aloud. Needs an action."
       },
       "Pressable": {
         "type": "object",
@@ -1578,7 +1564,7 @@
           "children"
         ],
         "additionalProperties": false,
-        "description": "Makes any content clickable, such as a tile or a swatch."
+        "description": "Makes any content clickable, such as a tile or a swatch. Needs an action."
       },
       "Input": {
         "type": "object",
@@ -1601,13 +1587,46 @@
           },
           "placeholder": {
             "type": "string"
+          },
+          "rules": {
+            "type": "object",
+            "properties": {
+              "required": {
+                "type": "boolean"
+              },
+              "email": {
+                "type": "boolean"
+              },
+              "url": {
+                "type": "boolean"
+              },
+              "numeric": {
+                "type": "boolean"
+              },
+              "min": {
+                "type": "number"
+              },
+              "max": {
+                "type": "number"
+              },
+              "minLength": {
+                "type": "number"
+              },
+              "maxLength": {
+                "type": "number"
+              },
+              "pattern": {
+                "type": "string"
+              }
+            },
+            "additionalProperties": false
           }
         },
         "required": [
           "value"
         ],
         "additionalProperties": false,
-        "description": "Text or number field; a number field stores numbers."
+        "description": "Text or number field; a number field stores numbers, and null when emptied."
       },
       "TextArea": {
         "type": "object",
@@ -1623,12 +1642,46 @@
           },
           "rows": {
             "type": "number"
+          },
+          "rules": {
+            "type": "object",
+            "properties": {
+              "required": {
+                "type": "boolean"
+              },
+              "email": {
+                "type": "boolean"
+              },
+              "url": {
+                "type": "boolean"
+              },
+              "numeric": {
+                "type": "boolean"
+              },
+              "min": {
+                "type": "number"
+              },
+              "max": {
+                "type": "number"
+              },
+              "minLength": {
+                "type": "number"
+              },
+              "maxLength": {
+                "type": "number"
+              },
+              "pattern": {
+                "type": "string"
+              }
+            },
+            "additionalProperties": false
           }
         },
         "required": [
           "value"
         ],
-        "additionalProperties": false
+        "additionalProperties": false,
+        "description": "Multi-line text field; rows is 2 to 20 (default 3)."
       },
       "Select": {
         "type": "object",
@@ -1667,6 +1720,39 @@
           },
           "placeholder": {
             "type": "string"
+          },
+          "rules": {
+            "type": "object",
+            "properties": {
+              "required": {
+                "type": "boolean"
+              },
+              "email": {
+                "type": "boolean"
+              },
+              "url": {
+                "type": "boolean"
+              },
+              "numeric": {
+                "type": "boolean"
+              },
+              "min": {
+                "type": "number"
+              },
+              "max": {
+                "type": "number"
+              },
+              "minLength": {
+                "type": "number"
+              },
+              "maxLength": {
+                "type": "number"
+              },
+              "pattern": {
+                "type": "string"
+              }
+            },
+            "additionalProperties": false
           }
         },
         "required": [
@@ -1779,6 +1865,39 @@
           },
           "lineThrough": {
             "type": "boolean"
+          },
+          "rules": {
+            "type": "object",
+            "properties": {
+              "required": {
+                "type": "boolean"
+              },
+              "email": {
+                "type": "boolean"
+              },
+              "url": {
+                "type": "boolean"
+              },
+              "numeric": {
+                "type": "boolean"
+              },
+              "min": {
+                "type": "number"
+              },
+              "max": {
+                "type": "number"
+              },
+              "minLength": {
+                "type": "number"
+              },
+              "maxLength": {
+                "type": "number"
+              },
+              "pattern": {
+                "type": "string"
+              }
+            },
+            "additionalProperties": false
           }
         },
         "required": [
@@ -1786,7 +1905,7 @@
           "label"
         ],
         "additionalProperties": false,
-        "description": "lineThrough strikes the label when checked, for to-do lists."
+        "description": "lineThrough strikes the label when checked, for to-do lists. rules takes only required."
       },
       "RadioGroup": {
         "type": "object",
@@ -1833,6 +1952,39 @@
               "pills",
               "cards"
             ]
+          },
+          "rules": {
+            "type": "object",
+            "properties": {
+              "required": {
+                "type": "boolean"
+              },
+              "email": {
+                "type": "boolean"
+              },
+              "url": {
+                "type": "boolean"
+              },
+              "numeric": {
+                "type": "boolean"
+              },
+              "min": {
+                "type": "number"
+              },
+              "max": {
+                "type": "number"
+              },
+              "minLength": {
+                "type": "number"
+              },
+              "maxLength": {
+                "type": "number"
+              },
+              "pattern": {
+                "type": "string"
+              }
+            },
+            "additionalProperties": false
           }
         },
         "required": [
@@ -1856,13 +2008,46 @@
           },
           "max": {
             "type": "string"
+          },
+          "rules": {
+            "type": "object",
+            "properties": {
+              "required": {
+                "type": "boolean"
+              },
+              "email": {
+                "type": "boolean"
+              },
+              "url": {
+                "type": "boolean"
+              },
+              "numeric": {
+                "type": "boolean"
+              },
+              "min": {
+                "type": "number"
+              },
+              "max": {
+                "type": "number"
+              },
+              "minLength": {
+                "type": "number"
+              },
+              "maxLength": {
+                "type": "number"
+              },
+              "pattern": {
+                "type": "string"
+              }
+            },
+            "additionalProperties": false
           }
         },
         "required": [
           "value"
         ],
         "additionalProperties": false,
-        "description": "Dates are \"YYYY-MM-DD\"."
+        "description": "Dates, min and max are \"YYYY-MM-DD\". rules takes only required."
       },
       "Timer": {
         "type": "object",
@@ -1892,47 +2077,7 @@
           "children"
         ],
         "additionalProperties": false,
-        "description": "Groups fields; their values go with any @ToAssistant inside."
-      },
-      "SearchImage": {
-        "type": "object",
-        "properties": {
-          "query": {
-            "type": "string"
-          },
-          "aspectRatio": {
-            "type": "number"
-          },
-          "radius": {
-            "anyOf": [
-              {
-                "type": "string",
-                "enum": [
-                  "sm",
-                  "md",
-                  "lg",
-                  "xl",
-                  "full"
-                ]
-              },
-              {
-                "type": "number"
-              }
-            ]
-          },
-          "fit": {
-            "type": "string",
-            "enum": [
-              "cover",
-              "contain"
-            ]
-          }
-        },
-        "required": [
-          "query"
-        ],
-        "additionalProperties": false,
-        "description": "A real photo the app finds for query; it needs no URL and no tool. Name the exact thing in 2 to 4 words: \"Belém Tower Lisbon\", \"iPhone 17\", \"pastel de nata\". Use one for every place, dish, product or thing with a look."
+        "description": "Groups fields; their values go with any @ToAssistant inside, once every field's rules pass."
       },
       "Image": {
         "type": "object",
@@ -1976,7 +2121,7 @@
           "alt"
         ],
         "additionalProperties": false,
-        "description": "Photo from a URL the user or a tool gave; if it fails, a photo is found for alt."
+        "description": "Photo from a URL the user or a tool gave; never invent a URL. If it fails to load, an empty photo placeholder shows. aspectRatio is 0.2 to 5 (default 1.5)."
       },
       "Icon": {
         "type": "object",
@@ -2069,12 +2214,8 @@
             "type": "string",
             "enum": [
               "number",
-              "currency",
               "percent"
             ]
-          },
-          "currency": {
-            "type": "string"
           },
           "stacked": {
             "type": "boolean"
@@ -2088,59 +2229,7 @@
           "data"
         ],
         "additionalProperties": false,
-        "description": "Rows of data; x is the category key (a number key for scatter), series the value keys (default: every number key). percent values are like 45; currency is a code like \"EUR\"."
-      },
-      "Map": {
-        "type": "object",
-        "properties": {
-          "markers": {
-            "type": "array",
-            "items": {
-              "$ref": "#/$defs/MapMarker"
-            }
-          },
-          "route": {
-            "type": "boolean"
-          },
-          "selected": {
-            "type": "string"
-          },
-          "height": {
-            "type": "number"
-          }
-        },
-        "required": [
-          "markers"
-        ],
-        "additionalProperties": false,
-        "description": "Street map fitted to its markers. route draws the road path in marker order; selected holds the clicked marker's label."
-      },
-      "MapMarker": {
-        "type": "object",
-        "properties": {
-          "label": {
-            "type": "string"
-          },
-          "lat": {
-            "type": "number"
-          },
-          "lng": {
-            "type": "number"
-          },
-          "category": {
-            "type": "string"
-          },
-          "icon": {
-            "type": "string"
-          }
-        },
-        "required": [
-          "label",
-          "lat",
-          "lng"
-        ],
-        "additionalProperties": false,
-        "description": "A place on a Map; icon is one emoji, else the pin shows its number."
+        "description": "Rows of data; x is the category key (a number key for scatter), series the value keys (default: every number key). format applies to pie and donut only: \"percent\" shows each slice as a share of the total, \"number\" its value. stacked stacks bar and area series. height sets the plot height in px; pie and donut ignore it and size themselves."
       },
       "YouTube": {
         "type": "object",
@@ -2212,9 +2301,42 @@
         "properties": {
           "children": {
             "type": "array",
-            "items": {}
+            "items": {
+              "anyOf": [
+                {
+                  "$ref": "#/$defs/Circle"
+                },
+                {
+                  "$ref": "#/$defs/Ellipse"
+                },
+                {
+                  "$ref": "#/$defs/Rect"
+                },
+                {
+                  "$ref": "#/$defs/Line"
+                },
+                {
+                  "$ref": "#/$defs/Path"
+                },
+                {
+                  "$ref": "#/$defs/Polyline"
+                },
+                {
+                  "$ref": "#/$defs/Polygon"
+                },
+                {
+                  "$ref": "#/$defs/SvgText"
+                },
+                {
+                  "$ref": "#/$defs/G"
+                }
+              ]
+            }
           },
           "viewBox": {
+            "type": "string"
+          },
+          "label": {
             "type": "string"
           },
           "width": {
@@ -2235,7 +2357,7 @@
           "viewBox"
         ],
         "additionalProperties": false,
-        "description": "A drawing for steps, parts, mechanisms, diagrams and layouts. Scales to its width; its shapes take expressions, so state can move them."
+        "description": "A drawing for steps, parts, mechanisms, diagrams and layouts. Scales to its width; its shapes take expressions, so state can move them. label says in a few words what it shows, for screen readers: always give one."
       },
       "Circle": {
         "type": "object",
@@ -2267,7 +2389,8 @@
           "cy",
           "r"
         ],
-        "additionalProperties": false
+        "additionalProperties": false,
+        "description": "fill defaults to the text color; with only a stroke it stays unfilled."
       },
       "Ellipse": {
         "type": "object",
@@ -2303,7 +2426,8 @@
           "rx",
           "ry"
         ],
-        "additionalProperties": false
+        "additionalProperties": false,
+        "description": "fill defaults to the text color; with only a stroke it stays unfilled."
       },
       "Rect": {
         "type": "object",
@@ -2342,7 +2466,8 @@
           "width",
           "height"
         ],
-        "additionalProperties": false
+        "additionalProperties": false,
+        "description": "rx rounds the corners; fill defaults to the text color, and with only a stroke it stays unfilled."
       },
       "Line": {
         "type": "object",
@@ -2375,7 +2500,8 @@
           "x2",
           "y2"
         ],
-        "additionalProperties": false
+        "additionalProperties": false,
+        "description": "Stroked in the text color, 2 wide, unless stroke and strokeWidth are set."
       },
       "Path": {
         "type": "object",
@@ -2399,7 +2525,8 @@
         "required": [
           "d"
         ],
-        "additionalProperties": false
+        "additionalProperties": false,
+        "description": "d is SVG path data only (M, L, C, A, Z...), else nothing draws; unfilled unless fill is set."
       },
       "Polyline": {
         "type": "object",
@@ -2407,14 +2534,14 @@
           "points": {
             "type": "string"
           },
+          "fill": {
+            "type": "string"
+          },
           "stroke": {
             "type": "string"
           },
           "strokeWidth": {
             "type": "number"
-          },
-          "fill": {
-            "type": "string"
           },
           "opacity": {
             "type": "number"
@@ -2448,27 +2575,8 @@
         "required": [
           "points"
         ],
-        "additionalProperties": false
-      },
-      "G": {
-        "type": "object",
-        "properties": {
-          "children": {
-            "type": "array",
-            "items": {}
-          },
-          "transform": {
-            "type": "string"
-          },
-          "opacity": {
-            "type": "number"
-          }
-        },
-        "required": [
-          "children"
-        ],
         "additionalProperties": false,
-        "description": "Group; transform like \"rotate(30 50 50)\" or \"translate(10 0)\"."
+        "description": "Closed shape; points like \"0,0 10,5 20,0\". fill defaults to the text color; with only a stroke it stays unfilled."
       },
       "SvgText": {
         "type": "object",
@@ -2510,7 +2618,55 @@
           "x",
           "y"
         ],
-        "additionalProperties": false
+        "additionalProperties": false,
+        "description": "A text label at x, y; anchor sets which end sits on x."
+      },
+      "G": {
+        "type": "object",
+        "properties": {
+          "children": {
+            "type": "array",
+            "items": {
+              "anyOf": [
+                {
+                  "$ref": "#/$defs/Circle"
+                },
+                {
+                  "$ref": "#/$defs/Ellipse"
+                },
+                {
+                  "$ref": "#/$defs/Rect"
+                },
+                {
+                  "$ref": "#/$defs/Line"
+                },
+                {
+                  "$ref": "#/$defs/Path"
+                },
+                {
+                  "$ref": "#/$defs/Polyline"
+                },
+                {
+                  "$ref": "#/$defs/Polygon"
+                },
+                {
+                  "$ref": "#/$defs/SvgText"
+                }
+              ]
+            }
+          },
+          "transform": {
+            "type": "string"
+          },
+          "opacity": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "children"
+        ],
+        "additionalProperties": false,
+        "description": "Group; transform like \"rotate(30 50 50)\" or \"translate(10 0)\"; one with the wrong number of arguments is dropped."
       },
       "HtmlView": {
         "type": "object",
@@ -2530,6 +2686,98 @@
         ],
         "additionalProperties": false,
         "description": "Sandboxed HTML page with inline JS, for games and canvas. No network except script CDNs. Fits its content unless height is set."
+      },
+      "SearchImage": {
+        "type": "object",
+        "properties": {
+          "query": {
+            "type": "string"
+          },
+          "aspectRatio": {
+            "type": "number"
+          },
+          "radius": {
+            "anyOf": [
+              {
+                "type": "string",
+                "enum": [
+                  "sm",
+                  "md",
+                  "lg",
+                  "xl",
+                  "full"
+                ]
+              },
+              {
+                "type": "number"
+              }
+            ]
+          },
+          "fit": {
+            "type": "string",
+            "enum": [
+              "cover",
+              "contain"
+            ]
+          }
+        },
+        "required": [
+          "query"
+        ],
+        "additionalProperties": false,
+        "description": "A real photo the app finds for query; it needs no URL and no tool. Name the exact thing in 2 to 4 words: \"Belém Tower Lisbon\", \"iPhone 17\", \"pastel de nata\". Use one for every place, dish, product or thing with a look."
+      },
+      "Map": {
+        "type": "object",
+        "properties": {
+          "markers": {
+            "type": "array",
+            "items": {
+              "$ref": "#/$defs/MapMarker"
+            }
+          },
+          "route": {
+            "type": "boolean"
+          },
+          "selected": {
+            "type": "string"
+          },
+          "height": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "markers"
+        ],
+        "additionalProperties": false,
+        "description": "Street map fitted to its markers. route draws the road path in marker order; selected holds the clicked marker's label."
+      },
+      "MapMarker": {
+        "type": "object",
+        "properties": {
+          "label": {
+            "type": "string"
+          },
+          "lat": {
+            "type": "number"
+          },
+          "lng": {
+            "type": "number"
+          },
+          "category": {
+            "type": "string"
+          },
+          "icon": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "label",
+          "lat",
+          "lng"
+        ],
+        "additionalProperties": false,
+        "description": "A place on a Map; icon is one emoji, else the pin shows its number."
       },
       "ChessBoard": {
         "type": "object",
@@ -3175,7 +3423,10 @@
           "additionalProperties": false
         },
         "returns": {
-          "type": "number"
+          "type": [
+            "number",
+            "null"
+          ]
         }
       },
       "Random": {
@@ -3682,7 +3933,7 @@
         }
       },
       "FormatDate": {
-        "description": "A date as text: \"date\" Oct 9, 2026 (default), \"short\" Oct 9, \"long\" Friday, October 9, 2026, \"weekday\" Fri, \"month\" Oct 2026, \"time\" 9:30 PM, \"datetime\", \"iso\" 2026-10-09. Dates are \"YYYY-MM-DD\", ISO or a timestamp",
+        "description": "A date as text: \"date\" Oct 9, 2026 (default), \"short\" Oct 9, \"long\" Friday, October 9, 2026, \"weekday\" Fri, \"month\" Oct 2026, \"time\" 9:30 PM, \"datetime\", \"iso\" 2026-10-09. Dates are \"YYYY-MM-DD\", ISO or a timestamp; \"time\" and \"datetime\" need a timestamp or an ISO date-time, as a plain date has no time",
         "params": {
           "type": "object",
           "properties": {
@@ -3907,7 +4158,7 @@
         }
       },
       "Pivot": {
-        "description": "One row per rowKey value with a column per colKey value holding agg of field, for stacked or grouped charts",
+        "description": "One row per rowKey value, under key, with a column per colKey value holding agg of field, for stacked or grouped charts",
         "params": {
           "type": "object",
           "properties": {
@@ -3994,7 +4245,7 @@
         }
       },
       "Between": {
-        "description": "Rows whose field is from min to max, both included; compares numbers, or text such as \"YYYY-MM-DD\" dates. Leave min or max null for an open end",
+        "description": "Rows whose field is from min to max, both included; compares numbers, dates by day (\"YYYY-MM-DD\", ISO or a timestamp), or text. Leave min or max null for an open end",
         "params": {
           "type": "object",
           "properties": {
@@ -4161,7 +4412,7 @@
         }
       },
       "Histogram": {
-        "description": "Counts numbers into equal-width bins (value is the count); min and max fix the range, default the data's",
+        "description": "Counts numbers into equal-width bins as {key, value} rows: key is the bin's start, value the count; min and max fix the range, default the data's",
         "params": {
           "type": "object",
           "properties": {
@@ -4197,19 +4448,11 @@
               },
               "value": {
                 "type": "number"
-              },
-              "start": {
-                "type": "number"
-              },
-              "end": {
-                "type": "number"
               }
             },
             "required": [
               "key",
-              "value",
-              "start",
-              "end"
+              "value"
             ],
             "additionalProperties": false
           }

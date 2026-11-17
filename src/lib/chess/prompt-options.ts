@@ -25,7 +25,7 @@ $hint = false
 pos = @Position($moves)
 head = Col([Title("Play the London System", "xl"), Text("You are White. Set up **d4, Bf4, e3, Nf3** and castle short; the engine answers every move.", "md", "muted")], 2)
 boardCard = Card([ChessBoard($moves, null, "computer", "white", null, $level, $hint && pos.turn == "white" ? [@BestMove($moves)] : [])])
-controls = Card([Label("Engine strength"), SegmentedControl($level, ["easy", "medium", "hard"], true), EvalBar(@Score($moves)), Button($hint ? "Hide hint" : "Show a hint", @Set($hint, !$hint), "outline", null, "sm", "lightbulb")], null, null, 3)
+controls = Card([Label("Engine strength"), SegmentedControl($level, ["easy", "medium", "hard"], true), EvalBar(@Score($moves)), Button($hint ? "Hide hint" : "Show a hint", @Set($hint, !$hint), "outline", null, "sm", "lightbulb")], null, 3)
 panel = Col([controls, Card([Title("Moves", "md"), MoveList($moves)]), Card([PositionSummary($moves)])], 3)
 follow = Card([Row([Button("Review my game", @ToAssistant("Review the game I just played", {moves: $moves}), "soft"), Button("Teach me the plan", @ToAssistant("What is White's plan in the London System?"), "soft")], 2, null, null, true)], "soft")`;
 
