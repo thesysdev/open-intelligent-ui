@@ -9,9 +9,24 @@ import { useEffect } from "react";
 // saves into the message itself.
 
 // prefix keeps each chat's threads apart; the main chat uses "oiu".
-const threadsKey = (prefix: string) => `${prefix}:threads`;
-const messagesKeyFor = (prefix: string) => (id: string) => `${prefix}:messages:${id}`;
+// VERSION is in every key. Bump it when saved answers would no longer render
+// (the component library changed its components or their argument order): the
+// next load deletes every chat saved under an older version.
+const VERSION = "v2";
+const threadsKey = (prefix: string) => `${prefix}:${VERSION}:threads`;
+const messagesKeyFor = (prefix: string) => (id: string) => `${prefix}:${VERSION}:messages:${id}`;
 const MAX_THREADS = 50;
+
+// "oiu:threads", "oiu:messages:<id>" (before versions) or "oiu:v1:..." -> removed
+function deleteOlderChats(prefix: string) {
+  try {
+    const current = `${prefix}:${VERSION}:`;
+    const stale = Object.keys(localStorage).filter((k) => k.startsWith(`${prefix}:`) && !k.startsWith(current));
+    for (const key of stale) localStorage.removeItem(key);
+  } catch {
+    // Blocked storage: nothing was saved to delete.
+  }
+}
 
 function read<T>(key: string, fallback: T): T {
   try {
@@ -36,6 +51,7 @@ const titleOf = (message: Message) => {
 };
 
 export function localChatStorage(prefix = "oiu"): ChatStorage {
+  deleteOlderChats(prefix);
   const THREADS = threadsKey(prefix);
   const messagesKey = messagesKeyFor(prefix);
   return {
