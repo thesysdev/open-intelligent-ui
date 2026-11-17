@@ -11,6 +11,7 @@ import { withBase } from "@/lib/base-path";
 import { localChatStorage, SaveMessages } from "@/lib/chat-storage";
 import { chessLibrary } from "@/lib/chess/library";
 import { webUrl } from "@/lib/components/style";
+import { ThemeProvider } from "@openuidev/intelligent-ui-library";
 
 // Same URL guard as the main chat: only http(s) opens, in a new tab without an opener.
 if (typeof window !== "undefined") {
@@ -48,30 +49,33 @@ export default function ChessCoach() {
     document.documentElement.setAttribute("data-openui-theme", mode);
   }, [mode]);
 
+  // The library reads its mode from its own ThemeProvider, not from AgentInterface's theme.
   return (
-    <div className="chat-shell">
-      <AgentInterface
-        llm={llm}
-        storage={storage}
-        componentLibrary={chessLibrary}
-        onAction={onAction}
-        agentName="Chess Coach"
-        logoUrl={withBase("/shiro-face.svg")}
-        theme={{ mode }}
-        starters={starters}
-      >
-        <AgentInterface.SidebarFooter>
-          <AgentInterface.ThemeModeToggle mode={mode} onModeChange={setPreference} />
-        </AgentInterface.SidebarFooter>
-        <AgentInterface.ThreadHeader showChatTitle={false} />
-        <AgentInterface.Welcome
-          image={<img src={withBase("/shiro-woodworker.svg")} alt="" className="welcome-mascot" />}
-          title="What shall we work on today?"
-          starterVariant="card"
-          glowAnimation
-        />
-        <SaveMessages prefix="chess" />
-      </AgentInterface>
-    </div>
+    <ThemeProvider mode={mode}>
+      <div className="chat-shell">
+        <AgentInterface
+          llm={llm}
+          storage={storage}
+          componentLibrary={chessLibrary}
+          onAction={onAction}
+          agentName="Chess Coach"
+          logoUrl={withBase("/shiro-face.svg")}
+          theme={{ mode }}
+          starters={starters}
+        >
+          <AgentInterface.SidebarFooter>
+            <AgentInterface.ThemeModeToggle mode={mode} onModeChange={setPreference} />
+          </AgentInterface.SidebarFooter>
+          <AgentInterface.ThreadHeader showChatTitle={false} />
+          <AgentInterface.Welcome
+            image={<img src={withBase("/shiro-woodworker.svg")} alt="" className="welcome-mascot" />}
+            title="What shall we work on today?"
+            starterVariant="card"
+            glowAnimation
+          />
+          <SaveMessages prefix="chess" />
+        </AgentInterface>
+      </div>
+    </ThemeProvider>
   );
 }

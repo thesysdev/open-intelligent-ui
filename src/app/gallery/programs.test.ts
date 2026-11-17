@@ -1,8 +1,7 @@
 import { createParser, type LibrarySpec } from "@openuidev/lang-core";
 import { describe, expect, it } from "vitest";
 import spec from "@/generated/spec.json";
-import { actions } from "@/lib/actions";
-import { functions } from "@/lib/functions";
+import { library as app } from "@/lib/library";
 import { exampleDashboard, exampleShoppingList, exampleSteps, exampleTrip } from "@/lib/prompt-options";
 import { compositionPrograms } from "./composition-programs";
 import { programs } from "./programs";
@@ -12,15 +11,10 @@ const library: LibrarySpec = spec;
 const parser = createParser(library.schema!, library.root);
 
 describe("the generated library spec", () => {
-  it("lists every function and action (run npm run generate after changes)", () => {
-    expect(Object.keys(library.functions ?? {})).toEqual(functions.map((f) => f.name));
-    expect(Object.keys(library.actions ?? {})).toEqual(actions.map((a) => a.name));
-  });
-
-  it("gives each function a one-line description", () => {
-    for (const f of functions) {
-      expect(f.description, f.name).toMatch(/^[^\n—]{8,240}$/);
-    }
+  it("matches the app's library (run npm run generate after changes)", () => {
+    expect(Object.keys(library.components)).toEqual(Object.keys(app.components));
+    expect(Object.keys(library.functions ?? {})).toEqual(Object.keys(app.functions));
+    expect(Object.keys(library.actions ?? {})).toEqual(Object.keys(app.actions ?? {}));
   });
 });
 

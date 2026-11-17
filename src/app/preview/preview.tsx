@@ -7,6 +7,7 @@ import { demoTools } from "@/lib/demo-data";
 import { chessLibrary } from "@/lib/chess/library";
 import { coachLibrary } from "@/lib/coach/library";
 import { library } from "@/lib/library";
+import { ThemeProvider } from "@openuidev/intelligent-ui-library";
 
 type Bridge = { __OPENUI_PROGRAM__?: string; __OPENUI_ERRORS__?: string[]; __OPENUI_ACTIONS__?: string[] };
 
@@ -26,13 +27,15 @@ export function Preview({ theme, kind = "chat" }: { theme: "light" | "dark"; kin
 
   return (
     <div data-theme={theme} style={{ minHeight: "100%", background: "var(--iui-canvas)", color: "var(--iui-ink)", fontFamily: "var(--iui-font)" }}>
-      <main className="preview-root" style={{ maxWidth: 800, margin: "0 auto", padding: "24px 16px 48px", fontSize: 16, lineHeight: 1.6 }}>
-        {program === null ? null : program ? (
-          <Renderer response={program} library={kind === "coach" ? coachLibrary : kind === "chess" ? chessLibrary : library} isStreaming={false} onAction={onAction} onError={onError} toolProvider={demoTools} />
-        ) : (
-          <p>No program. Set window.__OPENUI_PROGRAM__ before the page loads.</p>
-        )}
-      </main>
+      <ThemeProvider mode={theme}>
+        <main className="preview-root" style={{ maxWidth: 800, margin: "0 auto", padding: "24px 16px 48px", fontSize: 16, lineHeight: 1.6 }}>
+          {program === null ? null : program ? (
+            <Renderer response={program} library={kind === "coach" ? coachLibrary : kind === "chess" ? chessLibrary : library} isStreaming={false} onAction={onAction} onError={onError} toolProvider={demoTools} />
+          ) : (
+            <p>No program. Set window.__OPENUI_PROGRAM__ before the page loads.</p>
+          )}
+        </main>
+      </ThemeProvider>
     </div>
   );
 }

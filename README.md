@@ -18,7 +18,7 @@ ChatGPT's Intelligent UI (left) and this project (right) answering the same requ
 
 ## What's in the demo
 
-The model streams OpenUI Lang 1.0, and the app renders it with a library of primitives the model arranges itself: no layout is fixed in the components. The library (`src/lib/library.ts`, components in `src/lib/components/`) follows the Open Intelligent UI design. The components have light and dark tokens, but only `/gallery` (and the benchmark's `/preview`) switch to dark; the chat is light only:
+The model streams OpenUI Lang 1.0, and the app renders it with a library of primitives the model arranges itself: no layout is fixed in the components. The primitives and `@functions` come from the [`@openuidev/intelligent-ui-library`](https://www.npmjs.com/package/@openuidev/intelligent-ui-library) component library, and `src/lib/library.ts` extends it (`library.extend`) with what only this app can do: `SearchImage`, `Map` with `MapMarker`, and `@CopyToClipboard`. The components have light and dark tokens, but only `/gallery` (and the benchmark's `/preview`) switch to dark; the chat is light only:
 
 - **Layout:** `Col`, `Row`, `Box` (background, radius, border, sizes, flex), `Grid`, `Card`, `Carousel` (a scrolling, snapping row), `Popover`, `Divider`, `Spacer`.
 - **Text:** `Title`, `Text` (inline **bold**, *italic*, `code`, links), `Caption`, `Label`, `Badge`, `Link`, `List` and `ListItem` (bullets, numbers, a timeline), `Markdown`.
@@ -27,7 +27,7 @@ The model streams OpenUI Lang 1.0, and the app renders it with a library of prim
 - **More text and play:** `Text` takes a list mixing strings and inline components; `Quote`, `Code` (with copy) and `Math` (KaTeX); `Flashcard` (flips) and `Celebration` (confetti when a condition turns true).
 - **Drawing:** `Svg` with `G`, `Circle`, `Ellipse`, `Rect`, `Line`, `Path`, `Polyline`, `Polygon` and `SvgText`, whose attributes take expressions so state can move them; `HtmlView` runs an HTML page (a game, a canvas) in a sandboxed iframe.
 
-- **Functions:** 59 generic `@functions` (`src/lib/functions/`) next to the 1.0 built-ins, so an answer can compute with its own state: lists (`@Append`, `@Remove`, `@Update`, `@Toggle`, `@Includes`, `@Range`, `@Chunk`, `@Shuffle`, ...), numbers (`@Pow`, `@Random`, `@Clamp`, `@Percent`, `@Allocate` for splits that add up to the cent, `@Payment` for loans, `@Convert` for units), text (`@Format`, `@Join`, `@Split`, `@Replace`, `@Capitalize`, `@Plural`, `@Duration`, `@Default`), colors (`@MixColor`), dates (`@Today`, `@FormatDate`, `@AddDays`, `@AddMonths`, `@DaysBetween`, `@MonthsBetween`, `@StartOf`) and data for dashboards (`@GroupBy`, `@Pivot`, `@Top`, `@Between`, `@Bucket`, `@Cumulative`, `@MovingAvg`, `@Change`, `@Histogram`, `@Stats`). A bad argument makes a call evaluate to null, as in 1.0.
+- **Functions:** 59 generic `@functions` (from the component library) next to the 1.0 built-ins, so an answer can compute with its own state: lists (`@Append`, `@Remove`, `@Update`, `@Toggle`, `@Includes`, `@Range`, `@Chunk`, `@Shuffle`, ...), numbers (`@Pow`, `@Random`, `@Clamp`, `@Percent`, `@Allocate` for splits that add up to the cent, `@Payment` for loans, `@Convert` for units), text (`@Format`, `@Join`, `@Split`, `@Replace`, `@Capitalize`, `@Plural`, `@Duration`, `@Default`), colors (`@MixColor`), dates (`@Today`, `@FormatDate`, `@AddDays`, `@AddMonths`, `@DaysBetween`, `@MonthsBetween`, `@StartOf`) and data for dashboards (`@GroupBy`, `@Pivot`, `@Top`, `@Between`, `@Bucket`, `@Cumulative`, `@MovingAvg`, `@Change`, `@Histogram`, `@Stats`). A bad argument makes a call evaluate to null, as in 1.0.
 - **Actions:** `@CopyToClipboard(text)`, for copying a shopping list or a split.
 
 The dev-only page `/gallery` renders hand-written programs: a working answer for each of the 16 Intelligent UI examples (from the 7-speed bike to the arcade game), two dashboards over demo data, the prompt's worked examples, and programs that exercise every component.
@@ -107,10 +107,10 @@ What changes with a local model:
 - **Chat Completions.** OpenUI Gateway also supports the Chat Completions API, and OpenUI works with either. This example uses the Responses API because Gateway's hosted tools are available only there. An application already built on Chat Completions can keep that protocol and pair it with `openAIReadableStreamAdapter` or `openAIAdapter` in the browser.
 - **State.** Inputs bind to `$variables` (`Slider($price, 0, 100)`), and any statement that reads them updates as the user interacts. Buttons and `Pressable` run `@Set`, `@Reset`, `@ToAssistant`, `@OpenUrl` and `@CopyToClipboard` steps.
 - **Working tools.** The prompt options in `src/lib/prompt-options.ts` (rules and worked examples) teach the model to answer with a tool that works in the page: lists and inputs live in `$variables`, everything shown is computed from them with `@functions`, and buttons change them with `@Set`, instead of sending a form back to the assistant. `@Each` maps a list into rows, e.g. `@Each(@Range(0, $years + 1), "y", {year: y, balance: $p * @Pow(1 + $r / 100, y)})`.
-- **Photos.** `SearchImage` (and `Image` when its URL fails) asks `/api/wiki` for the lead photo of the Wikipedia article titled like the query, then `/api/image-search` for Wikipedia and Wikimedia Commons results whose titles match it.
+- **Photos.** `SearchImage` asks `/api/wiki` for the lead photo of the Wikipedia article titled like the query, then `/api/image-search` for Wikipedia and Wikimedia Commons results whose titles match it.
 - **Threads.** Threads and messages, including what the user typed or ticked in an answer, are kept in the browser's localStorage (`src/lib/chat-storage.tsx`), so they survive switching threads and reloading.
 - **Map data.** Street geometry comes from `/api/street-route`, which validates input and caches results from the public OSRM demo server's driving profile: a road overview, not walking or transit directions. When it's unavailable, a labelled direct connection is drawn instead.
-- **Theme.** Colors, type, radii and spacing are tokens in `src/lib/components/theme.css`, with a dark set under `data-theme="dark"` that only `/gallery` and `/preview` use. The chat shell keeps its `AgentInterface` theme from `src/lib/response-theme.ts`.
+- **Theme.** Answers are themed by the component library's `ThemeProvider`, which each page sets to its light or dark mode. The app's own components (SearchImage, the map, the coach and chess pieces) use the tokens in `src/lib/components/theme.css`, with a dark set under `data-theme="dark"`. The chat shell is styled in `src/app/globals.css`.
 
 ## Project structure
 
@@ -119,20 +119,17 @@ What changes with a local model:
 | `src/app/layout.tsx` | Root layout: page metadata, the Inter font and `globals.css`. |
 | `src/app/page.tsx` | The chat page. Renders `AgentInterface` with the component library, theme, welcome screen and starter prompts, and connects it to `/api/chat`. |
 | `src/app/globals.css` | Global CSS reset. |
-| `src/app/shell.css` | Restyles the `AgentInterface` shell (sidebar, composer, starters, message bubbles), using theme tokens where they exist. |
 | `src/app/api/chat/route.ts` | Chat endpoint. Validates the request, forwards the conversation to OpenUI Cloud (or, with `LLM_BASE_URL` or the Ollama variables, to any OpenAI-compatible API with the prompt built here), and streams the response back. |
 | `src/app/api/street-route/route.ts` | Street geometry between stops from OSRM, cached on the server. |
 | `src/app/api/wiki/route.ts` | Wikipedia lookup: the lead photos (and coordinates) of an article, cached on the server. |
 | `src/app/api/image-search/route.ts` | Photo search for `SearchImage`: matching Wikipedia lead images, then Wikimedia Commons, cached on the server. |
 | `src/app/gallery/` | The dev-only `/gallery` page and its OpenUI Lang programs; `tool-programs.ts` holds the 16 examples and the dashboards. |
 | `src/app/preview/` | A dev-only page that renders one program handed in by a script, for the benchmark's screenshots. |
-| `src/lib/library.ts` | The OpenUI component library: the primitives, their groups and prompt notes. |
-| `src/lib/functions/` | The library's `@functions` (`defineFunction`), with tests that run them through the 1.0 parser and evaluator. |
+| `src/lib/library.ts` | The app's component library: `@openuidev/intelligent-ui-library` extended with `SearchImage`, `Map`, `MapMarker` and `@CopyToClipboard`. |
 | `src/lib/actions.ts` | The `@CopyToClipboard` action and its handler. |
 | `src/lib/demo-data.ts` | Demo data tools (`get_orders`, `get_tickets`, `get_traffic`) for Query-backed dashboards: their specs for the prompt and a function-map tool provider. |
-| `src/lib/prompt-options.ts` | The prompt options: the working-tool rules and examples, and a dashboard variant with the demo data tools. |
-| `src/lib/response-theme.ts` | Theme tokens for the `AgentInterface` shell (colors, fonts, radii, chat bubbles), built with `createTheme()`. |
-| `src/lib/components/` | The components (`defineComponent` + Zod schema each), their styles and tokens, and the map in `map/`. |
+| `src/lib/prompt-options.ts` | The prompt options: the component library's rules and examples, with the photo and map rules rewritten for `SearchImage` and `Map`, and a dashboard variant with the demo data tools. |
+| `src/lib/components/` | The app's own components: `SearchImage`, the map in `map/`, and their styles and tokens. |
 | `src/generated/spec.json` | Library spec sent to Gateway in the system prompt. Regenerate with `npm run generate` after changing a component schema. |
 | `src/generated/system-prompt.txt` | The full system prompt for the library; `dashboard-system-prompt.txt` adds the demo data tools. Regenerate with `npm run prompt`. |
 | `scripts/bench/` | The benchmark: 16 example prompts and 8 dashboard prompts, run against a model and checked; see [Benchmark](#benchmark). |
@@ -143,8 +140,8 @@ What changes with a local model:
 
 `npm install && npm run dev`, then open http://localhost:3000/gallery. It needs no API key: every example and component renders from hand-written programs, with Light and Dark at the top right. Check phone width too.
 
-- **Components** are in `src/lib/components/` (`layout.tsx`, `text.tsx`, `markdown.tsx`, `controls.tsx`, `media.tsx`, `chart.tsx`, `table.tsx`, `svg.tsx`, `html-view.tsx`, `map/`), styled by `components.css` (`iui-*` classes).
-- **Tokens** (colors, type, radii, spacing) are in `src/lib/components/theme.css`, with the dark set under `[data-theme="dark"]`. The chat shell around answers is `src/app/shell.css` and `src/lib/response-theme.ts`.
+- **Components** come from `@openuidev/intelligent-ui-library`, styled there. The app's own are in `src/lib/components/` (`search-image.tsx`, styled by `components.css`, and `map/`), plus the coach and chess pieces in `src/lib/coach/` and `src/lib/chess/`.
+- **Tokens** (colors, type, radii, spacing) are in `src/lib/components/theme.css`, with the dark set under `[data-theme="dark"]`. The chat shell around answers is styled in `src/app/globals.css`.
 - **`/gallery`** is the design surface: "Working tools" holds the 16 examples and two dashboards, "Components" one program per component.
 
 How anything looks can change freely. What the model writes must keep working, so keep these as they are, or regenerate the prompt (`npm run generate && npm run prompt`) and tell whoever owns it:

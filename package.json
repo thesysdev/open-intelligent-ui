@@ -20,8 +20,9 @@
     "cards:art": "node scripts/fetch-card-art.mjs"
   },
   "dependencies": {
-    "@openuidev/lang-core": "^1.0.0",
-    "@openuidev/react-lang": "^1.0.0",
+    "@openuidev/intelligent-ui-library": "^0.0.1",
+    "@openuidev/lang-core": "^1.1.1",
+    "@openuidev/react-lang": "^1.1.1",
     "@openuidev/react-ui": "^0.18.1",
     "chess.js": "^1.4.0",
     "katex": "^0.16.47",

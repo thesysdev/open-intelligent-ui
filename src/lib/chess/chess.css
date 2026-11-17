@@ -23,7 +23,7 @@
 
 /* Beside a taller column in a Grid, the board's cell keeps its own height
    instead of stretching into an empty card. */
-.iui-grid > :has(.ch-board):not(:has(.iui-grid)) { align-self: start; }
+.openui-intelligent-grid > :has(.ch-board):not(:has(.openui-intelligent-grid)) { align-self: start; }
 
 .ch-wrap { display: flex; flex-direction: column; gap: 8px; width: 100%; max-width: 440px; margin: 0 auto; }
 .ch-board { position: relative; display: grid; grid-template-columns: repeat(8, 1fr); grid-template-rows: repeat(8, 1fr); aspect-ratio: 1; width: 100%; border-radius: 10px; overflow: hidden; box-shadow: 0 0 0 1px color-mix(in srgb, var(--ch-dark) 60%, transparent), 0 4px 14px rgb(0 0 0 / 14%); user-select: none; -webkit-user-select: none; touch-action: none; container-type: inline-size; }

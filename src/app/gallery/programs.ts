@@ -36,9 +36,9 @@ photos = Grid([SearchImage("Belém Tower Lisbon"), SearchImage("Alfama Lisbon"),
 h2 = Title("Before you go", "md")
 md = Markdown("- Trams 28 and 12 get crowded after 10 AM.\\n- Wear shoes with grip: the cobbles are polished smooth.\\n- Most museums close on **Mondays**.")
 stats = Grid([s1, s2, s3], 3, 150, 3)
-s1 = Card([Caption("Walking"), Title("6.4 km", "xl")], null, 4, 1)
-s2 = Card([Caption("Day pass"), Title("€6.80", "xl")], null, 4, 1)
-s3 = Card([Caption("Sunset"), Title("7:42 PM", "xl")], null, 4, 1)
+s1 = Card([Caption("Walking"), Title("6.4 km", "xl")], null, 1, 4)
+s2 = Card([Caption("Day pass"), Title("€6.80", "xl")], null, 1, 4)
+s3 = Card([Caption("Sunset"), Title("7:42 PM", "xl")], null, 1, 4)
 closing = Text("Times are estimates, not live data.", "xs", "muted")`,
   },
   {
@@ -86,11 +86,11 @@ icons = Row([IconButton("heart", null, "Save"), IconButton("share", null, "Share
     note: "Box backgrounds, radius, border, sizes and flex; Grid with minChildWidth; Card outline and soft; Spacer.",
     code: `root = Col([stats, swatches, tints, summary], 4)
 stats = Grid([st1, st2], 2, 220, 4)
-st1 = Card([Caption("Photography services · demo estimate"), Title("$617M", "xl"), Caption("2025, U.S. · narrow market definition")], null, 4, 2)
-st2 = Card([Caption("Commercial drones · demo estimate"), Title("$4.1B", "xl"), Caption("2024, U.S. · broader market definition")], null, 4, 2)
+st1 = Card([Caption("Photography services · demo estimate"), Title("$617M", "xl"), Caption("2025, U.S. · narrow market definition")], null, 2, 4)
+st2 = Card([Caption("Commercial drones · demo estimate"), Title("$4.1B", "xl"), Caption("2024, U.S. · broader market definition")], null, 2, 4)
 swatches = Row([Box([], null, null, null, "#d9c9b0", "lg", null, 44, 44), Box([], null, null, null, "#9fb4a4", "lg", null, 44, 44), Box([], null, null, null, "#4f5d75", "lg", null, 44, 44), Box([], null, null, null, "#c96f53", "full", null, 44, 44), Spacer(), Badge("Warm neutrals")], 2)
 tints = Grid([Box([Text("Info tint", "sm", "info")], null, null, 3, "info", "lg"), Box([Text("Success tint", "sm", "success")], null, null, 3, "success", "lg"), Box([Text("Warning tint", "sm", "warning")], null, null, 3, "warning", "lg"), Box([Text("On a hex color", "sm"), Caption("Text stays readable")], null, 1, 3, "#f5e6c8", "lg")], 4, 130, 2)
-summary = Card([Row([Text("Subtotal"), Spacer(), Text("$156.00", null, null, null, null, null, true)]), Row([Text("Tax · 8.5%", "sm", "muted"), Spacer(), Text("$13.26", "sm", "muted", null, null, null, true)]), Divider(), Row([Text("Total"), Spacer(), Title("$169.26", "xl")])], "soft", null, 2)`,
+summary = Card([Row([Text("Subtotal"), Spacer(), Text("$156.00", null, null, null, null, null, true)]), Row([Text("Tax · 8.5%", "sm", "muted"), Spacer(), Text("$13.26", "sm", "muted", null, null, null, true)]), Divider(), Row([Text("Total"), Spacer(), Title("$169.26", "xl")])], "soft", 2)`,
   },
   {
     id: "gdp",
@@ -124,7 +124,7 @@ head = Row([Title("What are you splitting?", "md"), Spacer(), SegmentedControl($
 body = $mode == "item" ? items : equal
 items = Col([Row([Text("Burrata & sourdough"), Spacer(), Text("$18", null, null, "medium", null, null, true)]), Row([Text("Mains"), Spacer(), Text("$96", null, null, "medium", null, null, true)]), Row([Text("A bottle of red"), Spacer(), Text("$42", null, null, "medium", null, null, true)])], 3)
 equal = Grid([Input($people, "People at the table", "number"), Slider($tip, 0, 30, 1, "Tip", "%", [{value: 0, label: "None"}, {value: 15, label: "15%"}, {value: 30, label: "30%"}])], 2, 220, 6)
-summary = Card([Row([Text("Total with tip"), Spacer(), Title("$" + @Round(156 * (1 + $tip / 100), 2), "lg")]), Row([Text("Each of " + $people, "sm", "muted"), Spacer(), Text("$" + @Round(156 * (1 + $tip / 100) / ($people > 0 ? $people : 1), 2), "sm", null, "medium", null, null, true)])], "soft", null, 2)`,
+summary = Card([Row([Text("Total with tip"), Spacer(), Title("$" + @Round(156 * (1 + $tip / 100), 2), "lg")]), Row([Text("Each of " + $people, "sm", "muted"), Spacer(), Text("$" + @Round(156 * (1 + $tip / 100) / ($people > 0 ? $people : 1), 2), "sm", null, "medium", null, null, true)])], "soft", 2)`,
   },
   {
     id: "checklist",
@@ -180,19 +180,19 @@ chain = Path("M 90 40 L 240 62 A 18 18 0 0 1 240 98 L 90 120 A 40 40 0 0 1 90 40
 front = G([Circle(90, 80, 40, "surface", "ink", 3), Line(90, 80, 90, 44, "ink", 4), Circle(90, 80, 6, "ink")], "rotate(" + $angle + " 90 80)")
 rear = G([Circle(240, 80, 18, "surface", "ink", 3), Line(240, 80, 240, 64, "info", 3), Circle(240, 80, 4, "ink")], "rotate(" + $angle * ratio + " 240 80)")
 readout = SvgText("Rear " + @Round($angle * ratio % 360, 0) + "°", 240, 132, 12, "muted", "middle")
-shapes = Svg([Rect(10, 10, 60, 40, "info", null, null, 0.8, 8), Ellipse(120, 30, 34, 20, "success"), Polygon("180,50 205,10 230,50", "warning"), Polyline("250,45 265,15 280,40 295,12", "danger", 3), SvgText("Rect · Ellipse · Polygon · Polyline", 160, 72, 11, "muted", "middle")], "0 0 320 80", null, null)`,
+shapes = Svg([Rect(10, 10, 60, 40, "info", null, null, 0.8, 8), Ellipse(120, 30, 34, 20, "success"), Polygon("180,50 205,10 230,50", "warning"), Polyline("250,45 265,15 280,40 295,12", null, "danger", 3), SvgText("Rect · Ellipse · Polygon · Polyline", 160, 72, 11, "muted", "middle")], "0 0 320 80", null, null, null)`,
   },
   {
     id: "chart",
     title: "Charts",
-    note: "SegmentedControl switches Chart($type); currency and percent formats; stacked bars; pie and donut.",
+    note: "SegmentedControl switches Chart($type); number and percent formats; stacked bars; pie and donut.",
     code: `root = Card([head, chart, Grid([pie, donut], 2, 260, 6)])
 $type = "bar"
 head = Row([Col([Title("Drone services revenue", "md"), Caption("Illustrative revenue path, not a forecast")], 1), Spacer(), SegmentedControl($type, ["bar", "line", "area"])], 3, null, null, true)
-chart = Chart($type, rows, "year", ["Photography", "Inspection"], "currency", null, $type != "line")
+chart = Chart($type, rows, "year", ["Photography", "Inspection"], "number", $type != "line")
 rows = [{year: "2025", Photography: 617000000, Inspection: 410000000}, {year: "2027", Photography: 820000000, Inspection: 690000000}, {year: "2030", Photography: 1240000000, Inspection: 1310000000}, {year: "2034", Photography: 1900000000, Inspection: 2350000000}]
 pie = Col([Title("How people get around", "sm"), Chart("pie", modes, "mode", ["share"], "percent")], 2)
-donut = Col([Title("Budget", "sm"), Chart("donut", budget, "item", ["amount"], "currency", "EUR")], 2)
+donut = Col([Title("Budget", "sm"), Chart("donut", budget, "item", ["amount"])], 2)
 modes = [{mode: "Walking", share: 52}, {mode: "Transit", share: 31}, {mode: "Cycling", share: 17}]
 budget = [{item: "Lodging", amount: 840}, {item: "Food", amount: 420}, {item: "Transport", amount: 260}, {item: "Museums", amount: 90}]`,
   },
@@ -205,18 +205,18 @@ budget = [{item: "Lodging", amount: 840}, {item: "Food", amount: 420}, {item: "T
   {
     id: "images",
     title: "Images",
-    note: "A working src; no src (search by alt); a failing src that falls back to search; a failing src with nothing found.",
+    note: "A working src; SearchImage, which finds a photo for its query; a failing src; a search that finds nothing.",
     code: `root = Card([Title("Golden hour in San Francisco", "md"), Grid([i1, i2, i3, i4], 4, 150, 3)])
 i1 = Col([Image("${bridge}", "Golden Gate Bridge from Battery East"), Text("Working src", "sm", null, "semibold"), Caption("Loads the given URL")], 2)
-i2 = Col([SearchImage("Alcatraz Island"), Text("No src", "sm", null, "semibold"), Caption("Found by searching the query")], 2)
-i3 = Col([Image("https://example.invalid/palace.jpg", "Palace of Fine Arts"), Text("Broken src", "sm", null, "semibold"), Caption("Falls back to search")], 2)
-i4 = Col([Image("https://example.invalid/none.jpg", "qzxv unfindable subject 0000", 1.5, "xl"), Text("Nothing found", "sm", null, "semibold"), Caption("Quiet placeholder")], 2)`,
+i2 = Col([SearchImage("Alcatraz Island"), Text("SearchImage", "sm", null, "semibold"), Caption("Found by searching the query")], 2)
+i3 = Col([Image("https://example.invalid/palace.jpg", "Palace of Fine Arts"), Text("Broken src", "sm", null, "semibold"), Caption("Quiet placeholder")], 2)
+i4 = Col([SearchImage("qzxv unfindable subject 0000", 1.5, "xl"), Text("Nothing found", "sm", null, "semibold"), Caption("Quiet placeholder")], 2)`,
   },
   {
     id: "map",
     title: "Map with a route",
     note: "Map(markers, route, $stop): street route via /api/street-route, category filter, emoji and numbered pins; clicking a pin sets $stop.",
-    code: `root = Col([Title("San Francisco, your way", "md"), Text("Tap a pin to choose where to start.", "sm", "muted"), map, Card([Row([Icon("map-pin", "sm"), Text("Starting at **" + $stop + "**", "sm")], 2)], "soft", 3)])
+    code: `root = Col([Title("San Francisco, your way", "md"), Text("Tap a pin to choose where to start.", "sm", "muted"), map, Card([Row([Icon("map-pin", "sm"), Text("Starting at **" + $stop + "**", "sm")], 2)], "soft", null, 3)])
 $stop = "Ferry Building"
 map = Map([m1, m2, m3, m4], true, $stop)
 m1 = MapMarker("Ferry Building", 37.7955, -122.3937, "Food", "☕")
