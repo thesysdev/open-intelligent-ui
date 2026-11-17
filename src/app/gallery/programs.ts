@@ -185,7 +185,7 @@ shapes = Svg([Rect(10, 10, 60, 40, "info", null, null, 0.8, 8), Ellipse(120, 30,
   {
     id: "chart",
     title: "Charts",
-    note: "SegmentedControl switches Chart($type); currency and percent formats; stacked bars; pie and donut.",
+    note: "SegmentedControl switches Chart($type); number and percent formats; stacked bars; pie and donut.",
     code: `root = Card([head, chart, Grid([pie, donut], 2, 260, 6)])
 $type = "bar"
 head = Row([Col([Title("Drone services revenue", "md"), Caption("Illustrative revenue path, not a forecast")], 1), Spacer(), SegmentedControl($type, ["bar", "line", "area"])], 3, null, null, true)
@@ -205,12 +205,12 @@ budget = [{item: "Lodging", amount: 840}, {item: "Food", amount: 420}, {item: "T
   {
     id: "images",
     title: "Images",
-    note: "A working src; no src (search by alt); a failing src that falls back to search; a failing src with nothing found.",
+    note: "A working src; SearchImage, which finds a photo for its query; a failing src; a search that finds nothing.",
     code: `root = Card([Title("Golden hour in San Francisco", "md"), Grid([i1, i2, i3, i4], 4, 150, 3)])
 i1 = Col([Image("${bridge}", "Golden Gate Bridge from Battery East"), Text("Working src", "sm", null, "semibold"), Caption("Loads the given URL")], 2)
-i2 = Col([SearchImage("Alcatraz Island"), Text("No src", "sm", null, "semibold"), Caption("Found by searching the query")], 2)
-i3 = Col([Image("https://example.invalid/palace.jpg", "Palace of Fine Arts"), Text("Broken src", "sm", null, "semibold"), Caption("Falls back to search")], 2)
-i4 = Col([Image("https://example.invalid/none.jpg", "qzxv unfindable subject 0000", 1.5, "xl"), Text("Nothing found", "sm", null, "semibold"), Caption("Quiet placeholder")], 2)`,
+i2 = Col([SearchImage("Alcatraz Island"), Text("SearchImage", "sm", null, "semibold"), Caption("Found by searching the query")], 2)
+i3 = Col([Image("https://example.invalid/palace.jpg", "Palace of Fine Arts"), Text("Broken src", "sm", null, "semibold"), Caption("Quiet placeholder")], 2)
+i4 = Col([SearchImage("qzxv unfindable subject 0000", 1.5, "xl"), Text("Nothing found", "sm", null, "semibold"), Caption("Quiet placeholder")], 2)`,
   },
   {
     id: "map",
