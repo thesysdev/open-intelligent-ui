@@ -162,7 +162,7 @@ Then open `/gallery` (`npm run dev`), switch between light and dark, and try it 
 
 ## Benchmark
 
-`scripts/bench/run.mjs` sends the 16 example prompts (with `system-prompt.txt`) and 8 dashboard prompts (with `dashboard-system-prompt.txt`) to a model on any OpenAI-compatible endpoint, saves each answer, checks it with the 1.0 parser, flags `@names` and components the library does not have, and screenshots each answer in light and dark at 390 and 1280 px through `/preview`. The key is read from an environment variable at run time.
+`scripts/bench/run.mjs` sends the 16 example prompts (with `system-prompt.txt`) and 8 dashboard prompts (with `dashboard-system-prompt.txt`) to a model on any OpenAI-compatible endpoint, saves each answer, checks it with the 1.0 parser, flags `@names` and components the library does not have, rejects successful HTTP responses without non-empty string completion content (retaining their raw JSON for diagnosis), and screenshots each answer in light and dark at 390 and 1280 px through `/preview`. The key is read from an environment variable at run time.
 
 ```bash
 npm run dev   # in another terminal, for the screenshots
