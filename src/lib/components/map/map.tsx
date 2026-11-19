@@ -13,6 +13,17 @@ import { useDialog } from "./use-dialog";
 import { useStreetRoute } from "./use-street-route";
 
 const ROUTE = "route";
+
+/* MapLibre only reads hex, rgb() and hsl(); theme tokens can be oklch() or lab(). The canvas
+   turns any CSS color into rgba() it can read. */
+function toRgb(color: string) {
+  const ctx = document.createElement("canvas").getContext("2d");
+  if (!ctx) return color;
+  ctx.fillStyle = color; ctx.fillRect(0, 0, 1, 1);
+  const [r, g, b, a] = ctx.getImageData(0, 0, 1, 1).data;
+  return `rgba(${r}, ${g}, ${b}, ${+(a / 255).toFixed(3)})`;
+}
+
 // Room for the controls on top and for labels, which hang below and beside each pin.
 const FRAME_PADDING = { top: 70, left: 72, bottom: 50, right: 72 };
 const FLY_MS = 920;
@@ -131,7 +142,7 @@ export const MapView = defineComponent({
       let fellBack = false;
       // Re-adds the route line whenever a style (vector, dark or fallback) finishes loading.
       instance.on("style.load", () => {
-        const ink = getComputedStyle(container.current ?? document.body).getPropertyValue("--iui-ink").trim() || "#272727";
+        const ink = toRgb(getComputedStyle(container.current ?? document.body).getPropertyValue("--iui-ink").trim() || "#272727");
         if (!instance.getSource(ROUTE)) instance.addSource(ROUTE, { type: "geojson", data: { type: "FeatureCollection", features: [] } });
         if (!instance.getLayer(ROUTE)) instance.addLayer({ id: ROUTE, type: "line", source: ROUTE, layout: { "line-cap": "round", "line-join": "round" }, paint: { "line-color": ink, "line-width": 3.2 } });
         setLine(instance, linePoints.current);
