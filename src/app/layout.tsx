@@ -27,9 +27,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    // The chat is light only. OpenUI's stylesheet switches its tokens to dark with the OS setting
-    // unless <html> has data-openui-theme="light".
-    <html lang="en" data-openui-theme="light" suppressHydrationWarning>
+    <html lang="en" suppressHydrationWarning>
       <body className={inter.className}>
         {children}
       </body>
