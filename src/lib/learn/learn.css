@@ -1,0 +1,84 @@
+/* Example "company design system" styles, built on the app's theme tokens
+   (--iui-*) so the example components match the rest of the UI in light and
+   dark. Imported by library.ts, like the coach's coach.css. */
+
+.lrn-kpi {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: var(--iui-space-group-lg);
+  border: 1px solid var(--iui-border);
+  border-radius: var(--iui-radius-lg);
+  background: var(--iui-canvas);
+}
+
+.lrn-kpi-label {
+  font-size: 12px;
+  line-height: 1.4;
+  color: var(--iui-muted);
+}
+
+.lrn-kpi-value {
+  font-size: 28px;
+  line-height: 1.2;
+  font-weight: 640;
+  color: var(--iui-ink);
+  font-variant-numeric: tabular-nums;
+}
+
+.lrn-kpi-delta {
+  font-size: 12px;
+  line-height: 1.4;
+  font-weight: 560;
+}
+
+.lrn-kpi-delta.is-up {
+  color: var(--iui-success);
+}
+
+.lrn-kpi-delta.is-down {
+  color: var(--iui-danger);
+}
+
+.lrn-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 3px 10px;
+  border-radius: 999px;
+  font-size: 12px;
+  line-height: 1.4;
+  font-weight: 560;
+}
+
+.lrn-badge-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: currentColor;
+}
+
+.lrn-badge.tone-neutral {
+  color: var(--iui-ink);
+  background: var(--iui-badge-neutral-soft);
+}
+
+.lrn-badge.tone-success {
+  color: var(--iui-badge-success);
+  background: var(--iui-badge-success-soft);
+}
+
+.lrn-badge.tone-warning {
+  color: var(--iui-badge-warning);
+  background: var(--iui-badge-warning-soft);
+}
+
+.lrn-badge.tone-danger {
+  color: var(--iui-badge-danger);
+  background: var(--iui-badge-danger-soft);
+}
+
+.lrn-badge.tone-info {
+  color: var(--iui-badge-purple);
+  background: var(--iui-badge-purple-soft);
+}

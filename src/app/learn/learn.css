@@ -1,0 +1,282 @@
+/* Layout for the /learn tutorial shell. Components rendered inside the
+   playground reuse the app's theme tokens, so data-theme flips them too. */
+
+.learn {
+  min-height: 100vh;
+  background: var(--iui-canvas);
+  color: var(--iui-ink);
+  font-family: var(--iui-font);
+  font-size: 16px;
+  line-height: 1.6;
+}
+
+.learn-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 20px;
+  border-bottom: 1px solid var(--iui-border);
+  position: sticky;
+  top: 0;
+  background: var(--iui-canvas);
+  z-index: 10;
+}
+
+.learn-name {
+  font-weight: 640;
+}
+
+.learn-divider {
+  margin: 0 8px;
+  color: var(--iui-faint);
+}
+
+.learn-sub {
+  color: var(--iui-muted);
+}
+
+.learn-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.learn-lang {
+  display: flex;
+  gap: 4px;
+}
+
+.learn-lang button {
+  padding: 4px 10px;
+  border: 0;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--iui-muted);
+  font-size: 13px;
+  cursor: pointer;
+  font-family: inherit;
+}
+
+.learn-lang button[aria-pressed="true"] {
+  color: var(--iui-ink);
+  background: var(--iui-hover);
+}
+
+.learn-theme {
+  display: flex;
+  gap: 4px;
+}
+
+.learn-theme a {
+  padding: 4px 10px;
+  border-radius: 6px;
+  color: var(--iui-muted);
+  text-decoration: none;
+  font-size: 13px;
+}
+
+.learn-theme a[aria-current="page"] {
+  color: var(--iui-ink);
+  background: var(--iui-hover);
+}
+
+.learn-body {
+  display: grid;
+  grid-template-columns: 240px minmax(0, 1fr);
+  gap: 0;
+  max-width: 1100px;
+  margin: 0 auto;
+}
+
+.learn-nav {
+  padding: 20px 16px;
+  border-right: 1px solid var(--iui-border);
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  align-self: start;
+  position: sticky;
+  top: 57px;
+}
+
+.learn-nav-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 7px 10px;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--iui-ink);
+  text-align: left;
+  font-size: 14px;
+  cursor: pointer;
+  font-family: inherit;
+}
+
+.learn-nav-item:hover {
+  background: var(--iui-hover);
+}
+
+.learn-nav-item.is-current {
+  background: var(--iui-pressed);
+}
+
+.learn-nav-part {
+  width: 20px;
+  height: 20px;
+  flex: none;
+  border-radius: 50%;
+  background: var(--iui-surface-strong);
+  color: var(--iui-muted);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+}
+
+.learn-nav-item.is-current .learn-nav-part {
+  background: var(--iui-ink);
+  color: var(--iui-on-ink);
+}
+
+.learn-nav-check {
+  margin-left: auto;
+  color: var(--iui-success);
+  font-size: 13px;
+}
+
+.learn-content {
+  padding: 28px 32px 64px;
+  min-width: 0;
+}
+
+.learn-title {
+  font-size: 26px;
+  line-height: 1.2;
+  margin: 0 0 18px;
+}
+
+.learn-block {
+  margin: 18px 0;
+}
+
+.learn-block-title {
+  font-size: 15px;
+  margin: 0 0 8px;
+  color: var(--iui-muted);
+}
+
+.learn-playground {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: 12px;
+  align-items: start;
+}
+
+.learn-code {
+  min-height: 260px;
+  padding: 12px;
+  border: 1px solid var(--iui-border-strong);
+  border-radius: var(--iui-radius-lg);
+  background: var(--iui-surface);
+  color: var(--iui-ink);
+  font-family: var(--iui-mono);
+  font-size: 12.5px;
+  line-height: 1.55;
+  resize: vertical;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.learn-code:focus {
+  outline: 2px solid var(--iui-ring);
+  outline-offset: 1px;
+}
+
+.learn-preview {
+  padding: 16px;
+  border: 1px solid var(--iui-border);
+  border-radius: var(--iui-radius-lg);
+  background: var(--iui-canvas);
+  min-height: 260px;
+}
+
+.learn-code-block {
+  padding: 14px;
+  border: 1px solid var(--iui-border);
+  border-radius: var(--iui-radius-lg);
+  background: var(--iui-surface);
+  overflow-x: auto;
+}
+
+.learn-code-block code {
+  font-family: var(--iui-mono);
+  font-size: 12.5px;
+  line-height: 1.55;
+}
+
+.learn-errors {
+  grid-column: 1 / -1;
+  margin: 0;
+  padding: 10px 12px;
+  border: 1px solid var(--iui-badge-danger-soft);
+  border-radius: var(--iui-radius-md);
+  background: var(--iui-danger-soft);
+  color: var(--iui-badge-danger);
+  font-size: 13px;
+  list-style: none;
+}
+
+.learn-foot {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 32px;
+  padding-top: 20px;
+  border-top: 1px solid var(--iui-border);
+}
+
+.learn-btn {
+  padding: 8px 16px;
+  border: 1px solid var(--iui-border-strong);
+  border-radius: var(--iui-radius-md);
+  background: var(--iui-canvas);
+  color: var(--iui-ink);
+  font-size: 14px;
+  cursor: pointer;
+  font-family: inherit;
+}
+
+.learn-btn:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+
+.learn-btn.is-primary {
+  background: var(--iui-ink);
+  color: var(--iui-on-ink);
+  border-color: var(--iui-ink);
+}
+
+@media (max-width: 760px) {
+  .learn-body {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .learn-nav {
+    flex-direction: row;
+    flex-wrap: wrap;
+    border-right: 0;
+    border-bottom: 1px solid var(--iui-border);
+    position: static;
+  }
+
+  .learn-playground {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .learn-content {
+    padding: 20px 16px 48px;
+  }
+}
