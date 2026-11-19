@@ -7,10 +7,8 @@ import {
   fetchLLM,
   openAIConversationMessageFormat,
   openAIResponsesAdapter,
-  useThemeModePreference,
 } from "@openuidev/react-ui";
 import type { ActionEvent } from "@openuidev/react-lang";
-import { useEffect } from "react";
 import { ChartColumn, ChefHat, Dog, Drum, Hammer, MapPinned, Plane, UtensilsCrossed } from "lucide-react";
 import { runLibraryAction } from "@/lib/actions";
 import { withBase } from "@/lib/base-path";
@@ -59,19 +57,9 @@ function onAction(event: ActionEvent) {
 }
 
 export default function Home() {
-  // Follows the system theme until the footer toggle is first used, then
-  // remembers the choice.
-  const { setPreference, mode } = useThemeModePreference();
-
-  // Mirror the resolved mode onto <html>, so the components' dark tokens also
-  // apply while the theme follows the system.
-  useEffect(() => {
-    document.documentElement.setAttribute("data-openui-theme", mode);
-  }, [mode]);
-
   // The library reads its mode from its own ThemeProvider, not from AgentInterface's theme.
   return (
-    <ThemeProvider mode={mode}>
+    <ThemeProvider mode="light">
       <div className="chat-shell">
         <AgentInterface
           llm={llm}
@@ -80,12 +68,9 @@ export default function Home() {
           onAction={onAction}
           agentName="OpenUI"
           logoUrl={withBase("/shiro-face.svg")}
-          theme={{ mode }}
+          theme={{ mode: "light" }}
           starters={starters}
         >
-          <AgentInterface.SidebarFooter>
-            <AgentInterface.ThemeModeToggle mode={mode} onModeChange={setPreference} />
-          </AgentInterface.SidebarFooter>
           <AgentInterface.ThreadHeader showChatTitle={false} />
           <AgentInterface.Welcome
             image={<img src={withBase("/shiro-woodworker.svg")} alt="" className="welcome-mascot" />}
