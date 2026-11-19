@@ -136,7 +136,7 @@ async function pool(items, size, fn) {
 // Checks
 /** @names outside string literals; any the library and built-ins do not have are flagged. */
 function callNames(program) {
-  const code = program.replace(/"(?:[^"\\]|\\.)*"/g, '""');
+  const code = program.replace(/"(?:[^"\\]|\\.)*"|'(?:[^'\\]|\\.)*'|\/\/[^\n]*|#[^\n]*/g, "");
   return [...code.matchAll(/@([A-Za-z_]\w*)/g)].map((m) => m[1]);
 }
 
