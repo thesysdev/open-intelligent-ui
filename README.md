@@ -170,6 +170,8 @@ PLAYWRIGHT_CORE=/path/to/playwright-core CHROME=/path/to/chrome-headless-shell \
   OPENROUTER_API_KEY=... npm run bench -- --model <id> --base-url https://openrouter.ai/api/v1 --key-env OPENROUTER_API_KEY
 npm run bench -- --fake                 # the hand-written programs stand in for the model
 npm run bench -- --answers <dir>        # re-check and re-shoot saved <id>.oui answers
+# Reports are retained; the command exits nonzero if no answer is checked,
+# generation/parsing fails, names are unknown, or rendering has errors/overflow.
 ```
 
 Results go to `bench-out/<model>-<time>/`: `answers/`, `shots/`, `report.json` and `report.md`. Other options: `--only id,id`, `--kind tool|dashboard`, `--widths`, `--no-shots`, `--concurrency`, `--temperature`, `--max-tokens`, `--app`.
