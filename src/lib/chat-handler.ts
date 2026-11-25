@@ -55,11 +55,12 @@ function toInput(messages: unknown): ResponseInputItem[] | null {
 
 /**
  * The chat's thread ID, sent as the Gateway session ID so the thread's turns show
- * as one session in the console. Null when it is missing or could not go in a header.
+ * as one session in the console. Thread IDs are UUIDs; anything that is not 1 to 256
+ * visible ASCII characters is dropped, because a header can't carry it (the SDK throws
+ * on non-ASCII and trims spaces).
  */
 function sessionIdOf(threadId: unknown): string | null {
-  if (typeof threadId !== "string" || !threadId.trim() || threadId.length > 256 || /\p{Cc}/u.test(threadId)) return null;
-  return threadId;
+  return typeof threadId === "string" && /^[\x21-\x7e]{1,256}$/.test(threadId) ? threadId : null;
 }
 
 /** The conversation as Chat Completions messages (text only). */
