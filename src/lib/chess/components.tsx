@@ -85,14 +85,16 @@ export const ChessBoard = defineComponent({
     const { mode, side } = props;
     const sideCode = side === "white" ? "w" : "b";
     const moves = useMemo(() => strings(field.value), [field.value]);
-    const key = moves.join(" ");
+    const key = JSON.stringify(moves);
     const state = useMemo(() => replay(moves, props.fen), [key, props.fen]); // eslint-disable-line react-hooks/exhaustive-deps
     const { game, played } = state;
     const fen = game.fen();
     const turn = game.turn();
     const over = game.isGameOver();
     const line = props.line;
-    const progress = mode === "line" && line ? lineProgress(state.san, line, props.fen) : null;
+    const progress = mode === "line" && line ? lineProgress(moves, line, props.fen) : null;
+    const invalidLine = progress?.illegalLineMove != null;
+    const nextLineMove = progress?.next;
 
     const [selected, setSelected] = useState<Square | null>(null);
     const [drag, setDrag] = useState<{ from: Square; x: number; y: number } | null>(null);
@@ -113,9 +115,8 @@ export const ChessBoard = defineComponent({
       if (mode === "computer") {
         const level = LEVEL[props.level];
         reply = () => bestMove(state.san, props.fen, level.depth, level.jitter);
-      } else if (mode === "line" && progress?.onLine && progress.next) {
-        const next = progress.next;
-        reply = () => next;
+      } else if (mode === "line" && nextLineMove) {
+        reply = () => nextLineMove;
       }
       if (!reply) return;
       setThinking(true);
@@ -129,7 +130,7 @@ export const ChessBoard = defineComponent({
         window.clearTimeout(timer);
         setThinking(false);
       };
-    }, [key, mode, streaming]); // eslint-disable-line react-hooks/exhaustive-deps
+    }, [key, mode, streaming, nextLineMove]); // eslint-disable-line react-hooks/exhaustive-deps
 
     useEffect(() => {
       setSelected(null);
@@ -190,7 +191,7 @@ export const ChessBoard = defineComponent({
     const at = (sq: Square) => ({ x: files.indexOf(sq[0]) + 0.5, y: ranks.indexOf(Number(sq[1])) + 0.5 });
     const rect = boardRef.current?.getBoundingClientRect();
 
-    const status = streaming
+    const status = streaming || invalidLine
       ? null
       : over
         ? positionInfo(state.san, props.fen).status
@@ -301,13 +302,14 @@ export const ChessBoard = defineComponent({
               <button type="button" className="ch-tool" onClick={undo} disabled={streaming || !state.san.length}>
                 <Glyph name="undo-2" size={14} /> Undo
               </button>
-              <button type="button" className="ch-tool" onClick={() => field.setValue([])} disabled={streaming || !state.san.length}>
+              <button type="button" className="ch-tool" onClick={() => field.setValue([])} disabled={streaming || !moves.length}>
                 <Glyph name="rotate-ccw" size={14} /> Reset
               </button>
             </span>
           </div>
         ) : null}
-        {state.bad && !streaming ? <div className="ch-warn">Stopped at {state.bad}: not a legal move here.</div> : null}
+        {invalidLine && !streaming ? <div className="ch-warn">The line contains an illegal move ({progress.illegalLineMove || "blank move"}).</div> : null}
+        {state.bad !== null && !streaming ? <div className="ch-warn">Stopped at {state.bad || "a blank move"}: not a legal move here.</div> : null}
       </div>
     );
   },

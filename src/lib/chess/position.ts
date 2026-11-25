@@ -151,19 +151,21 @@ export function openingChecks(game: Chess, history: Move[], side: "w" | "b") {
 
 /** How far moves follow line (a full line from the same start): the next move and whether it went wrong. */
 export function lineProgress(moves: unknown, line: unknown, fen?: string | null) {
-  const played = replay(moves, fen).san;
-  const target = replay(line, fen).san;
+  const { san: played, bad: illegalMove } = replay(moves, fen);
+  const { san: target, bad: illegalLineMove } = replay(line, fen);
   let same = 0;
   while (same < played.length && same < target.length && played[same] === target[same]) same += 1;
-  const onLine = same === played.length && played.length <= target.length;
+  const wentOffLine = same < played.length || illegalMove !== null;
+  const onLine = !wentOffLine && illegalLineMove === null;
   return {
     onLine,
     played: same,
     total: target.length,
     done: onLine && played.length === target.length,
     next: onLine ? (target[played.length] ?? null) : null,
-    expected: onLine ? null : (target[same] ?? null),
-    wrongMove: onLine ? null : (played[same] ?? null),
+    expected: wentOffLine ? (target[same] ?? null) : null,
+    wrongMove: wentOffLine ? (played[same] ?? illegalMove) : null,
+    illegalLineMove,
   };
 }
 

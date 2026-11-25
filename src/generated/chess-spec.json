@@ -590,7 +590,7 @@
     },
     "LineProgress": {
       "signature": "LineProgress(moves: string[], line: string[], fen?: string) → any",
-      "description": "How far moves follow line (a full move list from the same start): {onLine, played, total, done, next (the line's next move), expected and wrongMove (where it left the line)}"
+      "description": "How far moves follow line (a full move list from the same start): {onLine, played, total, done, next (the line's next move), expected, wrongMove (where it left the line), illegalLineMove (the first illegal move in the solution, or null)}"
     },
     "BestMove": {
       "signature": "BestMove(moves: string[], fen?: string) → string",
@@ -4616,7 +4616,7 @@
         }
       },
       "LineProgress": {
-        "description": "How far moves follow line (a full move list from the same start): {onLine, played, total, done, next (the line's next move), expected and wrongMove (where it left the line)}",
+        "description": "How far moves follow line (a full move list from the same start): {onLine, played, total, done, next (the line's next move), expected, wrongMove (where it left the line), illegalLineMove (the first illegal move in the solution, or null)}",
         "params": {
           "type": "object",
           "properties": {
