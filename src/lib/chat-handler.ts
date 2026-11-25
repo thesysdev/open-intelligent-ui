@@ -53,6 +53,15 @@ function toInput(messages: unknown): ResponseInputItem[] | null {
   return items.length ? items.slice(-MAX_ITEMS) : null;
 }
 
+/**
+ * The chat's thread ID, sent as the Gateway session ID so the thread's turns show
+ * as one session in the console. Null when it is missing or could not go in a header.
+ */
+function sessionIdOf(threadId: unknown): string | null {
+  if (typeof threadId !== "string" || !threadId.trim() || threadId.length > 256 || /\p{Cc}/u.test(threadId)) return null;
+  return threadId;
+}
+
 /** The conversation as Chat Completions messages (text only). */
 function toChatMessages(input: ResponseInputItem[]): ChatCompletionMessageParam[] {
   return input.map((item) => {
@@ -117,8 +126,11 @@ export function createChatHandler(librarySpec: LibrarySpec, promptOptions: Promp
       return Response.json({ error: { message: "request body too large" } }, { status: 413 });
     }
     let input: ResponseInputItem[] | null;
+    let sessionId: string | null = null;
     try {
-      input = toInput((JSON.parse(raw) as { messages?: unknown }).messages);
+      const body = JSON.parse(raw) as { messages?: unknown; threadId?: unknown };
+      input = toInput(body.messages);
+      sessionId = sessionIdOf(body.threadId);
     } catch {
       input = null;
     }
@@ -142,7 +154,11 @@ export function createChatHandler(librarySpec: LibrarySpec, promptOptions: Promp
                 ...(effort ? { reasoning: { effort } } : {}),
                 stream: true,
               },
-              { signal: req.signal }, // propagate browser aborts
+              {
+                signal: req.signal, // propagate browser aborts
+                // store is false, so without this header each turn would be its own session.
+                ...(sessionId ? { headers: { "x-thesys-session-id": sessionId } } : {}),
+              },
             )
           : asResponsesEvents(
               await client.chat.completions.create(
