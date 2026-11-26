@@ -8,9 +8,11 @@ const MAX_STOPS = 25;
 export async function GET(req: Request) {
   // "lng,lat;lng,lat;..." with at least two valid points.
   const coords = new URL(req.url).searchParams.get("coords") ?? "";
-  const points = coords.split(";").map((pair) => pair.split(",").map(Number));
+  const pairs = coords.split(";").map((pair) => pair.split(","));
+  const points = pairs.map((pair) => pair.map(Number));
   const valid = points.length >= 2 && points.length <= MAX_STOPS
-    && points.every(([lng, lat, ...rest]) => !rest.length && Math.abs(lng) <= 180 && Math.abs(lat) <= 90);
+    && pairs.every((pair) => pair.length === 2 && pair.every((value) => value.trim() !== ""))
+    && points.every(([lng, lat]) => Number.isFinite(lng) && Number.isFinite(lat) && Math.abs(lng) <= 180 && Math.abs(lat) <= 90);
   if (!valid) return Response.json({ error: { message: `coords must be 2–${MAX_STOPS} lng,lat pairs` } }, { status: 400 });
   const key = points.map((p) => p.join(",")).join(";");
 
