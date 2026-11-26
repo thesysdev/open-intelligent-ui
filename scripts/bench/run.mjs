@@ -173,6 +173,9 @@ const entries = await pool(prompts, offline ? prompts.length : Number(opt.concur
       const reply = await ask(prompt);
       Object.assign(entry, { text: reply.text, usage: reply.usage, ms: reply.ms });
       writeFileSync(path.join(out, "answers", `${prompt.id}.json`), JSON.stringify(reply.raw, null, 2));
+      if (typeof reply.text !== "string" || !reply.text.trim()) {
+        throw new Error("The model response must contain non-empty text in choices[0].message.content.");
+      }
     }
     entry.program = extractProgram(entry.text);
     writeFileSync(path.join(out, "answers", `${prompt.id}.oui`), entry.program);
