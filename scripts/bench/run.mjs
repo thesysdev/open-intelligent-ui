@@ -39,6 +39,23 @@ const { values: opt } = parseArgs({
   },
 });
 
+
+function numberOption(name, { integer = false, minimum = 0 } = {}) {
+  const value = Number(opt[name]);
+  if (!opt[name].trim() || !Number.isFinite(value) || value < minimum || (integer && !Number.isInteger(value))) {
+    throw new Error(`--${name} must be a ${integer ? "whole" : "finite"} number of at least ${minimum}.`);
+  }
+  return value;
+}
+const concurrency = numberOption("concurrency", { integer: true, minimum: 1 });
+const maxTokens = numberOption("max-tokens", { integer: true, minimum: 1 });
+const temperature = opt.temperature === undefined ? undefined : numberOption("temperature");
+const widths = opt.widths.split(",").map((width) => {
+  const value = Number(width);
+  if (!width.trim() || !Number.isInteger(value) || value < 1) throw new Error("--widths must be comma-separated positive whole numbers.");
+  return value;
+});
+
 const offline = opt.fake || !!opt.answers;
 if (!offline && (!opt.model || !opt["base-url"])) {
   console.error("Pass --model and --base-url (or BENCH_BASE_URL), or --fake or --answers for a run without a model.");
@@ -53,12 +70,21 @@ if (!offline && !apiKey) {
 const label = opt.fake ? "fake" : opt.answers ? "recheck" : opt.model.replace(/[^\w.-]+/g, "_");
 const stamp = new Date().toISOString().replace(/[:.]/g, "-").slice(0, 19);
 const out = path.resolve(opt.out ?? path.join(root, "bench-out", `${label}-${stamp}`));
-mkdirSync(path.join(out, "answers"), { recursive: true });
 
 // Prompts, system prompts and the library
 let prompts = JSON.parse(readFileSync(path.join(root, "scripts/bench/prompts.json"), "utf8"));
-if (opt.only) prompts = prompts.filter((p) => opt.only.split(",").includes(p.id));
-if (opt.kind) prompts = prompts.filter((p) => p.kind === opt.kind);
+if (opt.only !== undefined) {
+  const ids = opt.only.split(",").map((id) => id.trim()).filter(Boolean);
+  const unknown = ids.filter((id) => !prompts.some((p) => p.id === id));
+  if (!ids.length || unknown.length) throw new Error(`--only needs known prompt ids; unknown: ${unknown.join(", ") || "empty selection"}.`);
+  prompts = prompts.filter((p) => ids.includes(p.id));
+}
+if (opt.kind !== undefined) {
+  if (!["tool", "dashboard"].includes(opt.kind)) throw new Error("--kind must be tool or dashboard.");
+  prompts = prompts.filter((p) => p.kind === opt.kind);
+}
+if (!prompts.length) throw new Error("The selected --only and --kind options match no prompts.");
+mkdirSync(path.join(out, "answers"), { recursive: true });
 const system = {
   tool: readFileSync(path.join(root, "src/generated/system-prompt.txt"), "utf8"),
   dashboard: readFileSync(path.join(root, "src/generated/dashboard-system-prompt.txt"), "utf8"),
@@ -94,8 +120,8 @@ async function ask(prompt) {
       { role: "system", content: system[prompt.kind] },
       { role: "user", content: prompt.prompt },
     ],
-    max_tokens: Number(opt["max-tokens"]),
-    ...(opt.temperature ? { temperature: Number(opt.temperature) } : {}),
+    max_tokens: maxTokens,
+    ...(temperature === undefined ? {} : { temperature }),
   };
   const started = Date.now();
   const res = await fetch(`${opt["base-url"].replace(/\/$/, "")}/chat/completions`, {
@@ -163,7 +189,7 @@ function check(program) {
 // Run
 const fakes = offline ? await savedAnswers() : null;
 console.log(`${prompts.length} prompts → ${out}`);
-const entries = await pool(prompts, offline ? prompts.length : Number(opt.concurrency), async (prompt) => {
+const entries = await pool(prompts, offline ? prompts.length : concurrency, async (prompt) => {
   const entry = { id: prompt.id, kind: prompt.kind, prompt: prompt.prompt };
   try {
     if (fakes) {
@@ -192,7 +218,6 @@ if (!opt["no-shots"]) {
   const require = createRequire(import.meta.url);
   const { chromium } = require(process.env.PLAYWRIGHT_CORE ?? "playwright-core");
   const browser = await chromium.launch(process.env.CHROME ? { executablePath: process.env.CHROME } : {});
-  const widths = opt.widths.split(",").map(Number);
   mkdirSync(path.join(out, "shots"), { recursive: true });
   for (const entry of entries.filter((e) => e.program)) {
     entry.shots = [];
