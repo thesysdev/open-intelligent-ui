@@ -188,10 +188,13 @@ const entries = await pool(prompts, offline ? prompts.length : Number(opt.concur
 });
 
 // Screenshots
+let screenshotError = null;
 if (!opt["no-shots"]) {
+  let browser;
+  try {
   const require = createRequire(import.meta.url);
   const { chromium } = require(process.env.PLAYWRIGHT_CORE ?? "playwright-core");
-  const browser = await chromium.launch(process.env.CHROME ? { executablePath: process.env.CHROME } : {});
+  browser = await chromium.launch(process.env.CHROME ? { executablePath: process.env.CHROME } : {});
   const widths = opt.widths.split(",").map(Number);
   mkdirSync(path.join(out, "shots"), { recursive: true });
   for (const entry of entries.filter((e) => e.program)) {
@@ -223,7 +226,19 @@ if (!opt["no-shots"]) {
     }
     console.log(`${entry.id}: ${entry.shots.length} screenshots`);
   }
-  await browser.close();
+  } catch (err) {
+    screenshotError = err instanceof Error ? err.message : String(err);
+    console.error(`Screenshots failed: ${screenshotError}`);
+    process.exitCode = 1;
+  } finally {
+    if (browser) {
+      try { await browser.close(); }
+      catch (err) {
+        screenshotError ??= err instanceof Error ? err.message : String(err);
+        process.exitCode = 1;
+      }
+    }
+  }
 }
 
 // Report
@@ -241,6 +256,7 @@ const summary = {
   interactive: done.filter((e) => e.check.stateVariables > 0 || e.check.queries > 0).length,
   usingToAssistant: done.filter((e) => e.check.toAssistant > 0).length,
   renderErrors: done.filter((e) => Object.values(e.render ?? {}).some((r) => r.errors.length || r.console.length)).length,
+  screenshotError,
 };
 writeFileSync(path.join(out, "report.json"), JSON.stringify({ summary, entries }, null, 2));
 
@@ -250,6 +266,7 @@ const md = [
   "",
   `${summary.date}. ${summary.answered} answered, ${summary.skipped} skipped, ${summary.failed} failed. Parse-clean ${summary.parseClean}/${summary.answered}; unknown @names in ${summary.withUnknownNames}; interactive ($state or Query) ${summary.interactive}; @ToAssistant in ${summary.usingToAssistant}; render errors in ${summary.renderErrors}.`,
   "",
+  ...(screenshotError ? [`Screenshots failed: ${cell(screenshotError)}`, ""] : []),
   "| id | kind | parse errors | unknown @names | $vars | @Set/@Reset | @ToAssistant | functions used | render errors | light | dark |",
   "|---|---|---|---|---|---|---|---|---|---|---|",
   ...entries.map((e) => {
