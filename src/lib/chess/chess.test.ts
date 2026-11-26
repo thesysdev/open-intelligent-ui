@@ -22,6 +22,18 @@ describe("chess positions", () => {
     expect(p.material.capturedByWhite).toEqual(["pawn"]);
   });
 
+  it("counts only actual captures when play starts from a custom position", () => {
+    const fen = "4k3/P7/8/3pP3/8/8/8/4K3 w - d6 0 2";
+    expect(positionInfo([], fen).material).toEqual({
+      white: 2, black: 1, diff: 1, capturedByWhite: [], capturedByBlack: [],
+    });
+    const position = positionInfo(["exd6", "Kd7", "a8=Q"], fen);
+    expect(position.illegal).toBeNull();
+    expect(position.material).toEqual({
+      white: 10, black: 0, diff: 10, capturedByWhite: ["pawn"], capturedByBlack: [],
+    });
+  });
+
   it("follows a line and spots where it left", () => {
     const line = ["e4", "e5", "Nf3", "Nc6", "Bc4"];
     expect(lineProgress(["e4", "e5"], line)).toMatchObject({ onLine: true, played: 2, next: "Nf3", done: false });

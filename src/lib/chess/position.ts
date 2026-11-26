@@ -65,21 +65,22 @@ export function replay(moves: unknown, fen?: string | null) {
 const colorName = (c: "w" | "b"): Color => (c === "w" ? "white" : "black");
 
 /** Material on the board and what each side has captured. */
-export function material(game: Chess) {
+function material(game: Chess, played: readonly Move[]) {
   const left = { w: { p: 0, n: 0, b: 0, r: 0, q: 0, k: 0 }, b: { p: 0, n: 0, b: 0, r: 0, q: 0, k: 0 } };
   for (const row of game.board()) for (const sq of row) if (sq) left[sq.color][sq.type] += 1;
-  const full = { p: 8, n: 2, b: 2, r: 2, q: 1, k: 1 };
   const points = (c: "w" | "b") => (Object.keys(VALUE) as PieceSymbol[]).reduce((sum, t) => sum + VALUE[t] * left[c][t], 0);
-  // Pieces a side is missing, clamped at zero so a promoted queen does not count as a captured one.
-  const missing = (c: "w" | "b") => (["q", "r", "b", "n", "p"] as PieceSymbol[]).flatMap((t) => Array(Math.max(0, full[t] - left[c][t])).fill(PIECE_NAME[t]) as string[]);
+  const captures: Record<"w" | "b", string[]> = { w: [], b: [] };
+  for (const move of played) {
+    if (move.captured) captures[move.color].push(PIECE_NAME[move.captured]);
+  }
   const white = points("w");
   const black = points("b");
-  return { white, black, diff: white - black, capturedByWhite: missing("b"), capturedByBlack: missing("w") };
+  return { white, black, diff: white - black, capturedByWhite: captures.w, capturedByBlack: captures.b };
 }
 
 /** Facts about the position after moves: turn, check, result, material. */
 export function positionInfo(moves: unknown, fen?: string | null) {
-  const { game, san, bad } = replay(moves, fen);
+  const { game, played, san, bad } = replay(moves, fen);
   const turn = colorName(game.turn());
   const checkmate = game.isCheckmate();
   const draw = game.isDraw() || game.isStalemate();
@@ -112,7 +113,7 @@ export function positionInfo(moves: unknown, fen?: string | null) {
     result,
     status,
     legalMoves: game.moves().length,
-    material: material(game),
+    material: material(game, played),
     illegal: bad,
   };
 }
