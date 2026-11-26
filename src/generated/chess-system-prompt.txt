@@ -187,7 +187,7 @@ Use @-prefixed built-in functions (@Count, @Sum, @Avg, @Min, @Max, @Round) on da
 @Position(moves: string[], fen?: string) → any — Facts after moves: {fen, moves (SAN), ply, moveNumber, turn (white, black), lastMove, inCheck, checkmate, stalemate, draw, gameOver, result (1-0, 0-1, 1/2-1/2 or null), status (plain words), legalMoves (count), material {white, black, diff, capturedByWhite, capturedByBlack}, illegal}
 @LegalMoves(moves: string[], fen?: string, square?: string) → string[] — The legal moves (SAN) for the side to move after moves, optionally only those of the piece on square
 @PlayMove(moves: string[], move: string, fen?: string) → string[] — Copy of moves with move added (written as SAN like "Nf3" or squares like "g1f3"); unchanged if it is not legal there
-@LineProgress(moves: string[], line: string[], fen?: string) → any — How far moves follow line (a full move list from the same start): {onLine, played, total, done, next (the line's next move), expected and wrongMove (where it left the line)}
+@LineProgress(moves: string[], line: string[], fen?: string) → any — How far moves follow line (a full move list from the same start): {onLine, played, total, done, next (the line's next move), expected, wrongMove (where it left the line), illegalLineMove (the first illegal move in the solution, or null)}
 @BestMove(moves: string[], fen?: string) → string — The built-in engine's move (SAN) for the side to move after moves, from a short search; good for hints, not deep analysis. null when the game is over
 @Score(moves: string[], fen?: string) → number — The built-in engine's score after moves in pawns from white's side (+1.5 white is better, 99 or -99 is mate), from material and piece placement
 

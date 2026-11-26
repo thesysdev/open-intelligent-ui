@@ -29,6 +29,27 @@ describe("chess positions", () => {
     expect(LineProgress.fn({ moves: line, line })).toMatchObject({ done: true });
   });
 
+  it("reports an illegal move after the matching moves", () => {
+    expect(LineProgress.fn({ moves: ["e4", "e5", "Nc6"], line: ["e4", "e5"] })).toMatchObject({
+      played: 2, onLine: false, done: false, next: null, wrongMove: "Nc6", illegalLineMove: null,
+    });
+    expect(LineProgress.fn({ moves: ["e4", "e5", "Nc6"], line: ["e4", "e5", "Nf3"] })).toMatchObject({
+      played: 2, onLine: false, done: false, expected: "Nf3", wrongMove: "Nc6",
+    });
+  });
+
+  it("reports an illegal solution move without completing the line", () => {
+    expect(LineProgress.fn({ moves: ["e4", "e5"], line: ["e4", "e5", "Nc6"] })).toMatchObject({
+      played: 2, onLine: false, done: false, next: null, wrongMove: null, illegalLineMove: "Nc6",
+    });
+    expect(LineProgress.fn({ moves: [], line: ["Ke2"] })).toMatchObject({ done: false, illegalLineMove: "Ke2" });
+  });
+
+  it("distinguishes a blank move from a missing illegal move", () => {
+    expect(LineProgress.fn({ moves: [""], line: [] })).toMatchObject({ onLine: false, done: false, wrongMove: "" });
+    expect(LineProgress.fn({ moves: [], line: [""] })).toMatchObject({ onLine: false, done: false, illegalLineMove: "" });
+  });
+
   it("adds only legal moves", () => {
     expect(PlayMove.fn({ moves: ["e4"], move: "e7e5" })).toEqual(["e4", "e5"]);
     expect(PlayMove.fn({ moves: ["e4"], move: "Ke2" })).toEqual(["e4"]);

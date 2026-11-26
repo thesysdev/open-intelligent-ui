@@ -58,7 +58,7 @@ export const PlayMove = defineFunction({
 export const LineProgress = defineFunction({
   name: "LineProgress",
   description:
-    "How far moves follow line (a full move list from the same start): {onLine, played, total, done, next (the line's next move), expected and wrongMove (where it left the line)}",
+    "How far moves follow line (a full move list from the same start): {onLine, played, total, done, next (the line's next move), expected, wrongMove (where it left the line), illegalLineMove (the first illegal move in the solution, or null)}",
   params: z.object({ moves: z.array(z.string()), line: z.array(z.string()), fen: z.string().optional() }),
   returns: z.any(),
   fn: ({ moves, line, fen }) => lineProgress(moves, line, fen),
