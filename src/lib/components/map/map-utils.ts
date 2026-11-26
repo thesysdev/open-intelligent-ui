@@ -13,8 +13,20 @@ export const coordinate = (input: unknown): LatLng | null => {
 export const lngLat = ([lat, lng]: LatLng): [number, number] => [lng, lat];
 
 export const boundsOf = (points: LatLng[]): LngLatBoundsLike => {
-  const lats = points.map((p) => p[0]); const lngs = points.map((p) => p[1]);
-  return [[Math.min(...lngs), Math.min(...lats)], [Math.max(...lngs), Math.max(...lats)]];
+  const lats = points.map((p) => p[0]);
+  const lngs = points.map((p) => p[1]).sort((a, b) => a - b);
+  // Cut the largest empty arc: places beside the date line should frame a
+  // local area, rather than nearly an entire world. MapLibre accepts >180°.
+  let gap = -1;
+  let start = 0;
+  for (let i = 0; i < lngs.length; i++) {
+    const next = (i + 1) % lngs.length;
+    const distance = lngs[next] + (next === 0 ? 360 : 0) - lngs[i];
+    if (distance > gap) { gap = distance; start = next; }
+  }
+  const west = lngs[start];
+  const end = lngs[(start + lngs.length - 1) % lngs.length];
+  return [[west, Math.min(...lats)], [end < west ? end + 360 : end, Math.max(...lats)]];
 };
 
 export const reducedMotion = () => window.matchMedia("(prefers-reduced-motion: reduce)").matches;
