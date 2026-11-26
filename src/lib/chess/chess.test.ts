@@ -82,4 +82,9 @@ describe("chess board props from a model", () => {
   it("reads moves with numbers and annotations", () => {
     expect(replay(strings("1.e4 e5 2.Nf3!? Nc6")).san).toEqual(["e4", "e5", "Nf3", "Nc6"]);
   });
+
+  it("reads PGN with spaced move numbers and a result", () => {
+    expect(replay(strings("1. e4 e5 2. Nf3 Nc6 3. Bb5 1-0"))).toMatchObject({ san: ["e4", "e5", "Nf3", "Nc6", "Bb5"], bad: null });
+    expect(replay(strings("1. e4 1... e5 2. O-O-O"))).toMatchObject({ san: ["e4", "e5"], bad: "O-O-O" });
+  });
 });
