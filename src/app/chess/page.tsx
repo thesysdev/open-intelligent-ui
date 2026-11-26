@@ -2,9 +2,8 @@
 import "@/lib/devtools";
 import "@openuidev/react-ui/styles/index.css";
 
-import { AgentInterface, fetchLLM, openAIConversationMessageFormat, openAIResponsesAdapter, useThemeModePreference } from "@openuidev/react-ui";
+import { AgentInterface, fetchLLM, openAIConversationMessageFormat, openAIResponsesAdapter } from "@openuidev/react-ui";
 import type { ActionEvent } from "@openuidev/react-lang";
-import { useEffect } from "react";
 import { BookOpen, Bot, Crown, Puzzle, Swords, Target } from "lucide-react";
 import { runLibraryAction } from "@/lib/actions";
 import { withBase } from "@/lib/base-path";
@@ -44,14 +43,9 @@ function onAction(event: ActionEvent) {
 }
 
 export default function ChessCoach() {
-  const { setPreference, mode } = useThemeModePreference();
-  useEffect(() => {
-    document.documentElement.setAttribute("data-openui-theme", mode);
-  }, [mode]);
-
   // The library reads its mode from its own ThemeProvider, not from AgentInterface's theme.
   return (
-    <ThemeProvider mode={mode}>
+    <ThemeProvider mode="light">
       <div className="chat-shell">
         <AgentInterface
           llm={llm}
@@ -60,12 +54,9 @@ export default function ChessCoach() {
           onAction={onAction}
           agentName="Chess Coach"
           logoUrl={withBase("/shiro-face.svg")}
-          theme={{ mode }}
+          theme={{ mode: "light" }}
           starters={starters}
         >
-          <AgentInterface.SidebarFooter>
-            <AgentInterface.ThemeModeToggle mode={mode} onModeChange={setPreference} />
-          </AgentInterface.SidebarFooter>
           <AgentInterface.ThreadHeader showChatTitle={false} />
           <AgentInterface.Welcome
             image={<img src={withBase("/shiro-woodworker.svg")} alt="" className="welcome-mascot" />}
