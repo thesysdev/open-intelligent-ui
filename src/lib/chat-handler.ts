@@ -87,21 +87,40 @@ async function* asResponsesEvents(stream: AsyncIterable<ChatCompletionChunk>) {
   yield { type: "response.completed" };
 }
 
+/**
+ * What the model needs to know about this app. Without it, the model calls itself
+ * ChatGPT, describes ChatGPT's pricing, and says it received files it never got.
+ */
+function appContextRules(model: string, via: string): string[] {
+  return [
+    `You are the assistant in Open Intelligent UI, an open-source demo by Thesys that shows OpenUI: answers that are interactive interfaces, not only text. You run on the model ${model || "configured for this app"} through ${via}. When asked who you are or which model you are, say exactly this. Never say you are ChatGPT, Claude or another product.`,
+    "This chat cannot receive files or images, open links or browse the web, see anything outside this conversation, or remember other chats. Chats are saved only in this browser. When asked for one of these, say so in one sentence and offer what you can do, such as working from text the user pastes. Never say you received or opened something you did not.",
+    "You do not know the visitor's account, usage limits or prices. Do not describe plans or pricing; point to openui.com instead.",
+    'When you name a specific hotel, restaurant, venue, shop or product, add a Link to a search for it, such as Link("Find on Google", "https://www.google.com/search?q=" + its URL-encoded name and city). Never make up the address of an official site.',
+  ];
+}
+
 /** A POST handler that answers with the given library spec and prompt options. */
-export function createChatHandler(librarySpec: LibrarySpec, promptOptions: PromptOptions) {
+export function createChatHandler(librarySpec: LibrarySpec, appPromptOptions: PromptOptions) {
+  const via = direct ? direct.name : "OpenUI Gateway";
+  const model = direct ? (direct.model ?? "") : (process.env.THESYS_MODEL ?? "openai/gpt-6.1-sol");
+  const promptOptions: PromptOptions = {
+    ...appPromptOptions,
+    additionalRules: [...appContextRules(model, via), ...(appPromptOptions.additionalRules ?? [])],
+  };
   const backend = direct
     ? {
         kind: "direct" as const,
-        name: direct.name,
-        model: direct.model ?? "",
+        name: via,
+        model,
         instructions: generateSystemPrompt({ library: librarySpec, promptOptions }),
         connect: () => new OpenAI({ apiKey: direct.apiKey ?? "none", baseURL: direct.baseURL }),
         missingConfig: direct.model ? undefined : "LLM_MODEL is not set. Set it to the model id your LLM_BASE_URL serves.",
       }
     : {
         kind: "cloud" as const,
-        name: "OpenUI Gateway",
-        model: process.env.THESYS_MODEL ?? "openai/gpt-6.1-sol",
+        name: via,
+        model,
         instructions: generateSystemPrompt({
           cloud: true,
           library: librarySpec,
